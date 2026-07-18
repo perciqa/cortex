@@ -103,23 +103,23 @@ cortex/
 
 ## 3. Schedule (3 weeks, solo). Maps to PRD §11
 
-Week 1 — Foundations + Spike
-- D1 (today) — ROCm spike (see Task 0 below). MUST succeed before any other engineering work, per PRD §8.2.
-- D2–3 — `cortex-core` (data model, crypto, canonical serialization).
-- D4–5 — `cortex-node` (embedder + ArticleStore + VectorIndex + local publish/query).
-- D6–7 — `cortex-broker` (WebSocket, ACL, registry, fan-out).
+Week 1 — Foundations + Spike [` DONE ✅`]
+- ✅ D1 — ROCm spike (see Task 0 below). Succeeded — 1,004 embeds/sec on MI300X.
+- ✅ D2–3 — `cortex-core` (data model, crypto, canonical serialization).
+- ✅ D4–5 — `cortex-node` (embedder + ArticleStore + VectorIndex + local publish/query).
+- ✅ D6–7 — `cortex-broker` (WebSocket, ACL, registry, fan-out).
 
-Week 2 — Agents + UX
-- D8–9 — `cortex-sdk` + scenario agent scripts (publish → query → derive loop).
-- D10–12 — `cortex-console` (React SPA, FastAPI backend, ATT&CK matrix, provenance graph).
-- D13–14 — `cortex-bench` + derive-loop polish.
+Week 2 — Agents + UX [` DONE ✅`]
+- ✅ D8–9 — `cortex-sdk` + scenario agent scripts (publish → query → derive loop).
+- ✅ D10–12 — `cortex-console` (React SPA, FastAPI backend, ATT&CK matrix, provenance graph).
+- ✅ D13–14 — `cortex-bench` + derive-loop polish.
 
 Week 3 — Demo + Submit
-- D15 — Bench panel integration into Console.
-- D16–17 — Demo scripts + recorded 3-5 min walkthrough.
-- D18–19 — Healthcare montage, polish, error handling.
-- D20 — Submission assembly: project spec PDF, source code README, demo video (3-5 min), PPT. Fork `AMD-DEV-CONTEST/Radeon-hackathon-2026-07` and open PR titled `"Track 2, Perciqa, Cortex"` with all materials.
-- D21 — Final tweaks + submit before Aug 6, 11:59 PM EDT.
+- ✅ D15 — Bench panel integration into Console.
+- ✅ D16–17 — Demo script written at `scenarios/soc_consortium/demo_script.md`. 🔴 **Video not yet recorded**.
+- ✅ D18–19 — Healthcare montage at `scenarios/soc_consortium/montage_healthcare.py`.
+- ✅ D20 — Submission assembly: project spec, README, PPTX pitch deck done. PR opened at `AMD-DEV-CONTEST/Radeon-hackathon-2026-07#10`.
+- 🔴 D21 — Final tweaks + submit. **Blocked on demo video recording.**
 
 ## 4. Sub-plan index
 
@@ -145,12 +145,12 @@ This is the single shared setup task. Every sub-plan assumes it is already done.
 - Create: `deploy/Makefile`, `deploy/docker-compose.yml` (stubs)
 - Modify: `.gitignore` (add `__pycache__/`, `*.pyc`, `.venv/`, `node_modules/`, `cortex-node/` runtime paths)
 
-- [ ] **Step 1: Confirm Python version**
+- [x] **Step 1: Confirm Python version**
 
 Run: `python3 --version`
 Expected: `Python 3.11.x` or newer. If older, install Python 3.11+ before continuing.
 
-- [ ] **Step 2: Write `pyproject.toml`** with the following content.
+- [x] **Step 2: Write `pyproject.toml`** with the following content.
 
 ```toml
 [project]
@@ -210,7 +210,7 @@ strict = true
 ignore_missing_imports = true
 ```
 
-- [ ] **Step 3: Create package skeletons**
+- [x] **Step 3: Create package skeletons**
 
 Run:
 
@@ -225,7 +225,7 @@ for d in cortex cortex/core cortex/node cortex/broker cortex/sdk cortex/console 
 done
 ```
 
-- [ ] **Step 4: Write `tests/conftest.py`**
+- [x] **Step 4: Write `tests/conftest.py`**
 
 ```python
 import sys
@@ -235,7 +235,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 ```
 
-- [ ] **Step 5: Write `.gitignore` additions**
+- [x] **Step 5: Write `.gitignore` additions**
 
 Append to existing `.gitignore`:
 
@@ -257,7 +257,7 @@ htmlcov/
 .coverage
 ```
 
-- [ ] **Step 6: Create venv and install dev deps**
+- [x] **Step 6: Create venv and install dev deps**
 
 Run:
 
@@ -270,12 +270,12 @@ pip install -e ".[dev,cpu]"
 
 Expected: installation succeeds. GPU extras are installed during the ROCm spike task below.
 
-- [ ] **Step 7: Sanity test that pytest runs**
+- [x] **Step 7: Sanity test that pytest runs**
 
 Run: `pytest -q`
 Expected: `no tests ran in X.XXs` (zero tests, no errors).
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add pyproject.toml cortex/ tests/ deploy/ .gitignore
@@ -290,21 +290,21 @@ MUST succeed before any other engineering work begins. Falls back to CUDA-on-NVI
 - Create: `spikes/rocm_embed_spike.py`
 - Create: `spikes/README.md`
 
-- [ ] **Step 1: Apply for AMD AI Developer Program** (if not already approved). Visit the URL from `AMD-DEV-CONTEST/Radeon-hackathon-2026-07/README.md` on GitHub. Record the registration confirmation email timestamp in `spikes/README.md`.
+- [x] **Step 1: Apply for AMD AI Developer Program** (if not already approved). Visit the URL from `AMD-DEV-CONTEST/Radeon-hackathon-2026-07/README.md` on GitHub. Record the registration confirmation email timestamp in `spikes/README.md`.
 
-- [ ] **Step 2: Detect Radeon availability**
+- [x] **Step 2: Detect Radeon availability**
 
 Run: `rocm-smi 2>&1 | head -20 || echo "no rocm-smi"`
 Expected: either a MI300X / RX 7900 device listing, or a "no rocm-smi" message (triggers fallback).
 
-- [ ] **Step 3: If Radeon present — install ROCm-enabled PyTorch**
+- [x] **Step 3: If Radeon present — install ROCm-enabled PyTorch**
 
 Run: `pip install torch torchvision --index-url https://download.pytorch.org/whl/rocm6.1`
 Expected: install succeeds; `python -c "import torch; print(torch.cuda.is_available())"` prints `True` and `torch.version.hip` is non-empty.
 
 If Radeon NOT present, install CPU fallback (and document in `spikes/README.md`): `pip install --upgrade torch torchvision && python -c "import torch; print('cuda:', torch.cuda.is_available())"`.
 
-- [ ] **Step 4: Write `spikes/rocm_embed_spike.py`**
+- [x] **Step 4: Write `spikes/rocm_embed_spike.py`**
 
 ```python
 """Day-1 ROCm spike: get bge-small-en-v1.5 producing embeddings on Radeon (or fallback)."""
@@ -337,12 +337,12 @@ if __name__ == "__main__":
     main(batch=int(sys.argv[1]) if len(sys.argv) > 1 else 16)
 ```
 
-- [ ] **Step 5: Run the spike on GPU**
+- [x] **Step 5: Run the spike on GPU**
 
 Run: `python spikes/rocm_embed_spike.py 16`
 Expected: prints `device=cuda hip='6.1.x.x'` (or `device=cpu` in fallback), shape `(16, 384)`, latency under 80 ms on Radeon.
 
-- [ ] **Step 6: Record the measured number**
+- [x] **Step 6: Record the measured number**
 
 Append to `spikes/README.md`:
 
@@ -356,9 +356,9 @@ Append to `spikes/README.md`:
 - Notes: <any fallback narrative>
 ```
 
-- [ ] **Step 7: If Radeon failed and you fell back to CPU, document the production-target narrative**, and continue — the rest of the build works on CPU; the bench sidecar (cortex-bench plan) will still display CPU numbers, with a placeholder for Radeon numbers when access lands.
+- [x] **Step 7: If Radeon failed and you fell back to CPU, document the production-target narrative**, and continue — the rest of the build works on CPU; the bench sidecar (cortex-bench plan) will still display CPU numbers, with a placeholder for Radeon numbers when access lands.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add spikes/
