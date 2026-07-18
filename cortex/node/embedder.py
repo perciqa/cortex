@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from typing import Literal
 
@@ -51,9 +52,14 @@ class Embedder:
     def _prefix(self, text: str) -> str:
         return f"finding: {text}" if not text.startswith(("finding:", "query:", "passage:")) else text
 
+    @staticmethod
+    def _normalize(text: str) -> str:
+        return re.sub(r"\s+", " ", text).strip()[:8192]
+
     def embed(self, texts: list[str]) -> np.ndarray:
         torch = self._torch
-        prefix = [self._prefix(t) for t in texts]
+        normalized = [self._normalize(t) for t in texts]
+        prefix = [self._prefix(t) for t in normalized]
         if self.fallback_to_cpu and self._device == "cuda":
             self._device = "cpu"
             self._model = self._model.to(self._device)
@@ -74,6 +80,8 @@ class Embedder:
                 msg = str(e)
                 if "out of memory" in msg.lower() and self.fallback_on_oom and self.effective_batch_size > 1:
                     self.effective_batch_size = max(1, self.effective_batch_size // 2)
+                    if self._device == "cuda":
+                        torch.cuda.empty_cache()
                     if self.on_embed_failed:
                         self.on_embed_failed(f"oom:halve_to={self.effective_batch_size}")
                     continue

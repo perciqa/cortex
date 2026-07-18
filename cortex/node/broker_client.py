@@ -21,6 +21,8 @@ class BrokerClient:
         on_metrics: Callable[..., None] | None = None,
         on_publish: Callable[..., None] | None = None,
         on_query: Callable[..., list[dict]] | None = None,
+        on_derive: Callable[..., None] | None = None,
+        on_subscribe: Callable[..., None] | None = None,
         outbound_spill_dir: Path = Path("./cortex-node/outbound"),
         outbound_cap: int = 10000,
         spill_threshold: int = 10000,
@@ -33,6 +35,8 @@ class BrokerClient:
         self.on_metrics = on_metrics or (lambda *_: None)
         self.on_publish = on_publish or (lambda *_: None)
         self.on_query = on_query or (lambda e: [])
+        self.on_derive = on_derive or (lambda *_: None)
+        self.on_subscribe = on_subscribe or (lambda *_: None)
         self.outbound_spill_dir = Path(outbound_spill_dir)
         self.outbound_cap = outbound_cap
         self.spill_threshold = spill_threshold
@@ -78,6 +82,14 @@ class BrokerClient:
                     qid = (env.get("payload") or {}).get("query_id")
                     if qid and qid in self._pending_query_results:
                         self._pending_query_results[qid].set_result(env)
+                elif t == "derive":
+                    result = self.on_derive(env)
+                    if asyncio.iscoroutine(result):
+                        asyncio.ensure_future(result)
+                elif t == "subscribe":
+                    result = self.on_subscribe(env)
+                    if asyncio.iscoroutine(result):
+                        asyncio.ensure_future(result)
                 elif t == "query":
                     results = self.on_query(env) or []
                     resp = {

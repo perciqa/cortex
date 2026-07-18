@@ -6,6 +6,7 @@ import logging
 import sys
 from collections.abc import Callable
 from datetime import UTC, datetime
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +21,6 @@ from cortex.bench.targets import (
 )
 from cortex.core.article import ArticleType, MemoryArticle, Provenance
 from cortex.node.broker_client import BrokerClient
-from cortex.node.embedder import Embedder
 from cortex.node.node import CortexNode
 
 log = logging.getLogger("cortex.bench")
@@ -142,6 +142,17 @@ class _Probes:
         self.query_cpu: QueryProbe = factory_result["query_cpu"]
 
 
+class _PrometheusHandler(BaseHTTPRequestHandler):
+    metrics_text = "# cortex-bench metrics not yet available\n"
+    def do_GET(self) -> None:  # noqa: N802
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; version=0.0.4")
+        self.end_headers()
+        self.wfile.write(type(self).metrics_text.encode("utf-8"))
+    def log_message(self, fmt: str, *args: Any) -> None:
+        pass
+
+
 class BenchRunner:
     def __init__(
         self,
@@ -152,17 +163,30 @@ class BenchRunner:
         broker_client_factory: Callable[[str], Any] | None = None,
         probe_factory: Callable[[str], Any] | None = None,
         gpu_sensor: GpuSensor | None = None,
+        prometheus_port: int = 9464,
     ) -> None:
         self.node_id = node_id
         self.broker_url = broker_url
         self.config_path = config_path
         self.tick_interval = tick_interval
+        self.prometheus_port = prometheus_port
         self._broker_factory = broker_client_factory or _default_broker_client
         self._probe_factory = probe_factory or _default_probe_factory
         self._gpu_sensor = gpu_sensor or GpuSensor()
         self._broker = None
         self._probes: _Probes | None = None
         self._stop = asyncio.Event()
+        self._httpd: HTTPServer | None = None
+
+    async def _start_prometheus(self) -> None:
+        try:
+            self._httpd = HTTPServer(("0.0.0.0", self.prometheus_port), _PrometheusHandler)
+            import threading
+            t = threading.Thread(target=self._httpd.serve_forever, daemon=True)
+            t.start()
+            log.info("prometheus /metrics on :%d", self.prometheus_port)
+        except Exception as exc:
+            log.warning("prometheus server failed: %s", exc)
 
     async def run(self) -> None:
         logging.basicConfig(level=logging.INFO, stream=sys.stderr)
@@ -170,6 +194,7 @@ class BenchRunner:
         if hasattr(self._broker, "connect"):
             await self._broker.connect()
         self._probes = _Probes(self._probe_factory(self.node_id))
+        await self._start_prometheus()
         log.info("cortex-bench started for %s", self.node_id)
         try:
             while not self._stop.is_set():
@@ -236,12 +261,32 @@ class BenchRunner:
             embeds_radeon, embeds_cpu, queries_radeon, queries_cpu,
             gpu["mem_util_pct"], qp95_r,
         )
+        nid = self.node_id
+        gpu_mem = gpu["mem_util_pct"]
+        _PrometheusHandler.metrics_text = "\n".join([
+            "# HELP cortex_embeds_per_sec Embedding throughput",
+            "# TYPE cortex_embeds_per_sec gauge",
+            f"cortex_embeds_per_sec{{backend=\"radeon\",node=\"{nid}\"}} {embeds_radeon:.3f}",
+            f"cortex_embeds_per_sec{{backend=\"cpu\",node=\"{nid}\"}} {embeds_cpu:.3f}",
+            "# HELP cortex_queries_per_sec Query throughput",
+            "# TYPE cortex_queries_per_sec gauge",
+            f"cortex_queries_per_sec{{backend=\"radeon\",node=\"{nid}\"}} {queries_radeon:.3f}",
+            f"cortex_queries_per_sec{{backend=\"cpu\",node=\"{nid}\"}} {queries_cpu:.3f}",
+            "# HELP cortex_gpu_mem_util_pct GPU memory utilization",
+            "# TYPE cortex_gpu_mem_util_pct gauge",
+            f"cortex_gpu_mem_util_pct{{node=\"{nid}\"}} {gpu_mem:.1f}",
+            "# HELP cortex_p95_query_latency_ms P95 query latency",
+            "# TYPE cortex_p95_query_latency_ms gauge",
+            f"cortex_p95_query_latency_ms{{node=\"{nid}\"}} {qp95_r:.1f}",
+        ]) + "\n"
 
     async def _cleanup(self) -> None:
         pending = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         for t in pending:
             if t.get_name() == "cortex-bench-tick":
                 t.cancel()
+        if self._httpd is not None:
+            self._httpd.shutdown()
         if self._broker is not None and hasattr(self._broker, "close"):
             with contextlib.suppress(Exception):
                 await self._broker.close()

@@ -116,6 +116,13 @@ class ArticleStore:
         for row in cur.fetchall():
             yield row[0]
 
+    def update_trust(self, article_id: str, score: float, expiration: Any) -> None:
+        exp_iso = _ts_iso(expiration) if hasattr(expiration, "isoformat") else str(expiration)
+        self._exec_retry(
+            "UPDATE articles SET trust_score=?, trust_expires=? WHERE id=?",
+            (score, exp_iso, article_id),
+        )
+
     def event_log_append(self, event: str, article_id: str | None, payload: dict) -> None:
         self._exec_retry(
             "INSERT INTO events (ts, event, article_id, payload_json) VALUES (?,?,?,?)",

@@ -60,8 +60,9 @@ async def test_partner_beta_from_alpha_does_not_reach_other_org_subscriber(  # n
                                     "topic": "threat-intel", "content": "secret"}},
         }
         await alpha_ws.send(json.dumps(publish))
-        ack = json.loads(await asyncio.wait_for(alpha_ws.recv(), timeout=2.0))
-        assert ack["type"] == "ack"
+        resp = json.loads(await asyncio.wait_for(alpha_ws.recv(), timeout=2.0))
+        assert resp["type"] == "error"
+        assert resp["payload"]["code"] == "SCOPE_VIOLATION"
 
         try:
             extra = await asyncio.wait_for(beta_ws.recv(), timeout=0.4)
@@ -113,8 +114,9 @@ async def test_scope_violation_event_mirrored_when_no_recipient_allowed(tmp_path
                                     "topic": "threat-intel", "content": "internal"}},
         }
         await alpha_ws.send(json.dumps(publish))
-        ack = json.loads(await asyncio.wait_for(alpha_ws.recv(), timeout=2.0))
-        assert ack["type"] == "ack"
+        resp = json.loads(await asyncio.wait_for(alpha_ws.recv(), timeout=2.0))
+        assert resp["type"] == "error"
+        assert resp["payload"]["code"] == "SCOPE_VIOLATION"
 
         ev = json.loads(await asyncio.wait_for(event_ws.recv(), timeout=2.0))
         assert ev["type"] == "event"

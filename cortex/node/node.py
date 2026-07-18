@@ -15,13 +15,13 @@ from cortex.core.canonical import article_canonical_bytes, compute_article_id
 from cortex.core.crypto import sign
 from cortex.core.envelope import EnvelopeType
 from cortex.core.errors import ArticleState, transition
-from cortex.node.receiver import receive_publish_envelope
 from cortex.node.broker_client import BrokerClient
 from cortex.node.config import NodeConfig, load_config
 from cortex.node.embedder import Embedder
 from cortex.node.keys import load_keys
 from cortex.node.provenance import ProvenanceGraph
 from cortex.node.query import QueryResult, retrieve
+from cortex.node.receiver import receive_publish_envelope
 from cortex.node.store import ArticleStore
 from cortex.node.trust import TrustEngine
 from cortex.node.vector_index import FAISSGPUIndex, HNSWIndex
@@ -71,6 +71,12 @@ class CortexNode:
                                           M=self.config.vector_index.hnsw.M,
                                           ef_construction=self.config.vector_index.hnsw.ef_construction,
                                           ef_search=self.config.vector_index.hnsw.ef_search)
+        vec_path = self.data_dir / "vectors"
+        if self.vector_index is not None:
+            try:
+                self.vector_index.load(vec_path)
+            except Exception:
+                log.info("no existing vector index at %s, starting fresh", vec_path)
         self.trust = TrustEngine(
             default_org_reputation=self.config.trust.default_org_reputation,
             reputation_overrides=self.config.trust.reputation_overrides,
@@ -91,6 +97,8 @@ class CortexNode:
             on_event=self._on_broker_event,
             on_publish=self._on_broker_publish,
             on_query=self._on_broker_query,
+            on_derive=self._on_broker_derive,
+            on_subscribe=self._on_broker_subscribe,
         )
         await self.broker.connect()
         self._health_task = asyncio.create_task(self._health_loop())
@@ -100,6 +108,11 @@ class CortexNode:
             self._health_task.cancel()
         if self.broker:
             await self.broker.stop()
+        if self.vector_index is not None:
+            try:
+                self.vector_index.save(self.data_dir / "vectors")
+            except Exception as exc:
+                log.warning("vector index save failed: %s", exc)
         if self.store:
             self.store.close()
         if self.provenance:
@@ -113,6 +126,24 @@ class CortexNode:
     def _on_broker_event(self, event: str, article_id: str | None, payload: dict) -> None:
         if self.store:
             self.store.event_log_append(event, article_id, payload)
+
+    def _on_broker_derive(self, env: dict) -> None:
+        payload = env.get("payload", {})
+        art_id = payload.get("article_id")
+        cites = payload.get("cites", [])
+        if self.provenance and art_id:
+            for cited_id in cites:
+                self.provenance.add_citation(art_id, cited_id)
+            if self.store:
+                for cited_id in cites:
+                    self.store.set_state(cited_id, "cited")
+                self.store.event_log_append("inbound.derive.received", art_id,
+                                            {"cites": cites, "src": env.get("src", "")})
+
+    def _on_broker_subscribe(self, env: dict) -> None:
+        if self.store:
+            self.store.event_log_append("inbound.subscribe.received", None,
+                                        {"src": env.get("src", "")})
 
     async def _on_broker_publish(self, env: dict) -> None:
         payload = env.get("payload", {})
@@ -150,6 +181,8 @@ class CortexNode:
             now = _dt.datetime.now(_dt.UTC)
             gv = self.provenance.graph_version if self.provenance is not None else 0
             score = self.trust.trust_for(article, now, _StoreAdapter(self.store), graph_version=gv)
+            trust_expires = now + _dt.timedelta(days=self.config.trust.half_life_days)
+            self.store.update_trust(article.id, score, trust_expires)
             self.store.set_state(article.id, "published")
             self.store.event_log_append("inbound.publish.received", article.id,
                                         {"trust_score": score, "src": env.get("src", "")})
@@ -296,11 +329,12 @@ class CortexNode:
         return []
 
     def derive(self, new_article: MemoryArticle, cited_article_ids: list[str]) -> str:
-        assert self.provenance
+        assert self.provenance and self.store
         new_article = replace(new_article, cites=list(cited_article_ids))
         art_id = self.publish(new_article)
         for cited_id in cited_article_ids:
             self.provenance.add_citation(art_id, cited_id)
+            self.store.set_state(cited_id, "cited")
         import uuid
         env_dict = {
             "type": EnvelopeType.DERIVE.value, "msg_id": str(uuid.uuid4()),

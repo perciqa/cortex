@@ -1,9 +1,6 @@
 from cortex.core.article import (
-    AgentDID,
-    ArticleId,
     ArticleType,
     MemoryArticle,
-    OrgDID,
     Provenance,
     Scope,
 )
@@ -38,6 +35,11 @@ from cortex.core.errors import (
     ScopeViolationError,
     SignatureVerificationError,
     UnknownProducerError,
+)
+from cortex.core.types import (
+    AgentDID,
+    ArticleId,
+    OrgDID,
 )
 
 __all__ = [

@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import time
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 
@@ -29,6 +30,20 @@ def _allowed_scope(article_scope: str, scope_filter: list[str]) -> bool:
     return article_scope in scope_filter
 
 
+def _parse_created_at(article: Any) -> datetime | None:
+    ts = getattr(article, "provenance", None) and getattr(article.provenance, "timestamp", None)
+    if ts is None:
+        return None
+    if isinstance(ts, str):
+        try:
+            return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        except Exception:
+            return None
+    if isinstance(ts, datetime):
+        return ts
+    return None
+
+
 def retrieve(
     store: Any,
     vector_index: Any,
@@ -39,6 +54,7 @@ def retrieve(
     top_k: int,
     min_trust: float,
     deadline_ms: int,
+    min_age: datetime | None = None,
     now: Any | None = None,
 ) -> list[QueryResult]:
     started = time.monotonic()
@@ -56,6 +72,10 @@ def retrieve(
             continue
         if topic_filter and article.type not in topic_filter:
             continue
+        if min_age is not None:
+            created = _parse_created_at(article)
+            if created is not None and created < min_age:
+                continue
         trust = float(article.trust_score) if article.trust_score is not None else 0.0
         if trust < min_trust:
             continue

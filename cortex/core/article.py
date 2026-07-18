@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime
+from dataclasses import dataclass, field
+from datetime import datetime
 from enum import StrEnum
-from typing import TypeAlias
 
-ArticleId: TypeAlias = str
-AgentDID: TypeAlias = str
-OrgDID: TypeAlias = str
+from cortex.core.types import ArticleId
 
 
 class ArticleType(StrEnum):
@@ -21,6 +18,7 @@ class ArticleType(StrEnum):
 class Scope(StrEnum):
     PRIVATE = "private"
     PUBLIC = "public"
+    PARTNER = "partner"
 
     @classmethod
     def _missing_(cls, value: object) -> Scope | None:
@@ -63,13 +61,11 @@ class MemoryArticle:
     embedding: list[float] | None = None
     embedding_model: str | None = None
     org_signature: bytes | None = None
-    cites: list[ArticleId] = None  # type: ignore[assignment]
+    cites: list[ArticleId] = field(default_factory=list)
     trust_score: float | None = None
     trust_expiration: datetime | None = None
 
     def __post_init__(self) -> None:
-        if self.cites is None:
-            object.__setattr__(self, "cites", [])
         if not isinstance(self.scope, Scope):
             object.__setattr__(self, "scope", Scope(self.scope))
         if len(self.content) > _MAX_CONTENT_CHARS:

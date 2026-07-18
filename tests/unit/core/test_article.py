@@ -1,7 +1,7 @@
 import pytest
 
-from cortex.core.article import AgentDID, ArticleId, OrgDID
 from cortex.core.crypto import did_for_agent, did_for_org
+from cortex.core.types import AgentDID, ArticleId, OrgDID
 
 
 def test_type_aliases_are_str():

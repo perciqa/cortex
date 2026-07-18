@@ -1,3 +1,4 @@
+import json
 from datetime import UTC, datetime
 
 from cortex.core.canonical import canonical_bytes
@@ -99,6 +100,46 @@ def test_article_canonical_bytes_includes_signed_fields():
     assert b'"run_id":"run-1"' in cb
 
 
+
+
+def test_canonical_float_shortest_roundtrippable():
+    out = canonical_bytes({"v": 0.5})
+    assert out == b'{"v":0.5}'
+
+
+def test_canonical_float_large():
+    out = canonical_bytes({"v": 1234567.0})
+    assert b"e+" not in out
+    assert b"e-" not in out
+
+
+def test_canonical_float_very_small():
+    out = canonical_bytes({"v": 1e-10})
+    assert float(out.decode().split(":")[1].rstrip("}")) == 1e-10
+
+
+def test_canonical_float_infinity():
+    import math
+    out = canonical_bytes({"v": math.inf})
+    decoded = json.loads(out)
+    assert decoded["v"] == float("inf")
+
+
+def test_canonical_float_nan():
+    import math
+    out = canonical_bytes({"v": math.nan})
+    decoded = json.loads(out)
+    assert math.isnan(decoded["v"])
+
+
+def test_canonical_float_negative():
+    out = canonical_bytes({"v": -3.14})
+    assert out == b'{"v":-3.14}'
+
+
+def test_canonical_int_unchanged():
+    out = canonical_bytes({"v": 42})
+    assert out == b'{"v":42}'
 
 
 def test_article_id_deterministic_for_identical_content():
