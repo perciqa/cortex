@@ -4,7 +4,6 @@ import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import uvicorn
 
@@ -28,7 +27,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 @dataclass
 class Lifecycle:
-    subscriber: Optional[BrokerSubscriber]
+    subscriber: BrokerSubscriber | None
     async def stop(self):
         if self.subscriber is None:
             return

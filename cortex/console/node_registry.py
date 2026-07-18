@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import httpx
 
@@ -25,13 +24,13 @@ class NodeRegistry:
     """Tracks the debug HTTP base URL for each connected node."""
 
     def __init__(self) -> None:
-        self._nodes: dict[str, tuple[str, Optional[httpx.BaseClient]]] = {}
+        self._nodes: dict[str, tuple[str, httpx.BaseClient | None]] = {}
 
-    def register(self, slug: str, base_url: str, transport: Optional[httpx.BaseTransport] = None) -> None:
+    def register(self, slug: str, base_url: str, transport: httpx.BaseTransport | None = None) -> None:
         client = httpx.AsyncClient(base_url=base_url, transport=transport)
         self._nodes[slug] = (base_url, client)
 
-    def get(self, slug: str) -> tuple[str, Optional[httpx.AsyncClient]]:
+    def get(self, slug: str) -> tuple[str, httpx.AsyncClient | None]:
         return self._nodes.get(slug, ("", None))
 
     @property

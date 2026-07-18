@@ -45,7 +45,7 @@ class BrokerSubscriber:
                 log.warning("broker disconnected; retrying in %.1fs", backoff)
                 try:
                     await asyncio.wait_for(self._stop.wait(), timeout=backoff)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     pass
                 backoff = min(self._max_backoff, backoff * 2)
 

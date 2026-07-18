@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Any, Iterable
+from collections.abc import Iterable
 
 
 class EventRingBuffer:

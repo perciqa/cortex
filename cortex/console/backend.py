@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 from pathlib import Path
 from typing import Any
 
@@ -23,8 +22,8 @@ def create_app_with_broker(
     registry_path: Path,
     fanout: Fanout,
     broker_url: str | None,
-    node_registry: "NodeRegistry | None" = None,
-    attack_matrix: "AttackMatrixTracker | None" = None,
+    node_registry: NodeRegistry | None = None,
+    attack_matrix: AttackMatrixTracker | None = None,
 ) -> FastAPI:
     app = FastAPI(title="cortex-console")
     if node_registry is None:
@@ -70,7 +69,7 @@ def create_app_with_broker(
             while True:
                 try:
                     payload = await asyncio.wait_for(q.get(), timeout=30.0)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     await ws.send_json({"type": "ping"})
                     continue
                 await ws.send_json({"type": "event", "payload": payload})
@@ -87,7 +86,7 @@ def create_app_with_broker(
             while True:
                 payload = await asyncio.wait_for(q.get(), timeout=30.0)
                 await ws.send_json({"type": "metrics", "payload": payload})
-        except (WebSocketDisconnect, asyncio.TimeoutError):
+        except (TimeoutError, WebSocketDisconnect):
             pass
         finally:
             fanout.remove_metrics_client(q)
