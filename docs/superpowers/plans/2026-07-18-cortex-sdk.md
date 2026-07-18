@@ -79,18 +79,18 @@ examples/
 - Create: `tests/sdk/__init__.py`
 - Create: `tests/sdk/conftest.py`
 
-- [ ] **Step 1: Create `cortex/sdk/__init__.py`** (empty placeholder — public exports added by Task 15).
+- [x] **Step 1: Create `cortex/sdk/__init__.py`** (empty placeholder — public exports added by Task 15).
 
 ```python
 """Perciqa Cortex agent SDK — thin façade over cortex.node.CortexNode."""
 ```
 
-- [ ] **Step 2: Create `tests/sdk/__init__.py`** (empty).
+- [x] **Step 2: Create `tests/sdk/__init__.py`** (empty).
 
 ```python
 ```
 
-- [ ] **Step 3: Write `tests/sdk/conftest.py`** with shared fakes used by every task.
+- [x] **Step 3: Write `tests/sdk/conftest.py`** with shared fakes used by every task.
 
 ```python
 from __future__ import annotations
@@ -173,12 +173,12 @@ def fake_node() -> MagicMock:
     return make_fake_node()
 ```
 
-- [ ] **Step 4: Run sanity test**
+- [x] **Step 4: Run sanity test**
 
 Run: `pytest tests/sdk/ -q`
 Expected: `no tests ran in X.XXs` (zero tests, no errors).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/__init__.py tests/sdk/__init__.py tests/sdk/conftest.py
@@ -197,7 +197,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/sdk/provenance.py` (ProvenanceHelpers added fully in Task 5; this task only adds the helper used by `CortexClient._build_provenance`).
 - Test: `tests/sdk/test_client.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/sdk/test_client.py
@@ -240,12 +240,12 @@ def test_publish_finding_defaults_scope_to_private(fake_node: MagicMock):
     assert article.scope == Scope.PRIVATE
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_client.py -v`
 Expected: `ModuleNotFoundError: No module named 'cortex.sdk.client'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/sdk/exceptions.py
@@ -399,12 +399,12 @@ class CortexClient:
         raise NotImplementedError
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_client.py -v`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/exceptions.py cortex/sdk/provenance.py cortex/sdk/client.py tests/sdk/test_client.py
@@ -421,7 +421,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/sdk/client.py`
 - Test: `tests/sdk/test_client.py` (append)
 
-- [ ] **Step 1: Write the failing test (append to `tests/sdk/test_client.py`)**
+- [x] **Step 1: Write the failing test (append to `tests/sdk/test_client.py`)**
 
 ```python
 def test_publish_insight_includes_cites(fake_node: MagicMock):
@@ -456,12 +456,12 @@ def test_publish_warning_procedure_precedent_dispatch_correct_type(fake_node: Ma
         assert article.type == expected_type
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_client.py -v`
 Expected: `NotImplementedError` on `publish_insight`.
 
-- [ ] **Step 3: Minimal implementation** — replace the four stub methods in `cortex/sdk/client.py`:
+- [x] **Step 3: Minimal implementation** — replace the four stub methods in `cortex/sdk/client.py`:
 
 ```python
     def _publish_typed(
@@ -525,12 +525,12 @@ Expected: `NotImplementedError` on `publish_insight`.
         )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_client.py -v`
 Expected: PASS (all client tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/client.py tests/sdk/test_client.py
@@ -547,7 +547,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/sdk/client.py`
 - Test: `tests/sdk/test_client.py` (append)
 
-- [ ] **Step 1: Write the failing test (append)**
+- [x] **Step 1: Write the failing test (append)**
 
 ```python
 def test_search_passes_filter_args_and_returns_results_unchanged(
@@ -605,12 +605,12 @@ def test_search_maps_query_errors(fake_node: MagicMock):
         raise AssertionError("expected CortexQueryError")
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_client.py -v`
 Expected: `NotImplementedError` on `search`.
 
-- [ ] **Step 3: Minimal implementation** — replace the `search` stub:
+- [x] **Step 3: Minimal implementation** — replace the `search` stub:
 
 ```python
     def search(
@@ -633,12 +633,12 @@ Expected: `NotImplementedError` on `search`.
             raise map_node_error(exc) from exc
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_client.py -v`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/client.py tests/sdk/test_client.py
@@ -655,7 +655,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/sdk/client.py`
 - Test: `tests/sdk/test_client.py` (append)
 
-- [ ] **Step 1: Write the failing test (append)**
+- [x] **Step 1: Write the failing test (append)**
 
 ```python
 def test_compose_insight_calls_derive_with_new_article_and_cites(fake_node: MagicMock):
@@ -697,12 +697,12 @@ def test_compose_insight_maps_errors(fake_node: MagicMock):
         raise AssertionError("expected CortexSDKError")
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_client.py::test_compose_insight_calls_derive_with_new_article_and_cites -v`
 Expected: `NotImplementedError`.
 
-- [ ] **Step 3: Minimal implementation** — replace the `compose_insight` stub:
+- [x] **Step 3: Minimal implementation** — replace the `compose_insight` stub:
 
 ```python
     def compose_insight(
@@ -726,12 +726,12 @@ Expected: `NotImplementedError`.
             raise map_node_error(exc) from exc
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_client.py -v`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/client.py tests/sdk/test_client.py
@@ -748,7 +748,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - (already created in Task 1) `cortex/sdk/provenance.py`
 - Test: `tests/sdk/test_provenance.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/sdk/test_provenance.py
@@ -809,19 +809,19 @@ def test_with_source_hash_sets_sha256_and_schema():
     assert prov.run_id == base.run_id
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_provenance.py -v`
 Expected: PASS actually, since `provenance.py` already implements these helpers from Task 1. If they fail, fix `provenance.py` accordingly. (The point of the test here is to lock the contract.)
 
-- [ ] **Step 3: Implementation is already in place from Task 1.** If any test in Step 2 fails, fix the helper without changing the public signatures.
+- [x] **Step 3: Implementation is already in place from Task 1.** If any test in Step 2 fails, fix the helper without changing the public signatures.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_provenance.py -v`
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/sdk/test_provenance.py
@@ -838,7 +838,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/sdk/langchain_adapter.py`
 - Test: `tests/sdk/test_langchain_adapter.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/sdk/test_langchain_adapter.py
@@ -899,12 +899,12 @@ def test_get_relevant_documents_passes_filter_args(fake_node: MagicMock):
     assert kwargs["scope_filter"] == {"PUBLIC"}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_langchain_adapter.py -v`
 Expected: `ModuleNotFoundError: No module named 'cortex.sdk.langchain_adapter'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/sdk/langchain_adapter.py
@@ -971,12 +971,12 @@ class CortexRetriever(BaseRetriever):
         return docs
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_langchain_adapter.py -v`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/langchain_adapter.py tests/sdk/test_langchain_adapter.py
@@ -993,7 +993,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/sdk/langchain_adapter.py`
 - Test: `tests/sdk/test_langchain_adapter.py` (append)
 
-- [ ] **Step 1: Write the failing test (append)**
+- [x] **Step 1: Write the failing test (append)**
 
 ```python
 def test_as_tool_returns_named_tool_whose_run_returns_documents(fake_node: MagicMock):
@@ -1016,12 +1016,12 @@ def test_as_tool_returns_named_tool_whose_run_returns_documents(fake_node: Magic
     assert "article_id" in parsed[0]["metadata"]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_langchain_adapter.py::test_as_tool_returns_named_tool_whose_run_returns_documents -v`
 Expected: `AttributeError: 'CortexRetriever' object has no attribute 'as_tool'`.
 
-- [ ] **Step 3: Minimal implementation** — append to `cortex/sdk/langchain_adapter.py`:
+- [x] **Step 3: Minimal implementation** — append to `cortex/sdk/langchain_adapter.py`:
 
 ```python
 import json
@@ -1066,12 +1066,12 @@ Note: The actual `langchain_adapter.py` file should contain a single `CortexRetr
 - Add module-level `_docs_to_json(docs)` helper.
 - Add `as_tool` method inside `CortexRetriever` (the snippet above).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_langchain_adapter.py -v`
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/langchain_adapter.py tests/sdk/test_langchain_adapter.py
@@ -1088,7 +1088,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/sdk/langchain_adapter.py`
 - Test: `tests/sdk/test_langchain_adapter.py` (append)
 
-- [ ] **Step 1: Write the failing test (append)**
+- [x] **Step 1: Write the failing test (append)**
 
 ```python
 def test_cortex_publish_tool_runs_publish_finding(fake_node: MagicMock):
@@ -1126,12 +1126,12 @@ def test_cortex_publish_tool_rejects_oversized_content(fake_node: MagicMock):
     fake_node.publish.assert_not_called()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_langchain_adapter.py::test_cortex_publish_tool_runs_publish_finding -v`
 Expected: `ImportError: cannot import name 'CortexPublishTool'`.
 
-- [ ] **Step 3: Minimal implementation** — append to `cortex/sdk/langchain_adapter.py`:
+- [x] **Step 3: Minimal implementation** — append to `cortex/sdk/langchain_adapter.py`:
 
 ```python
 from cortex.core.article import Scope as CoreScope
@@ -1186,12 +1186,12 @@ class CortexPublishTool(Tool):
         )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_langchain_adapter.py -v`
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/langchain_adapter.py tests/sdk/test_langchain_adapter.py
@@ -1208,7 +1208,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/sdk/llm.py`
 - Test: `tests/sdk/test_llm.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/sdk/test_llm.py
@@ -1278,12 +1278,12 @@ def test_chat_posts_to_chat_completions_with_expected_body():
     assert received["body"]["messages"][0]["role"] == "system"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_llm.py -v`
 Expected: `ModuleNotFoundError: No module named 'cortex.sdk.llm'`.
 
-- [ ] **Step 3: Minimal implementation**
+- [x] **Step 3: Minimal implementation**
 
 ```python
 # cortex/sdk/llm.py
@@ -1340,12 +1340,12 @@ class vLLMClient:
         self._client.close()
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_llm.py -v`
 Expected: PASS (1 test).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/llm.py tests/sdk/test_llm.py
@@ -1362,7 +1362,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/sdk/llm.py`
 - Test: `tests/sdk/test_llm.py` (append)
 
-- [ ] **Step 1: Write the failing test (append)**
+- [x] **Step 1: Write the failing test (append)**
 
 ```python
 def test_scripted_reasoner_returns_final_after_one_tool_call():
@@ -1425,12 +1425,12 @@ def test_agent_step_dispatches_tool_then_returns_final():
     assert tool_invocations == ["phishing paddock"]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_llm.py::test_agent_step_dispatches_tool_then_returns_final -v`
 Expected: `ImportError: cannot import name 'ScriptedReasoner'`.
 
-- [ ] **Step 3: Minimal implementation** — append to `cortex/sdk/llm.py`:
+- [x] **Step 3: Minimal implementation** — append to `cortex/sdk/llm.py`:
 
 ```python
 from dataclasses import dataclass, field
@@ -1525,12 +1525,12 @@ def agent_step(
     return "<max_iters reached>"
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_llm.py -v`
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/llm.py tests/sdk/test_llm.py
@@ -1547,7 +1547,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/sdk/agent.py`
 - Test: `tests/sdk/test_agent.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/sdk/test_agent.py
@@ -1639,12 +1639,12 @@ def test_run_task_returns_max_iters_message_when_script_runs_out(fake_node: Magi
     assert isinstance(answer, str)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_agent.py -v`
 Expected: `ModuleNotFoundError: No module named 'cortex.sdk.agent'`.
 
-- [ ] **Step 3: Minimal implementation**
+- [x] **Step 3: Minimal implementation**
 
 ```python
 # cortex/sdk/agent.py
@@ -1732,12 +1732,12 @@ def _default_tools_builder(retriever: CortexRetriever, client: CortexClient) -> 
 _DEFAULT_TOOLS_BUILDER = _default_tools_builder
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_agent.py -v`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/agent.py tests/sdk/test_agent.py
@@ -1754,7 +1754,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/sdk/llamaindex_adapter.py`
 - Test: `tests/sdk/test_llamaindex_adapter.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/sdk/test_llamaindex_adapter.py
@@ -1801,12 +1801,12 @@ def test_cortex_reader_uses_explicit_node_when_no_retriever(fake_node: MagicMock
     assert kwargs["scope_filter"] == {"PUBLIC"}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_llamaindex_adapter.py -v`
 Expected: `ModuleNotFoundError: No module named 'cortex.sdk.llamaindex_adapter'`.
 
-- [ ] **Step 3: Minimal implementation**
+- [x] **Step 3: Minimal implementation**
 
 ```python
 # cortex/sdk/llamaindex_adapter.py
@@ -1905,12 +1905,12 @@ class CortexReader(BaseReader):
 
 Note: `BaseReader` in llama_index 0.10+ is a pydantic BaseModel. If the constructor signature in the installed llama-index version rejects kwargs, the implementer should fall back to populating fields via `object.__setattr__` and a no-args `super().__init__()` call. The test contract must remain stable either way.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/test_llamaindex_adapter.py -v`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/llamaindex_adapter.py tests/sdk/test_llamaindex_adapter.py
@@ -1926,7 +1926,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `tests/sdk/test_llamaindex_adapter.py` (append)
 
-- [ ] **Step 1: Write the failing test (append)**
+- [x] **Step 1: Write the failing test (append)**
 
 ```python
 def test_vector_store_index_from_cortex_reader(fake_node: MagicMock):
@@ -1946,19 +1946,19 @@ def test_vector_store_index_from_cortex_reader(fake_node: MagicMock):
         assert n.node.text
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_llamaindex_adapter.py::test_vector_store_index_from_cortex_reader -v`
 Expected: One of (a) PASS with llama_index installed in CI; (b) ` Skipped: no module named 'llama_index'` when llama_index is not installed. Both are acceptable outcomes. The test must NOT fail with an unrelated error.
 
-- [ ] **Step 3: No new implementation code** — this is a guard for the documented integration shape from the LangChain/LlamaIndex example in the plan brief.
+- [x] **Step 3: No new implementation code** — this is a guard for the documented integration shape from the LangChain/LlamaIndex example in the plan brief.
 
-- [ ] **Step 4: Run test to verify it passes (or skips gracefully)**
+- [x] **Step 4: Run test to verify it passes (or skips gracefully)**
 
 Run: `pytest tests/sdk/test_llamaindex_adapter.py -v`
 Expected: PASS or SKIPPED (no hard failures).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/sdk/test_llamaindex_adapter.py
@@ -1974,7 +1974,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Create: `examples/quickstart.py`
 
-- [ ] **Step 1: Write the example**
+- [x] **Step 1: Write the example**
 
 ```python
 # examples/quickstart.py
@@ -2055,12 +2055,12 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-- [ ] **Step 2: Verify the file parses**
+- [x] **Step 2: Verify the file parses**
 
 Run: `python -c "import ast; ast.parse(open('examples/quickstart.py').read()); print('ok')"`
 Expected: `ok`.
 
-- [ ] **Step 3: (Optional guard test)** Add a smoke test that imports the quickstart module without running it:
+- [x] **Step 3: (Optional guard test)** Add a smoke test that imports the quickstart module without running it:
 
 ```python
 # tests/sdk/test_quickstart.py
@@ -2076,7 +2076,7 @@ def test_quickstart_module_imports():
 Run: `pytest tests/sdk/test_quickstart.py -v`
 Expected: PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add examples/quickstart.py tests/sdk/test_quickstart.py
@@ -2093,7 +2093,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Test: `tests/sdk/test_exceptions.py`
 - Modify: `cortex/sdk/__init__.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/sdk/test_exceptions.py
@@ -2157,12 +2157,12 @@ def test_public_api_reexports():
         assert hasattr(sdk, name), f"cortex.sdk missing re-export: {name}"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/sdk/test_exceptions.py -v`
 Expected: `test_public_api_reexports` fails (`cortex.sdk` is empty); mapping tests may pass since `exceptions.py` exists from Task 1.
 
-- [ ] **Step 3: Minimal implementation** — extend `cortex/sdk/__init__.py`:
+- [x] **Step 3: Minimal implementation** — extend `cortex/sdk/__init__.py`:
 
 ```python
 """Perciqa Cortex agent SDK — thin façade over cortex.node.CortexNode."""
@@ -2197,12 +2197,12 @@ __all__ = [
 ]
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/sdk/ -v`
 Expected: PASS (all).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/sdk/__init__.py tests/sdk/test_exceptions.py

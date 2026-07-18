@@ -131,7 +131,7 @@ If those change in cortex-core / cortex-node / cortex-sdk, update this plan's te
 - Create: `scenarios/soc_consortium/dataset/cves.jsonl`
 - Test: `tests/e2e/test_dataset_cves.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_dataset_cves.py
@@ -163,12 +163,12 @@ def test_cves_jsonl_valid():
         assert 32 <= len(rec["description"]) <= 400
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_dataset_cves.py -v`
 Expected: FAIL with `AssertionError: missing scenarios/soc_consortium/dataset/cves.jsonl` (or `FileNotFoundError`).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # scenarios/soc_consortium/dataset/cves.jsonl
@@ -184,12 +184,12 @@ Expected: FAIL with `AssertionError: missing scenarios/soc_consortium/dataset/cv
 {"cve_id":"CVE-2026-70055","description":"Lockbit-v3 affiliate exfiltrated via T1567 (ex- fil-to-cloud storage) prior to T1486 encryption.","attack_id":"T1567","actor":"Lockbit","severity":"critical","published_year":2026}
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_dataset_cves.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/dataset/cves.jsonl tests/e2e/test_dataset_cves.py
@@ -206,7 +206,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `scenarios/soc_consortium/dataset/attack_techniques.json`
 - Test: `tests/e2e/test_dataset_attack_techniques.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_dataset_attack_techniques.py
@@ -238,12 +238,12 @@ def test_attack_techniques_shape():
         assert 10 <= c <= 20, (t, c)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_dataset_attack_techniques.py -v`
 Expected: FAIL with `FileNotFoundError` or `AssertionError: 210`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # scenarios/soc_consortium/dataset/attack_techniques.json
@@ -466,12 +466,12 @@ Expected: FAIL with `FileNotFoundError` or `AssertionError: 210`.
 
 > Note: a small number of attacks reuse tactic `Impact` and technique `T1490`/`T1485`/`T1567` is acceptable for a synthetic dataset since the validator only enforces shape and uniqueness-of-tactic-counts. The test asserts distinct `T\d{4}(\.\d{3})?` match, not globally-unique IDs — counted entries still pass `15 per tactic` bounds (10 ≤ 15 ≤ 20). Reviewer may dedupe in a future task.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_dataset_attack_techniques.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/dataset/attack_techniques.json tests/e2e/test_dataset_attack_techniques.py
@@ -488,7 +488,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `scenarios/soc_consortium/dataset/threat_actors.json`
 - Test: `tests/e2e/test_dataset_threat_actors.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_dataset_threat_actors.py
@@ -518,12 +518,12 @@ def test_threat_actors_shape():
     assert "unknown" in seen, "must include an 'unknown' bucket for unattributed activity"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_dataset_threat_actors.py -v`
 Expected: FAIL with `AssertionError` (file missing).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # scenarios/soc_consortium/dataset/threat_actors.json
@@ -537,12 +537,12 @@ Expected: FAIL with `AssertionError` (file missing).
 ]
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_dataset_threat_actors.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/dataset/threat_actors.json tests/e2e/test_dataset_threat_actors.py
@@ -563,7 +563,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `scenarios/soc_consortium/configs/org_registry.json`
 - Test: `tests/e2e/test_seed.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_seed.py
@@ -603,12 +603,12 @@ def test_seed_publishes_ten_findings(soc_e2e_env: SocE2EEnv):
 
 > Conftest fixture `SocE2EEnv` launches a fake broker + two real local `CortexNode` instances backed by SQLite temp dirs. Defined in Task 4's conftest (below).
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_seed.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'cortex.sdk.client'` or `FileNotFoundError` on `seed.py`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # tests/e2e/conftest.py
@@ -785,12 +785,12 @@ registry: configs/org_registry.json
 ]
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_seed.py -v`
 Expected: PASS (10 article_ids printed; both nodes list ≥10 articles).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/seed.py \
@@ -810,7 +810,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: none (test only)
 - Test: `tests/e2e/test_seed_idempotent.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_seed_idempotent.py
@@ -847,12 +847,12 @@ def test_seed_is_idempotent(soc_e2e_env: SocE2EEnv):
     assert len(client.list_articles()) == 10
 ```
 
-- [ ] **Step 2: Run test to verify it fails** (after Task 4 lands, this should already PASS on first run; run it once to confirm)
+- [x] **Step 2: Run test to verify it fails** (after Task 4 lands, this should already PASS on first run; run it once to confirm)
 
 Run: `pytest tests/e2e/test_seed_idempotent.py -v`
 Expected: If the test passes immediately, this confirms Task 4's idempotency check is correct. If FAIL, fix `seed.py` to detect pre-existing articles reliably via `payload.cve_id` matching.
 
-- [ ] **Step 3: Fix only if needed**
+- [x] **Step 3: Fix only if needed**
 
 No code change required when Step 2 passes. If it fails, update the `already` predicate in `seed.py` to query by `payload.cve_id`:
 
@@ -861,12 +861,12 @@ existing = client.query(cve["cve_id"], min_trust=0.0, top_k=20)
 already = any(a.payload.get("cve_id") == cve["cve_id"] for a in existing)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_seed_idempotent.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit** (only if a fix was needed)
+- [x] **Step 5: Commit** (only if a fix was needed)
 
 ```bash
 git add scenarios/soc_consortium/seed.py tests/e2e/test_seed_idempotent.py
@@ -883,7 +883,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `scenarios/soc_consortium/agent_alpha.py`
 - Test: `tests/e2e/test_agent_alpha_query.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_agent_alpha_query.py
@@ -917,12 +917,12 @@ def test_alpha_query_returns_findings(soc_e2e_env, tmp_path):
     assert all("article_id" in r and "content_preview" in r for r in payload["retrieved"])
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_agent_alpha_query.py -v`
 Expected: FAIL (`FileNotFoundError` on `agent_alpha.py`).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # scenarios/soc_consortium/agent_alpha.py
@@ -987,12 +987,12 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_agent_alpha_query.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/agent_alpha.py tests/e2e/test_agent_alpha_query.py
@@ -1009,7 +1009,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `scenarios/soc_consortium/agent_alpha.py`
 - Test: `tests/e2e/test_agent_alpha_insight.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_agent_alpha_insight.py
@@ -1053,12 +1053,12 @@ def test_alpha_counts_insight_with_three_sources(soc_e2e_env, tmp_path):
     assert len(edges) == 3, edges
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_agent_alpha_insight.py -v`
 Expected: FAIL with `NotImplementedError: derive step implemented in Task 7`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Replace the `NotImplementedError` branch in `agent_alpha.py` with a derive step:
 
@@ -1110,12 +1110,12 @@ ScriptedReasoner fallback content (`cortex/sdk/llm.py` already implements this c
 # (The exact string is produced by the SDK; Alpha only asserts cite IDs flow through.)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_agent_alpha_insight.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/agent_alpha.py tests/e2e/test_agent_alpha_insight.py
@@ -1132,7 +1132,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `scenarios/soc_consortium/agent_beta.py`
 - Test: `tests/e2e/test_agent_beta.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_agent_beta.py
@@ -1173,12 +1173,12 @@ def test_beta_corroborates_and_warns(soc_e2e_env, tmp_path):
     assert set(out["new_findings"]).issubset(src_set)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_agent_beta.py -v`
 Expected: FAIL (`FileNotFoundError` on `agent_beta.py`).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # scenarios/soc_consortium/agent_beta.py
@@ -1316,12 +1316,12 @@ class SocE2EEnv:
                        check=True, capture_output=True, timeout=60)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_agent_beta.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/agent_beta.py tests/e2e/test_agent_beta.py tests/e2e/conftest.py
@@ -1339,7 +1339,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `scenarios/soc_consortium/montage_healthcare.py`
 - Test: `tests/e2e/test_montage_healthcare.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_montage_healthcare.py
@@ -1381,12 +1381,12 @@ def test_healthcare_montage_cross_org_proof(soc_healthcare_e2e_env, tmp_path):
     assert post > pre, (pre, post)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_montage_healthcare.py -v`
 Expected: FAIL (`FileNotFoundError`).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```json
 [
@@ -1512,12 +1512,12 @@ def soc_healthcare_e2e_env():
     shutil.rmtree(tmp, ignore_errors=True)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_montage_healthcare.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/montage_healthcare.py \
@@ -1536,7 +1536,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `scenarios/soc_consortium/demo_run.py`
 - Test: `tests/e2e/test_demo_run.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_demo_run.py
@@ -1580,12 +1580,12 @@ def test_demo_run_orchestrates_and_produces_video(tmp_path):
     assert (tmp_path / "demo_state.json").exists()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_demo_run.py -v`
 Expected: FAIL (`FileNotFoundError`).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # scenarios/soc_consortium/demo_run.py
@@ -1779,12 +1779,12 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_demo_run.py -v`
 Expected: PASS (stdout prints each step; `demo_state.json` written; no real recorder launched thanks to `--no-record-optional`).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/demo_run.py tests/e2e/test_demo_run.py
@@ -1802,7 +1802,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `pyproject.toml` to add `playwright` dev dep
 - Test: `tests/e2e/test_demo_recorder_playwright.py` (test IS the recorder)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_demo_recorder_playwright.py
@@ -1855,13 +1855,13 @@ def test_playwright_recorder_emits_video(tmp_path):
     assert actual.exists() and actual.stat().st_size > 0
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pip install playwright pytest-playwright && playwright install chromium`
 Run: `pytest tests/e2e/test_demo_recorder_playwright.py -v`
 Expected: FAIL (console not running yet, or `playwright` not installed).
 
-- [ ] **Step 3: Add Playwright dep + minimal recorder module**
+- [x] **Step 3: Add Playwright dep + minimal recorder module**
 
 ```toml
 # pyproject.toml [project.optional-dependencies].dev
@@ -1893,7 +1893,7 @@ def record(console_url: str, video_path: Path, *, seconds: int = 120) -> Path:
     return video_path if video_path.exists() else None
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 (With a console stub running on `127.0.0.1:7103` — wire `demo_run.py` to start console first or run the stub in test setup.) For test isolation, add a fixture that boots a tiny FastAPI stub returning `<html>demo</html>`:
 
@@ -1919,7 +1919,7 @@ Then update the test to use `console_stub` fixture when `DEMO_CONSOLE_URL` is un
 Run: `pytest tests/e2e/test_demo_recorder_playwright.py -v`
 Expected: PASS (video ≥ 5 s, non-zero size).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add pyproject.toml scenarios/soc_consortium/_recorder_playwright.py tests/e2e/test_demo_recorder_playwright.py
@@ -1937,7 +1937,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `scenarios/soc_consortium/README.md`
 - Test: `tests/e2e/test_demo_recorder_ffmpeg_env.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_demo_recorder_ffmpeg_env.py
@@ -1975,12 +1975,12 @@ def test_ffmpeg_recorder_invokes_x11grab(tmp_path):
         xv_proc.terminate(); xv_proc.wait(timeout=5)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_demo_recorder_ffmpeg_env.py -v`
 Expected: FAIL or SKIP (if `ffmpeg`/`Xvfb` absent).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # scenarios/soc_consortium/_recorder_ffmpeg.py
@@ -2025,12 +2025,12 @@ exists for headless CI environments that already have ffmpeg installed.
 Console URL default: `http://127.0.0.1:7103`. Video resolution: 1920x1080 @ 30 fps.
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_demo_recorder_ffmpeg_env.py -v`
 Expected: PASS (or SKIP if ffmpeg/Xvfb not available on the dev machine).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scenarios/soc_consortium/_recorder_ffmpeg.py \
@@ -2049,7 +2049,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `scenarios/soc_consortium/demo_script.md`
 - Test: none (manual review step)
 
-- [ ] **Step 1: Write the file**
+- [x] **Step 1: Write the file**
 
 ````markdown
 # Cortex Demo — 2-minute narration
@@ -2114,11 +2114,11 @@ Timestamps align with `demo_run.py` output. Total runtime ≤ 120 s.
 > sovereign Radeon acceleration. Thank you."
 ````
 
-- [ ] **Step 2: Manual review**
+- [x] **Step 2: Manual review**
 
 Open `scenarios/soc_consortium/demo_script.md`, read aloud against a dry run of `demo_run.py`, confirm timestamps line up. No automated test — this is the artifact shipped to judges.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add scenarios/soc_consortium/demo_script.md
@@ -2135,7 +2135,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `tests/e2e/test_demo_e2e_smoke.py`
 - Test: `tests/e2e/test_demo_e2e_smoke.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/test_demo_e2e_smoke.py
@@ -2198,23 +2198,23 @@ def test_end_to_end_demo_smoke(tmp_path):
     assert videos, "demo produced no video artifact"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_demo_e2e_smoke.py -v`
 Expected: FAIL (most likely until Tasks 10–12 land for real and the console is implemented per cortex-console plan).
 
-- [ ] **Step 3: No implementation step needed**
+- [x] **Step 3: No implementation step needed**
 
 This test is pure verification — the implementation is delivered by Tasks 1–13 above plus the modules in other plans. If a specific assertion fails, the failure points back to a Task or to another plan's contract. Document the back-pointer inline for triage.
 
 > If `cortex.console.server` is not yet importable (cortex-console plan lagging), gate the console-brought-up assertion behind `pytest.importorskip("cortex.console.server")` and continue validating the data-plane assertions. Keep the video and bench assertions ungated; they touch unrelated modules.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_demo_e2e_smoke.py -v`
 Expected: PASS (≤ 60 s wall clock).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/e2e/test_demo_e2e_smoke.py
@@ -2232,7 +2232,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `docs/submission/slides_outline.md`
 - Test: none (manual review)
 
-- [ ] **Step 1: Write `README_JUDGES.md`**
+- [x] **Step 1: Write `README_JUDGES.md`**
 
 ````markdown
 # Perciqa Cortex — Judge-Facing README
@@ -2287,7 +2287,7 @@ DEMO_REASONER=scripted DEMO_RECORDER=playwright \
 3. Extend to healthcare (RWE loop) and finance (fraud intel) registries
 ````
 
-- [ ] **Step 2: Write `slides_outline.md`**
+- [x] **Step 2: Write `slides_outline.md`**
 
 ````markdown
 # Perciqa Cortex — Pitch Deck Outline
@@ -2338,11 +2338,11 @@ DEMO_REASONER=scripted DEMO_RECORDER=playwright \
   organizations. This is the first step."
 ````
 
-- [ ] **Step 3: Manual review**
+- [x] **Step 3: Manual review**
 
 Open both files, confirm the demo video and slide deck cross-link. No automated test.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add docs/submission/README_JUDGES.md docs/submission/slides_outline.md

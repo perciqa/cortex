@@ -112,7 +112,7 @@ tests/
 - Create: `cortex/console/node_registry.py`
 - Test: `tests/unit/console/test_backend.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/console/test_backend.py
@@ -152,12 +152,12 @@ async def test_tenants_reads_registry(tmp_path: Path):
     ]}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_backend.py -v`
 Expected: FAIL with `ModuleNotFoundError: cortex.console.backend`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/console/__init__.py
@@ -218,12 +218,12 @@ def create_app(static_dir: Path, registry_path: Path, broker_url: str | None = N
     return app
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_backend.py -v`
 Expected: PASS (2 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/__init__.py cortex/console/backend.py cortex/console/node_registry.py tests/unit/console/test_backend.py
@@ -241,7 +241,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/fanout.py`
 - Test: `tests/unit/console/test_broker_subscriber.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/console/test_broker_subscriber.py
@@ -281,12 +281,12 @@ async def test_broker_events_reach_fanout(unused_tcp_port: int):
     assert received == [{"event": "article.published", "data": {"id": "a1"}}]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_broker_subscriber.py -v`
 Expected: FAIL with `ModuleNotFoundError: cortex.console.broker_subscriber`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/console/fanout.py
@@ -408,12 +408,12 @@ class BrokerSubscriber:
         return self._task
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_broker_subscriber.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/broker_subscriber.py cortex/console/fanout.py tests/unit/console/test_broker_subscriber.py
@@ -430,7 +430,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/ring_buffer.py`
 - Test: `tests/unit/console/test_ring_buffer.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/console/test_ring_buffer.py
@@ -447,12 +447,12 @@ def test_event_ring_keeps_last_1000():
     assert items[-1] == {"id": 1000}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_ring_buffer.py -v`
 Expected: FAIL `ModuleNotFoundError: cortex.console.ring_buffer`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/console/ring_buffer.py
@@ -499,12 +499,12 @@ class MetricsRingBuffer:
         return {n: list(dq) for n, dq in self._by_node.items()}
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_ring_buffer.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/ring_buffer.py tests/unit/console/test_ring_buffer.py
@@ -521,7 +521,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/ring_buffer.py` (already added in Task 3)
 - Test: `tests/unit/console/test_ring_buffer.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/console/test_ring_buffer.py`:
 
@@ -542,21 +542,21 @@ def test_metrics_ring_per_node_last_60():
     assert len(beta) == 1
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_ring_buffer.py::test_metrics_ring_per_node_last_60 -v`
 Expected: PASS (implementation already added in Task 3, but Step 1 marker requires verification). If green, the test was preemptively covered — confirm by reverting the `MetricsRingBuffer` class temporarily to ensure the test fails without it.
 
-- [ ] **Step 3: Implementation already present**
+- [x] **Step 3: Implementation already present**
 
 `MetricsRingBuffer` is defined in `cortex/console/ring_buffer.py` (Task 3 Step 3). No new code required.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_ring_buffer.py -v`
 Expected: PASS (2 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/unit/console/test_ring_buffer.py
@@ -573,7 +573,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/backend.py`
 - Test: `tests/unit/console/test_backend.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/console/test_backend.py`:
 
@@ -614,12 +614,12 @@ async def test_ws_events_fanout(tmp_path: Path, unused_tcp_port: int):
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_backend.py::test_ws_events_fanout -v`
 Expected: FAIL `ImportError: cannot import name 'create_app_with_broker'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Modify `cortex/console/backend.py`:
 
@@ -696,12 +696,12 @@ def create_app_with_broker(
     return app
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_backend.py -v`
 Expected: PASS (3 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/backend.py tests/unit/console/test_backend.py
@@ -718,7 +718,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/backend.py` (already supported)
 - Test: `tests/unit/console/test_backend.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/console/test_backend.py`:
 
@@ -755,21 +755,21 @@ async def test_ws_metrics_fanout(tmp_path: Path, unused_tcp_port: int):
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_backend.py::test_ws_metrics_fanout -v`
 Expected: PASS (endpoint already wired in Task 5). If green, confirm the test is meaningfully exercised by temporarily removing the `/ws/metrics` route — the test must then fail.
 
-- [ ] **Step 3: Implementation already present**
+- [x] **Step 3: Implementation already present**
 
 `/ws/metrics` was added in Task 5. No new code required.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_backend.py -v`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/unit/console/test_backend.py
@@ -787,7 +787,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/node_registry.py`
 - Test: `tests/unit/console/test_backend.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/console/test_backend.py`:
 
@@ -815,12 +815,12 @@ async def test_articles_endpoint_proxies_to_node_debug(tmp_path: Path):
     assert r.json()["content"] == "hello"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_backend.py::test_articles_endpoint_proxies_to_node_debug -v`
 Expected: FAIL `NameError: NodeRegistry` or `AttributeError` on `create_app_with_broker(... node_registry=...)`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Modify `cortex/console/node_registry.py`:
 
@@ -904,12 +904,12 @@ def create_app_with_broker(
     # ... (ws_events, ws_metrics unchanged from Task 5)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_backend.py -v`
 Expected: PASS (5 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/backend.py cortex/console/node_registry.py tests/unit/console/test_backend.py
@@ -927,7 +927,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/backend.py`
 - Test: `tests/unit/console/test_attack_matrix.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/console/test_attack_matrix.py
@@ -958,12 +958,12 @@ async def test_attack_matrix_endpoint(tmp_path):
     assert r.json() == {"counts": {"T1059.001": 1}}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_attack_matrix.py -v`
 Expected: FAIL `ModuleNotFoundError: cortex.console.attack_matrix`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/console/attack_matrix.py
@@ -1031,12 +1031,12 @@ def create_app_with_broker(
         return JSONResponse({"attack_id": attack_id, "articles": attack_matrix.articles_for(attack_id)})
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_attack_matrix.py -v`
 Expected: PASS (2 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/attack_matrix.py cortex/console/backend.py tests/unit/console/test_attack_matrix.py
@@ -1061,7 +1061,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/tests/setup.ts`
 - Test: `cortex/console/frontend/tests/scaffold.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/scaffold.test.tsx
@@ -1082,12 +1082,12 @@ describe("App scaffold", () => {
 import "@testing-library/react";
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- scaffold.test`
 Expected: FAIL `Cannot find module '../src/App'` (npm and dependencies not yet installed).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```json
 // cortex/console/frontend/package.json
@@ -1238,12 +1238,12 @@ Run install:
 cd cortex/console/frontend && npm install
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- scaffold.test`
 Expected: PASS (1 test)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/
@@ -1263,7 +1263,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/styles/theme.ts`
 - Test: `cortex/console/frontend/tests/layout.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/layout.test.tsx
@@ -1285,12 +1285,12 @@ describe("Layout", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- layout.test`
 Expected: FAIL — only the title renders, the nav labels do not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```ts
 // cortex/console/frontend/src/styles/theme.ts
@@ -1404,12 +1404,12 @@ export function App() {
 export default App;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- layout.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/Layout.tsx cortex/console/frontend/src/components/StatusPill.tsx cortex/console/frontend/src/styles/theme.ts cortex/console/frontend/src/App.tsx cortex/console/frontend/tests/layout.test.tsx
@@ -1428,7 +1428,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/state/store.ts`
 - Test: `cortex/console/frontend/tests/useBrokerEvents.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // cortex/console/frontend/tests/useBrokerEvents.test.ts
@@ -1468,12 +1468,12 @@ expect(result.current.articles.length).toBe(1);
 expect(result.current.articles[0].id).toBe("a1");
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- useBrokerEvents.test`
 Expected: FAIL `Cannot find module '../src/hooks/useBrokerEvents'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```ts
 // cortex/console/frontend/src/state/store.ts
@@ -1595,12 +1595,12 @@ export function useBrokerMetrics(url: string): MetricsState {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- useBrokerEvents.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/hooks/ cortex/console/frontend/src/state/ cortex/console/frontend/tests/useBrokerEvents.test.ts
@@ -1617,7 +1617,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/views/FabricOverview.tsx`
 - Test: `cortex/console/frontend/tests/FabricOverview.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/FabricOverview.test.tsx
@@ -1637,12 +1637,12 @@ describe("FabricOverview", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- FabricOverview.test`
 Expected: FAIL `Cannot find module '../src/views/FabricOverview'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```tsx
 // cortex/console/frontend/src/views/FabricOverview.tsx
@@ -1684,12 +1684,12 @@ function TenantColumn({ t }: { t: Tenant }) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- FabricOverview.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/views/FabricOverview.tsx cortex/console/frontend/tests/FabricOverview.test.tsx
@@ -1708,7 +1708,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/components/TrustRing.tsx`
 - Test: `cortex/console/frontend/tests/ArticleFeed.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/ArticleFeed.test.tsx
@@ -1732,12 +1732,12 @@ describe("ArticleFeed", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- ArticleFeed.test`
 Expected: FAIL `Cannot find module '../src/views/ArticleFeed'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```tsx
 // cortex/console/frontend/src/components/TrustRing.tsx
@@ -1812,12 +1812,12 @@ export function ArticleFeed({ articles, onSelect }: ArticleFeedProps) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- ArticleFeed.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/views/ArticleFeed.tsx cortex/console/frontend/src/components/ArticleCard.tsx cortex/console/frontend/src/components/TrustRing.tsx cortex/console/frontend/tests/ArticleFeed.test.tsx
@@ -1835,7 +1835,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/components/SignatureStatus.tsx`
 - Test: `cortex/console/frontend/tests/ArticleDetail.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/ArticleDetail.test.tsx
@@ -1866,12 +1866,12 @@ describe("ArticleDetail", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- ArticleDetail.test`
 Expected: FAIL `Cannot find module '../src/views/ArticleDetail'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```tsx
 // cortex/console/frontend/src/components/SignatureStatus.tsx
@@ -1963,12 +1963,12 @@ function ProvenanceTree({ roots }: { roots: { id: string; content: string }[] })
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- ArticleDetail.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/views/ArticleDetail.tsx cortex/console/frontend/src/components/SignatureStatus.tsx cortex/console/frontend/tests/ArticleDetail.test.tsx
@@ -1985,7 +1985,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/views/ProvenanceGraph.tsx`
 - Test: `cortex/console/frontend/tests/ProvenanceGraph.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/ProvenanceGraph.test.tsx
@@ -2019,12 +2019,12 @@ describe("ProvenanceGraph", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- ProvenanceGraph.test`
 Expected: FAIL `Cannot find module '../src/views/ProvenanceGraph'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```tsx
 // cortex/console/frontend/src/views/ProvenanceGraph.tsx
@@ -2063,12 +2063,12 @@ function colorFromTrust(t: number): string {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- ProvenanceGraph.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/views/ProvenanceGraph.tsx cortex/console/frontend/tests/ProvenanceGraph.test.tsx
@@ -2085,7 +2085,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/views/ScopeFilter.tsx`
 - Test: `cortex/console/frontend/tests/ScopeFilter.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/ScopeFilter.test.tsx
@@ -2108,12 +2108,12 @@ describe("ScopeFilter", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- ScopeFilter.test`
 Expected: FAIL `Cannot find module '../src/views/ScopeFilter'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```tsx
 // cortex/console/frontend/src/views/ScopeFilter.tsx
@@ -2161,12 +2161,12 @@ export function ScopeFilter({ articles }: ScopeFilterProps) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- ScopeFilter.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/views/ScopeFilter.tsx cortex/console/frontend/tests/ScopeFilter.test.tsx
@@ -2183,7 +2183,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/views/BenchPanel.tsx`
 - Test: `cortex/console/frontend/tests/BenchPanel.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/BenchPanel.test.tsx
@@ -2212,12 +2212,12 @@ describe("BenchPanel", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- BenchPanel.test`
 Expected: FAIL `Cannot find module '../src/views/BenchPanel'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```tsx
 // cortex/console/frontend/src/views/BenchPanel.tsx
@@ -2256,12 +2256,12 @@ function Chart({ data, title }: { data: { name: string; radeon: number; cpu: num
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- BenchPanel.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/views/BenchPanel.tsx cortex/console/frontend/tests/BenchPanel.test.tsx
@@ -2279,7 +2279,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/frontend/src/data/attackTechniques.ts`
 - Test: `cortex/console/frontend/tests/AttackMatrix.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/AttackMatrix.test.tsx
@@ -2308,12 +2308,12 @@ describe("AttackMatrix", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- AttackMatrix.test`
 Expected: FAIL `Cannot find module '../src/views/AttackMatrix'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```ts
 // cortex/console/frontend/src/data/attackTechniques.ts
@@ -2391,12 +2391,12 @@ expect(many.className).toContain("bg-red-500");
 fireEvent.click(screen.getAllByTestId("attack-cell").find(c => c.getAttribute("data-attack-id") === "T1059.001")!);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- AttackMatrix.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/views/AttackMatrix.tsx cortex/console/frontend/src/data/attackTechniques.ts cortex/console/frontend/src/data/attackTechniquesLoader.ts cortex/console/frontend/tests/AttackMatrix.test.tsx
@@ -2414,7 +2414,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/frontend/src/data/attackTechniquesLoader.ts` (already referenced)
 - Test: `cortex/console/frontend/tests/attackTechniques.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // cortex/console/frontend/tests/attackTechniques.test.ts
@@ -2432,12 +2432,12 @@ describe("attack-techniques.tsv", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- attackTechniques.test`
 Expected: FAIL — TSV is empty / loader returns [] or short list.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Generate the TSV. The fixture lists 210 MITRE ATT&CK Enterprise technique IDs, one per line, tab-separated with a short name column (also loaded for tooltips). Place at `cortex/console/frontend/src/data/attack-techniques.tsv`. Implementation here shows the first 30 rows; the file must contain all 210 (12 tactics × ~14–18 techniques each, mass-select pulled from MITRE Enterprise v15).
 
@@ -2516,12 +2516,12 @@ export function loadAttackTechniques(): string[] {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- attackTechniques.test`
 Expected: PASS (1 test, exactly 210 unique IDs)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/data/attack-techniques.tsv cortex/console/frontend/tests/attackTechniques.test.ts
@@ -2538,7 +2538,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/console/__main__.py`
 - Test: `tests/unit/console/test_cli.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/console/test_cli.py
@@ -2566,12 +2566,12 @@ async def test_build_app_wires_broker_subscriber(tmp_path: Path):
     await lifecycle.stop()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_cli.py -v`
 Expected: FAIL `ModuleNotFoundError: cortex.console.__main__`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/console/__main__.py
@@ -2660,12 +2660,12 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_cli.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/__main__.py tests/unit/console/test_cli.py
@@ -2683,7 +2683,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `tests/e2e/conftest.py`
 - Test: `tests/e2e/test_console_smoke.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/e2e/conftest.py
@@ -2780,12 +2780,12 @@ async def test_console_renders_and_bench_updates(broker_server, console_server):
         await browser.close()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/e2e/test_console_smoke.py -v`
 Expected: FAIL — Playwright not installed, or page navigation fails because static dist not built.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Install Playwright: `pip install playwright && playwright install chromium`.
 
@@ -2797,12 +2797,12 @@ No backend code change required — implementation already exists. Update the te
 (static_dir / "main.js").write_text("document.getElementById('root').innerHTML = '<div>Perciqa Cortex</div>'")
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/e2e/test_console_smoke.py -v`
 Expected: PASS (1 test)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/e2e/test_console_smoke.py tests/e2e/conftest.py
@@ -2820,7 +2820,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/backend.py`
 - Test: `tests/unit/console/test_backend.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/console/test_backend.py`:
 
@@ -2845,12 +2845,12 @@ async def test_serves_built_dist_index(tmp_path: Path):
     assert "app" in js.text
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/console/test_backend.py::test_serves_built_dist_index -v`
 Expected: FAIL — `/static/main.js` returns 404 because no StaticFiles mount.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Modify `cortex/console/backend.py` `create_app_with_broker`:
 
@@ -2863,7 +2863,7 @@ app.mount("/static", StaticFiles(directory=str(static_dir / "static")), name="st
 
 Also wire `__main__.py` so `--static` points to the built `frontend/dist` (already done in Task 20).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/console/test_backend.py::test_serves_built_dist_index -v`
 Expected: PASS
@@ -2878,7 +2878,7 @@ curl -s http://localhost:8080/ | grep -q "<title>Perciqa Cortex</title>" && echo
 kill %1
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/backend.py tests/unit/console/test_backend.py
@@ -2896,7 +2896,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/frontend/src/components/StatusPill.tsx` (already supports disconnected)
 - Test: `cortex/console/frontend/tests/reconnect.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // cortex/console/frontend/tests/reconnect.test.tsx
@@ -2925,12 +2925,12 @@ describe("Reconnect banner", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- reconnect.test`
 Expected: FAIL — App does not instantiate a WebSocket; the status pill is hard-coded "connected".
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```tsx
 // cortex/console/frontend/src/App.tsx
@@ -2984,12 +2984,12 @@ async function fetchArticle(id: string) {
 export default App;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- reconnect.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/App.tsx cortex/console/frontend/tests/reconnect.test.tsx
@@ -3006,7 +3006,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/console/frontend/src/styles/theme.ts`
 - Test: `cortex/console/frontend/tests/theme.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // cortex/console/frontend/tests/theme.test.ts
@@ -3032,12 +3032,12 @@ describe("theme", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd cortex/console/frontend && npm test -- theme.test`
 Expected: FAIL — `TYPE_TAG_COLORS.procedure` may be missing; `trustColor` may not be exported.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Replace `cortex/console/frontend/src/styles/theme.ts`:
 
@@ -3061,12 +3061,12 @@ export function trustColor(pct: number): string {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd cortex/console/frontend && npm test -- theme.test`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/console/frontend/src/styles/theme.ts cortex/console/frontend/tests/theme.test.ts

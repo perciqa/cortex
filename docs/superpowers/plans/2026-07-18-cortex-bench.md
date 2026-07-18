@@ -83,7 +83,7 @@ Bench publishes `Envelope{type=METRICS, payload=metrics_dict}` to broker; broker
 - Test: `tests/bench/__init__.py`
 - Test: `tests/bench/test_metrics.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/__init__.py
 # (intentionally empty)
@@ -139,11 +139,11 @@ def test_to_envelope_uses_metrics_type_and_bench_src():
     assert env.payload == to_dict(m)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_metrics.py -v`
 Expected: ImportError / ModuleNotFoundError for `cortex.bench.metrics` and `cortex.core.envelope` (cortex-core contract not yet implemented when this plan runs ahead of cortex-core). If cortex-core is already in tree, the bench import still fails. Either way: FAIL.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 ```python
 # cortex/bench/__init__.py
 # (intentionally empty)
@@ -194,11 +194,11 @@ def to_envelope(metrics: BenchMetrics) -> Envelope:
     )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_metrics.py -v`
 Expected: PASS (2 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add cortex/bench/__init__.py cortex/bench/metrics.py tests/bench/__init__.py tests/bench/test_metrics.py
 git commit -m "feat(bench): BenchMetrics dataclass with Design §5.8 to_dict + METRICS envelope wrapper
@@ -214,7 +214,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/bench/embed_probe.py`
 - Test: `tests/bench/test_embed_probe.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_embed_probe.py
 import time
@@ -286,11 +286,11 @@ def test_probe_throughput_is_finite_with_instant_embedder(monkeypatch):
     assert throughput >= 0
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_embed_probe.py -v`
 Expected: ImportError for `cortex.bench.embed_probe`. FAIL.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 ```python
 # cortex/bench/embed_probe.py
 from __future__ import annotations
@@ -337,11 +337,11 @@ class EmbedProbe:
         return (self.batch_size, elapsed)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_embed_probe.py -v`
 Expected: PASS (3 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add cortex/bench/embed_probe.py tests/bench/test_embed_probe.py
 git commit -m "feat(bench): EmbedProbe with pool cycling and injectable embedder factory
@@ -357,7 +357,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/bench/embed_probe.py` (no-op if already correct; behavior covered by factory exception swallowing)
 - Test: `tests/bench/test_embed_probe_fallback.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_embed_probe_fallback.py
 from cortex.bench.embed_probe import EmbedProbe
@@ -421,11 +421,11 @@ def test_gpu_sensor_returns_zero_when_no_gpu(monkeypatch):
     assert snap == {"mem_util_pct": 0.0}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_embed_probe_fallback.py -v`
 Expected: ImportError for `cortex.bench.gpu_sensor`. FAIL.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 ```python
 # cortex/bench/gpu_sensor.py
 from __future__ import annotations
@@ -481,11 +481,11 @@ def _rocm_smi_mem_util() -> float:
 ```
 `embed_probe.py` already swallows construction exceptions (Task 2 implementation). No change required; re-verify by running tests.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_embed_probe_fallback.py -v`
 Expected: PASS (3 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add cortex/bench/gpu_sensor.py tests/bench/test_embed_probe_fallback.py
 git commit -m "feat(bench): GpuSensor + EmbedProbe graceful GPU fallback path
@@ -501,7 +501,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/bench/query_probe.py`
 - Test: `tests/bench/test_query_probe.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_query_probe.py
 import asyncio
@@ -569,11 +569,11 @@ def test_query_probe_is_async_aware():
     assert result[0] == 3
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_query_probe.py -v`
 Expected: ImportError for `cortex.bench.query_probe`. FAIL.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 ```python
 # cortex/bench/query_probe.py
 from __future__ import annotations
@@ -624,11 +624,11 @@ class QueryProbe:
         return await asyncio.to_thread(self.probe_once)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_query_probe.py -v`
 Expected: PASS (3 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add cortex/bench/query_probe.py tests/bench/test_query_probe.py
 git commit -m "feat(bench): QueryProbe measuring throughput and p95 query latency
@@ -644,7 +644,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/bench/gpu_sensor.py` (extend with configurable torch shim path already added in Task 3)
 - Test: `tests/bench/test_gpu_sensor.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_gpu_sensor.py
 from cortex.bench.gpu_sensor import GpuSensor
@@ -701,11 +701,11 @@ def test_clamps_overflow(monkeypatch):
     assert sensor.snapshot()["mem_util_pct"] == 100.0
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_gpu_sensor.py -v`
 Expected: ModuleNotFoundError for `cortex.bench.gpu_sensor` until Task 3's file exists. If Tasks executed in order (Task 3 already done), tests should already PASS — re-run to confirm. If Task 3 not yet done, FAIL with ImportError.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 `cortex/bench/gpu_sensor.py` from Task 3 already satisfies these tests (the snapshot clamps `[0, 100]` and returns `{"mem_util_pct": 0.0}` when CUDA is unavailable). No code change needed. To make the plan robust against out-of-order execution, ensure the file contains:
 
 ```python
@@ -760,11 +760,11 @@ def _rocm_smi_mem_util() -> float:
     return 0.0
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_gpu_sensor.py -v`
 Expected: PASS (3 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add tests/bench/test_gpu_sensor.py
 git commit -m "test(bench): GpuSensor branches for absent, normal, and over-util GPU
@@ -781,7 +781,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/bench/targets.py` (constants used by runner logging and Console)
 - Test: `tests/bench/test_runner.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_runner.py
 import asyncio
@@ -866,11 +866,11 @@ async def test_runner_publishes_three_envelopes_in_three_ticks(monkeypatch):
     assert 0.0 <= first["gpu_mem_util_pct"] <= 100.0
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_runner.py -v`
 Expected: ImportError for `cortex.bench.runner`. FAIL.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 ```python
 # cortex/bench/targets.py
 """Design §16.2 throughput targets — exported as constants so the Cortex Console
@@ -1048,11 +1048,11 @@ class BenchRunner:
                 pass
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_runner.py -v`
 Expected: PASS (1 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add cortex/bench/runner.py cortex/bench/targets.py tests/bench/test_runner.py
 git commit -m "feat(bench): BenchRunner async 2s tick loop publishing METRICS envelopes
@@ -1068,7 +1068,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/bench/runner.py` (add signal handling to `run()`; ensure `stop()` cancels pending tasks)
 - Test: `tests/bench/test_runner_shutdown.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_runner_shutdown.py
 import asyncio
@@ -1154,11 +1154,11 @@ async def test_keyboard_interrupt_in_run_triggers_clean_stop():
     assert fake_broker.closed is True
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_runner_shutdown.py -v`
 Expected: First test MAY pass already (Task 6 `stop()` closes broker); second test FAILS because `run()` does not catch `KeyboardInterrupt`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 Modify `BenchRunner.run` in `cortex/bench/runner.py`:
 
 ```python
@@ -1194,11 +1194,11 @@ Modify `BenchRunner.run` in `cortex/bench/runner.py`:
                 pass
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_runner_shutdown.py -v`
 Expected: PASS (2 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add cortex/bench/runner.py tests/bench/test_runner_shutdown.py
 git commit -m "feat(bench): graceful BenchRunner shutdown on SIGTERM/KeyboardInterrupt
@@ -1214,7 +1214,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/bench/__main__.py`
 - Test: `tests/bench/test_main.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_main.py
 import asyncio
@@ -1266,11 +1266,11 @@ def test_main_constructs_runner_with_argv(monkeypatch):
     assert fake.run_called == 1
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_main.py -v`
 Expected: ImportError for `cortex.bench.__main__`. FAIL.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 ```python
 # cortex/bench/__main__.py
 from __future__ import annotations
@@ -1330,11 +1330,11 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_main.py -v`
 Expected: PASS (1 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add cortex/bench/__main__.py tests/bench/test_main.py
 git commit -m "feat(bench): CLI entrypoint python -m cortex.bench with signal handlers
@@ -1350,7 +1350,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/bench/targets.py` (already created in Task 6 — re-assert here)
 - Test: `tests/bench/test_targets.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_targets.py
 from cortex.bench.targets import (
@@ -1377,11 +1377,11 @@ def test_broker_fanout_target_matches_design_16_2():
     assert BROKER_FANOUT_PER_SEC_TARGET == 1000
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_targets.py -v`
 Expected: If Task 6 already created `targets.py`, this PASSES immediately. Otherwise ImportError FAIL.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 Ensure `cortex/bench/targets.py` contains exactly:
 
 ```python
@@ -1399,11 +1399,11 @@ BENCH_QUERY_COUNT = 10
 BENCH_EMBED_BATCH = 16
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_targets.py -v`
 Expected: PASS (4 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add tests/bench/test_targets.py
 git commit -m "test(bench): assert Design §16.2 throughput target constants
@@ -1419,7 +1419,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Test: `tests/bench/test_integration_two_sidecars.py`
 - Create: `tests/bench/fixtures.py` (shared synthetic helpers)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/fixtures.py
 import asyncio
@@ -1558,11 +1558,11 @@ async def test_sidecar_metrics_payload_uses_design_5_8_key_order():
     ]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_integration_two_sidecars.py -v`
 Expected: ImportError for `tests.bench.fixtures` until Step 1 file exists; once fixtures written, may still FAIL if `BenchRunner` does not yield between ticks. FAIL until wiring is complete.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 The implementation from Tasks 1–9 already satisfies this integration test (BenchRunner publishes via the injected `_RecordingBroker`, `to_dict` produces the 7-key Design §5.8 layout exactly). If the test reveals a missing piece (e.g., the runner blocks on the first tick without yielding), patch `runner._tick` to `await asyncio.sleep(0)` once before doing work:
 
 ```python
@@ -1573,11 +1573,11 @@ The implementation from Tasks 1–9 already satisfies this integration test (Ben
 ```
 No other code changes should be required.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_integration_two_sidecars.py -v`
 Expected: PASS (2 passed).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add tests/bench/fixtures.py tests/bench/test_integration_two_sidecars.py cortex/bench/runner.py
 git commit -m "test(bench): integration test — two sidecars publish Design §5.8 metrics payloads
@@ -1593,7 +1593,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/bench/runner.py` (wrap each probe call in try/except; emit zeros on failure)
 - Test: `tests/bench/test_runner_error_reporting.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 ```python
 # tests/bench/test_runner_error_reporting.py
 import asyncio
@@ -1665,11 +1665,11 @@ async def test_sidecar_keeps_publishing_zeros_when_all_probes_fail():
         assert env.payload["gpu_mem_util_pct"] == 0.0
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run: `pytest tests/bench/test_runner_error_reporting.py -v`
 Expected: FAIL — `BenchRunner._tick` lets probe exceptions bubble, so the loop dies and zero envelopes are published.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 Replace `BenchRunner._tick` in `cortex/bench/runner.py` so each probe call is guarded:
 
 ```python
@@ -1725,13 +1725,13 @@ Replace `BenchRunner._tick` in `cortex/bench/runner.py` so each probe call is gu
         )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run: `pytest tests/bench/test_runner_error_reporting.py -v`
 Expected: PASS (1 passed). Also re-run the full bench suite to confirm no regressions:
 Run: `pytest tests/bench/ -v`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 ```bash
 git add cortex/bench/runner.py tests/bench/test_runner_error_reporting.py
 git commit -m "fix(bench): emit zero-valued METRICS when probes fail; sidecar never crashes

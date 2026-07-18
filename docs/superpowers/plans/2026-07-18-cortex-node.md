@@ -83,7 +83,7 @@ class QueryResult:
 - Create: `cortex/node/config.py`
 - Test: `tests/unit/node/test_config.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_config.py
@@ -170,12 +170,12 @@ def test_env_override_embed_backend_cpu(tmp_path: Path, monkeypatch) -> None:
     assert cfg.bench_enabled is True
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_config.py`
 Expected: `ImportError: cannot import name 'NodeConfig' from 'cortex.node.config'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/config.py
@@ -282,12 +282,12 @@ def load_config(path: Path) -> NodeConfig:
     return cfg
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_config.py`
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/config.py tests/unit/node/test_config.py
@@ -304,7 +304,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/node/store.py`
 - Test: `tests/unit/node/test_store.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_store.py
@@ -362,12 +362,12 @@ def test_schema_idempotent_reopen(tmp_path: Path) -> None:
     assert {"articles", "provenance_edges", "events"}.issubset(names)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_store.py::test_schema_idempotent_reopen`
 Expected: import error.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/store.py
@@ -427,12 +427,12 @@ class ArticleStore:
         self._conn.close()
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_store.py::test_schema_idempotent_reopen`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/store.py tests/unit/node/test_store.py
@@ -448,7 +448,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `cortex/node/store.py`, `tests/unit/node/test_store.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/node/test_store.py`:
 
@@ -513,12 +513,12 @@ def test_operational_error_retries(tmp_path: Path, monkeypatch) -> None:
     s.close()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_store.py`
 Expected: `AttributeError: 'ArticleStore' object has no attribute 'put'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `cortex/node/store.py`:
 
@@ -614,12 +614,12 @@ class ArticleStore:  # extended
 
 Adjust module imports to include `from datetime import datetime, timezone`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_store.py`
 Expected: `5 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/store.py tests/unit/node/test_store.py
@@ -636,7 +636,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/node/embedder.py`
 - Test: `tests/unit/node/test_embedder.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_embedder.py
@@ -662,12 +662,12 @@ def test_embed_one_shape() -> None:
     assert v.dtype == np.float16
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_embedder.py`
 Expected: `ImportError: cannot import name 'Embedder'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/embedder.py
@@ -761,12 +761,12 @@ class Embedder:
         return self.embed([text])[0]
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_embedder.py -m "not gpu"`
 Expected: `2 passed` (requires `transformers` and `torch` installed; if ROCm spike succeeded, this passes on CPU).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/embedder.py tests/unit/node/test_embedder.py
@@ -782,7 +782,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `cortex/node/embedder.py`, `tests/unit/node/test_embedder.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append:
 
@@ -808,12 +808,12 @@ def test_embed_oom_halves_batch_and_invokes_callback(monkeypatch) -> None:
     assert any("oom:halve_to" in c for c in calls), calls
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_embedder.py::test_embed_oom_halves_batch_and_invokes_callback`
 Expected: should pass already with implementation above, but if retry logic mis-orders prefix slicing, it may loop. Fix step 3.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Tighten the embed loop in `cortex/node/embedder.py` so the slice restarts on the same `i` after halving:
 
@@ -830,12 +830,12 @@ Tighten the embed loop in `cortex/node/embedder.py` so the slice restarts on the
                 raise
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_embedder.py::test_embed_oom_halves_batch_and_invokes_callback`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/embedder.py tests/unit/node/test_embedder.py
@@ -852,7 +852,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/node/vector_index.py`
 - Test: `tests/unit/node/test_vector_index.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_vector_index.py
@@ -891,12 +891,12 @@ def test_hnsw_add_search_save_load(tmp_path) -> None:
     assert hits2[0][0] == "a0"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_vector_index.py`
 Expected: import error.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/vector_index.py
@@ -979,12 +979,12 @@ class HNSWIndex:
         self._index.set_ef(self.ef_search)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_vector_index.py`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/vector_index.py tests/unit/node/test_vector_index.py
@@ -1000,7 +1000,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `cortex/node/vector_index.py`, `tests/unit/node/test_vector_index.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append:
 
@@ -1017,12 +1017,12 @@ def test_faiss_gpu_or_skip() -> None:
     assert hits[0][0] == "a0"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_vector_index.py::test_faiss_gpu_or_skip`
 Expected: import error or skipped if faiss absent.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `cortex/node/vector_index.py`:
 
@@ -1083,12 +1083,12 @@ class FAISSGPUIndex:
         self._next = int(meta["next"])
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_vector_index.py::test_faiss_gpu_or_skip`
 Expected: `1 passed` if faiss-gpu installed, else `skipped`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/vector_index.py tests/unit/node/test_vector_index.py
@@ -1105,7 +1105,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/node/provenance.py`
 - Test: `tests/unit/node/test_provenance.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_provenance.py
@@ -1146,12 +1146,12 @@ def test_graph_version_increments(tmp_path: Path) -> None:
     assert g.graph_version == v0 + 1
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_provenance.py`
 Expected: import error.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/provenance.py
@@ -1234,12 +1234,12 @@ class ProvenanceGraph:
         self._conn.close()
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_provenance.py`
 Expected: `3 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/provenance.py tests/unit/node/test_provenance.py
@@ -1256,7 +1256,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/node/trust.py`
 - Test: `tests/unit/node/test_trust.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_trust.py
@@ -1322,12 +1322,12 @@ def test_trust_for_with_cites() -> None:
     assert abs(t - expected) < 1e-3
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_trust.py`
 Expected: import error.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/trust.py
@@ -1386,12 +1386,12 @@ class TrustEngine:
         return t
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_trust.py`
 Expected: `3 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/trust.py tests/unit/node/test_trust.py
@@ -1407,7 +1407,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `cortex/node/trust.py`, `tests/unit/node/test_trust.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append:
 
@@ -1427,12 +1427,12 @@ def test_memoization_and_invalidation(tmp_path) -> None:
     # bump graph_version invalidates only that key path; we rely on key change
 ```
 
-- [ ] **Step 2: Run test**
+- [x] **Step 2: Run test**
 
 Run: `pytest -q tests/unit/node/test_trust.py::test_memoization_and_invalidation`
 Expected: `1 passed` (the implementation above already keys cache on `graph_version`).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Already covered by `TrustEngine._cache[(article_id, graph_version)]`. Add explicit comment to make the invariant visible:
 
@@ -1441,12 +1441,12 @@ Already covered by `TrustEngine._cache[(article_id, graph_version)]`. Add explic
 # cache key includes graph_version so prior entries become unreachable.
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_trust.py`
 Expected: `4 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/trust.py tests/unit/node/test_trust.py
@@ -1463,7 +1463,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/node/query.py`
 - Test: `tests/unit/node/test_retrieval.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_retrieval.py
@@ -1540,12 +1540,12 @@ def test_retrieval_applies_scope_trust_and_hybrid() -> None:
     assert all(isinstance(r.hybrid_score, float) for r in results)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_retrieval.py`
 Expected: import error.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/query.py
@@ -1623,12 +1623,12 @@ def retrieve(
     return scored[:top_k]
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_retrieval.py`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/query.py tests/unit/node/test_retrieval.py
@@ -1645,7 +1645,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/node/broker_client.py`
 - Test: `tests/unit/node/test_broker_client.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_broker_client.py
@@ -1717,12 +1717,12 @@ async def test_spill_when_queue_overflows(monkeypatch, tmp_path: Path) -> None:
     assert len(spilled) >= 1, f"expected spill files, got {spilled}"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_broker_client.py`
 Expected: import error.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/broker_client.py
@@ -1841,12 +1841,12 @@ class BrokerClient:
                 backoff = min(backoff * 2, 30.0)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_broker_client.py`
 Expected: `2 passed` (no real network sockets; fakes used).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/broker_client.py tests/unit/node/test_broker_client.py
@@ -1863,7 +1863,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/node/node.py`
 - Test: `tests/unit/node/test_node_publish.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_node_publish.py
@@ -1994,12 +1994,12 @@ async def test_publish_private_never_sends_envelope(cfg: Path, tmp_path: Path) -
     await node.stop()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_node_publish.py`
 Expected: import error.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/node.py
@@ -2215,12 +2215,12 @@ def _row_to_article(row: Any) -> MemoryArticle | None:
     )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_node_publish.py`
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/node.py tests/unit/node/test_node_publish.py
@@ -2236,7 +2236,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `cortex/node/node.py`, add test `tests/unit/node/test_node_query.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_node_query.py
@@ -2285,12 +2285,12 @@ async def test_query_returns_closest(tmp_path: Path, monkeypatch) -> None:
     await node.stop()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_node_query.py`
 Expected: passes if Task 11/13 wired in; otherwise failure reveals missing wire-up (store-aware retrieval adapter).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Add a store adapter to CortexNode.query so `retrieve` can hydrate from ArticleStore rows:
 
@@ -2307,12 +2307,12 @@ Add a store adapter to CortexNode.query so `retrieve` can hydrate from ArticleSt
 
 Update `_row_to_article` to populate all fields retrieval needs (`scope`, `type`, `trust_score`, `provenance`).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_node_query.py`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/node.py tests/unit/node/test_node_query.py
@@ -2328,7 +2328,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `cortex/node/node.py`, add test `tests/unit/node/test_node_derive.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_node_derive.py
@@ -2397,21 +2397,21 @@ def _row_to_article(row):
                          trust_score=row["trust_score"], trust_expiration=None)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_node_derive.py`
 Expected: should fail at `assert any(e["type"] == "derive" ...)` if envelope not emitted, or `cited_by` empty if edges not added. Pass once node.derive wires both.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 `CortexNode.derive` already in node.py per Task 13 step 3. Verify edges persist in SQLite and envelope task scheduled.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_node_derive.py`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/node.py tests/unit/node/test_node_derive.py
@@ -2427,7 +2427,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Add test `tests/unit/node/test_node_invariants.py`, `cortex/node/keys.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_node_invariants.py
@@ -2485,12 +2485,12 @@ def test_load_keys_refuses_world_readable(tmp_path: Path) -> None:
 
 Note: `load_keys` returning two tuples per the contract. We re-test the `ensure_keys` permissive mode in Task 19.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_node_invariants.py`
 Expected: `ImportError: cannot import name 'load_keys'` (already wired into node.py via Task 13 step 3 import — but `cortex/node/keys.py` not yet created).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/keys.py
@@ -2532,12 +2532,12 @@ def ensure_keys(path: Path, kind: str = "org") -> Path:
     return p
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_node_invariants.py`
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/keys.py tests/unit/node/test_node_invariants.py
@@ -2553,7 +2553,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Create: `cortex/node/receiver.py` and test `tests/unit/node/test_receiver.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_receiver.py
@@ -2618,12 +2618,12 @@ def test_tampered_canonical_raises_canonical_mismatch(tmp_path: Path) -> None:
         receive_publish_envelope(tampered, canonical, reg, store)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_receiver.py`
 Expected: import error.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/node/receiver.py
@@ -2660,12 +2660,12 @@ def receive_publish_envelope(article: Any, expected_canonical: bytes, registry: 
     return article.id
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_receiver.py`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/receiver.py tests/unit/node/test_receiver.py
@@ -2681,7 +2681,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `cortex/node/node.py`, add test `tests/unit/node/test_node_health.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_node_health.py
@@ -2725,11 +2725,11 @@ async def test_health_loop_swaps_to_cpu(tmp_path: Path, monkeypatch) -> None:
     await node.stop()
 ```
 
-- [ ] **Step 2: Run test to verify it fails / passes**
+- [x] **Step 2: Run test to verify it fails / passes**
 
 Run: `pytest -q tests/unit/node/test_node_health.py`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 `_health_loop` already implemented in node.py (Task 13). Tighten it:
 
@@ -2750,12 +2750,12 @@ Run: `pytest -q tests/unit/node/test_node_health.py`
                 self.store.event_log_append("node.embed.fallback_cpu", None, {"reason": "healthcheck"})
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_node_health.py`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/node.py tests/unit/node/test_node_health.py
@@ -2771,7 +2771,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Modify: `cortex/node/keys.py`, add test `tests/unit/node/test_keys.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/node/test_keys.py
@@ -2802,20 +2802,20 @@ def test_ensure_keys_idempotent(tmp_path: Path) -> None:
     assert a.read_bytes() == b.read_bytes()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/unit/node/test_keys.py`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 `ensure_keys` already in keys.py from Task 16. Confirm `generate_org_keypair` / `generate_agent_keypair` return `(priv_pem_bytes, pub_pem_bytes)` per core contract.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/unit/node/test_keys.py`
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/keys.py tests/unit/node/test_keys.py
@@ -2831,7 +2831,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Test: `tests/integration/test_two_node_roundtrip.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/test_two_node_roundtrip.py
@@ -2945,12 +2945,12 @@ async def test_two_node_roundtrip(tmp_path: Path) -> None:
     server.close(); await server.wait_closed()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest -q tests/integration/test_two_node_roundtrip.py`
 Expected: fails until `BrokerClient` real socket wiring handles acks/broadcasts; tune `BrokerClient._sender_loop` to ignore `ack` messages from broker without crashing.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `cortex/node/broker_client.py`, add receive loop that ignores non-result envelopes and surfaces events through `on_event`:
 
@@ -2980,12 +2980,12 @@ In `cortex/node/broker_client.py`, add receive loop that ignores non-result enve
 
 Update `stop()` to also cancel `_reader_task`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest -q tests/integration/test_two_node_roundtrip.py`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/node/broker_client.py tests/integration/test_two_node_roundtrip.py

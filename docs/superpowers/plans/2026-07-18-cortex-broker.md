@@ -51,7 +51,7 @@ broker:
 - Test: `tests/unit/broker/__init__.py`
 - Test: `tests/unit/broker/test_registry.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/broker/test_registry.py
@@ -119,12 +119,12 @@ def test_from_json_file_handles_empty_topics(tmp_path):
     assert rec.topics == []
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/broker/test_registry.py -q`
 Expected: `ImportError` for `cortex.broker.registry` (module does not exist yet).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/broker/__init__.py
@@ -178,12 +178,12 @@ class OrgRegistry:
         return cls(records)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/broker/test_registry.py -q`
 Expected: `4 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/__init__.py cortex/broker/registry.py tests/unit/broker/__init__.py tests/unit/broker/test_registry.py
@@ -200,7 +200,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/broker/acl.py`
 - Test: `tests/unit/broker/test_acl.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/broker/test_acl.py
@@ -233,12 +233,12 @@ def test_acl_intra_org_always_allowed_even_for_partner_other():
                      "did:percq:org:soc-alpha") is True
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/broker/test_acl.py -q`
 Expected: `ImportError` for `cortex.broker.acl`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/broker/acl.py
@@ -279,12 +279,12 @@ def filter_subscribers(
     return [s for s in subscribers if acl_allows(scope, src_org, s.org_did)]
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/broker/test_acl.py -q`
 Expected: `9 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/acl.py tests/unit/broker/test_acl.py
@@ -301,7 +301,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/broker/routing.py`
 - Test: `tests/unit/broker/test_routing.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/broker/test_routing.py
@@ -381,12 +381,12 @@ def test_unsubscribe_removes_subscriber():
     assert r.subscribers_for("apt29", "public", "did:percq:org:soc-alpha") == []
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/broker/test_routing.py -q`
 Expected: `ImportError` for `cortex.broker.routing`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/broker/routing.py
@@ -445,12 +445,12 @@ class Router:
         return out
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/broker/test_routing.py -q`
 Expected: `7 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/routing.py tests/unit/broker/test_routing.py
@@ -467,7 +467,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/broker/dedup.py`
 - Test: `tests/unit/broker/test_dedup.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/broker/test_dedup.py
@@ -514,12 +514,12 @@ def test_record_idempotent():
     assert d.is_replay("x", 1, 1) is True
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/broker/test_dedup.py -q`
 Expected: `ImportError` for `cortex.broker.dedup`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/broker/dedup.py
@@ -558,12 +558,12 @@ class Deduplicator:
         return len(self._seen)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/broker/test_dedup.py -q`
 Expected: `6 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/dedup.py tests/unit/broker/test_dedup.py
@@ -579,7 +579,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Test: `tests/unit/broker/test_envelope_roundtrip.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/broker/test_envelope_roundtrip.py
@@ -630,21 +630,21 @@ def test_envelope_to_json_is_canonical_string():
     assert s == envelope_to_json(env)
 ```
 
-- [ ] **Step 2: Run test to verify it fails (or skips)**
+- [x] **Step 2: Run test to verify it fails (or skips)**
 
 Run: `pytest tests/unit/broker/test_envelope_roundtrip.py -q`
 Expected: skipped if `cortex-core` is not yet present; otherwise the test passes once `Envelope` is imported and has the constructor used above.
 
-- [ ] **Step 3: No broker-side implementation needed**
+- [x] **Step 3: No broker-side implementation needed**
 
 This task is a consumer-side guard rail: the broker relies on `cortex.core.envelope` shapes and never redefines them. If the test fails because of a constructor mismatch, raise an issue against the `cortex-core` plan rather than patching core here.
 
-- [ ] **Step 4: Run test to verify it passes (or persists as skip)**
+- [x] **Step 4: Run test to verify it passes (or persists as skip)**
 
 Run: `pytest tests/unit/broker/test_envelope_roundtrip.py -q`
 Expected: `2 passed` (or `2 skipped` until core is merged).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/unit/broker/test_envelope_roundtrip.py
@@ -662,7 +662,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Test: `tests/integration/broker/__init__.py`
 - Test: `tests/integration/broker/test_server_handshake.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_server_handshake.py
@@ -767,12 +767,12 @@ async def test_unknown_org_in_handshake_is_rejected(tmp_path, unused_tcp_port):
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/integration/broker/test_server_handshake.py -q`
 Expected: `ImportError` for `cortex.broker.server`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/broker/server.py
@@ -943,12 +943,12 @@ class BrokerServer:
             self._event_clients.discard(c)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_server_handshake.py -q`
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/server.py tests/integration/broker/__init__.py tests/integration/broker/test_server_handshake.py
@@ -965,7 +965,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/broker/server.py`
 - Test: `tests/integration/broker/test_publish_forward.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_publish_forward.py
@@ -1053,12 +1053,12 @@ async def test_publish_to_public_topic_forwards_to_all_subscribers(tmp_path, unu
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/integration/broker/test_publish_forward.py -q`
 Expected: failure — the stub `_dispatch` only acks and never forwards; beta never receives a `publish`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Replace the body of `_dispatch` in `cortex/broker/server.py`:
 
@@ -1183,7 +1183,7 @@ Replace the body of `_dispatch` in `cortex/broker/server.py`:
             self._event_clients.discard(c)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_publish_forward.py -q`
 Expected: `1 passed`. Also rerun Task 6 tests to confirm no regression:
@@ -1191,7 +1191,7 @@ Expected: `1 passed`. Also rerun Task 6 tests to confirm no regression:
 Run: `pytest tests/integration/broker/ -q`
 Expected: all integration tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/server.py tests/integration/broker/test_publish_forward.py
@@ -1208,7 +1208,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/broker/server.py`
 - Test: `tests/integration/broker/test_scope_violation.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_scope_violation.py
@@ -1347,12 +1347,12 @@ async def test_scope_violation_event_mirrored_when_no_recipient_allowed(tmp_path
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/integration/broker/test_scope_violation.py -q`
 Expected: the second test fails because the broker never emits `broker.scope_violation` on no-recipient route.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `cortex/broker/server.py`, modify `_forward_to_subscribers` to detect a "no recipient allowed" route and emit `broker.scope_violation`:
 
@@ -1390,12 +1390,12 @@ In `cortex/broker/server.py`, modify `_forward_to_subscribers` to detect a "no r
             }))
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_scope_violation.py tests/integration/broker/ -q`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/server.py tests/integration/broker/test_scope_violation.py
@@ -1412,7 +1412,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/broker/server.py`
 - Test: `tests/integration/broker/test_query_fanout.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_query_fanout.py
@@ -1594,12 +1594,12 @@ async def test_query_deadline_truncation_returns_partial(tmp_path, unused_tcp_po
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/integration/broker/test_query_fanout.py -q`
 Expected: failures — `_handle_query` stub does not exist; caller does not receive `query_result`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Add the following to `cortex/broker/server.py` (it was already routed in Task 7's `_dispatch`; now we provide the body):
 
@@ -1698,12 +1698,12 @@ Add the following to `cortex/broker/server.py` (it was already routed in Task 7'
                                             "merged_count": len(merged)}))
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_query_fanout.py -q`
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/server.py tests/integration/broker/test_query_fanout.py
@@ -1720,7 +1720,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/broker/server.py`
 - Test: `tests/integration/broker/test_event_channel.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_event_channel.py
@@ -1807,12 +1807,12 @@ async def test_event_channel_sees_peer_connected_and_article_published(tmp_path,
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/integration/broker/test_event_channel.py -q`
 Expected: failure because the `?channel=event` query path is not handled; `event_ws` is treated as a normal node and waits forever for a SUBSCRIBE handshake.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Update `BrokerServer._handler` to inspect the `path` of the WS request. websockets passes the request path through `ws.path` (or `request.path` on newer versions). Modify the top of `_handler`:
 
@@ -1845,12 +1845,12 @@ Update `BrokerServer._handler` to inspect the `path` of the WS request. websocke
 
 > Note: the existing `_broadcast_event`/`_broadcast_metrics` already iterate over the sets. We rely on `websockets.serve` accepting `?query` paths by default.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_event_channel.py tests/integration/broker/ -q`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/server.py tests/integration/broker/test_event_channel.py
@@ -1866,7 +1866,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Test: `tests/integration/broker/test_metrics_channel.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_metrics_channel.py
@@ -1934,21 +1934,21 @@ async def test_metrics_producer_to_consumer_forwarding(tmp_path, unused_tcp_port
             pass
 ```
 
-- [ ] **Step 2: Verify the test passes (Task 7 already wired `_broadcast_metrics`)**
+- [x] **Step 2: Verify the test passes (Task 7 already wired `_broadcast_metrics`)**
 
 Run: `pytest tests/integration/broker/test_metrics_channel.py -q`
 Expected: `1 passed`. (If it fails because the producer doesn't wait long enough for the consumer, add a tiny `await asyncio.sleep(0.05)` between subscribe-ack and metrics-send — but the test as written is deterministic given the consumer is connected first.)
 
 If it does fail, the minimal patch is to ensure `_dispatch` routes `metrics` to `_broadcast_metrics` (already done in Task 7) plus an ack (also already done).
 
-- [ ] **Step 3: No implementation changes needed** — this task validates existing wiring. If test fails, debug per `systematic-debugging` skill before patching.
+- [x] **Step 3: No implementation changes needed** — this task validates existing wiring. If test fails, debug per `systematic-debugging` skill before patching.
 
-- [ ] **Step 4: Run test again to verify**
+- [x] **Step 4: Run test again to verify**
 
 Run: `pytest tests/integration/broker/test_metrics_channel.py -q`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/integration/broker/test_metrics_channel.py
@@ -1964,7 +1964,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Test: `tests/integration/broker/test_replay_window.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_replay_window.py
@@ -2084,12 +2084,12 @@ async def test_duplicate_msg_id_within_window_dropped_silently(tmp_path, unused_
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/integration/broker/test_replay_window.py -q`
 Expected: stale test fails (`_dispatch` returns ack instead of `DEADLINE_EXCEEDED` error — the replay check in Task 7's `_dispatch` had a buggy condition).
 
-- [ ] **Step 3: Fix the dedup branch in `_dispatch`**
+- [x] **Step 3: Fix the dedup branch in `_dispatch`**
 
 In `cortex/broker/server.py`, replace the top of `_dispatch` with a clean two-part check:
 
@@ -2121,12 +2121,12 @@ In `cortex/broker/server.py`, replace the top of `_dispatch` with a clean two-pa
 
 (Leave the rest of `_dispatch` unchanged.)
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_replay_window.py tests/integration/broker/ -q`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/server.py tests/integration/broker/test_replay_window.py
@@ -2142,7 +2142,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Test: `tests/integration/broker/test_reconnect.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_reconnect.py
@@ -2223,19 +2223,19 @@ async def test_broker_tolerates_disconnect_and_emits_peer_connected_on_reconnect
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it passes (Task 6/10 already emit peer_connected per handshake)**
+- [x] **Step 2: Run test to verify it passes (Task 6/10 already emit peer_connected per handshake)**
 
 Run: `pytest tests/integration/broker/test_reconnect.py -q`
 Expected: `1 passed`. This task validates the existing behavior; no code changes needed.
 
-- [ ] **Step 3: No implementation changes.** If the test fails, debug per `superpowers:systematic-debugging` and patch the `finally`-block cleanup in `_handler`.
+- [x] **Step 3: No implementation changes.** If the test fails, debug per `superpowers:systematic-debugging` and patch the `finally`-block cleanup in `_handler`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_reconnect.py -q`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/integration/broker/test_reconnect.py
@@ -2252,7 +2252,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/broker/server.py`
 - Test: `tests/integration/broker/test_dead_letter.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_dead_letter.py
@@ -2346,19 +2346,19 @@ async def test_dead_letter_emitted_when_send_fails(tmp_path, unused_tcp_port, mo
             pass
 ```
 
-- [ ] **Step 2: Run test to verify it passes (Task 7 already emits dead_letter on forward failure)**
+- [x] **Step 2: Run test to verify it passes (Task 7 already emits dead_letter on forward failure)**
 
 Run: `pytest tests/integration/broker/test_dead_letter.py -q`
 Expected: `1 passed`. If it fails because the Router entry is cleaned up before the publish reaches the broker, add a `await asyncio.sleep(0)` between `await beta.close()` and the `alpha.send` call, or instead reduce the wait time. The existing `_forward_to_subscribers` already wraps `sub.ws.send` in try/except and emits `broker.dead_letter` on exception.
 
-- [ ] **Step 3: No implementation changes needed** under most timing outcomes. If the test still fails, debug per `superpowers:systematic-debugging`.
+- [x] **Step 3: No implementation changes needed** under most timing outcomes. If the test still fails, debug per `superpowers:systematic-debugging`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_dead_letter.py -q`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/integration/broker/test_dead_letter.py
@@ -2376,7 +2376,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `cortex/broker/config.py`
 - Test: `tests/unit/broker/test_cli.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/broker/test_cli.py
@@ -2470,12 +2470,12 @@ def test_cli_starts_server_and_serves_subscribers(tmp_path, unused_tcp_port):
             proc.kill()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/broker/test_cli.py -q`
 Expected: `ImportError` for `cortex.broker.config` and missing `__main__.py`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/broker/config.py
@@ -2577,12 +2577,12 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/broker/test_cli.py -q`
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/broker/__main__.py cortex/broker/config.py tests/unit/broker/test_cli.py
@@ -2598,7 +2598,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Test: `tests/integration/broker/test_e2e_roundtrip.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/broker/test_e2e_roundtrip.py
@@ -2703,19 +2703,19 @@ async def test_full_publish_acl_forward_event_mirror_roundtrip(tmp_path, unused_
             pass
 ```
 
-- [ ] **Step 2: Verify the test passes (all earlier tasks already implement the needed paths)**
+- [x] **Step 2: Verify the test passes (all earlier tasks already implement the needed paths)**
 
 Run: `pytest tests/integration/broker/test_e2e_roundtrip.py -q`
 Expected: `1 passed`. If it fails, debug per `systematic-debugging`.
 
-- [ ] **Step 3: No implementation changes.** This task validates end-to-end behavior of everything in Tasks 6–12.
+- [x] **Step 3: No implementation changes.** This task validates end-to-end behavior of everything in Tasks 6–12.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/broker/test_e2e_roundtrip.py -q`
 Expected: `1 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/integration/broker/test_e2e_roundtrip.py
