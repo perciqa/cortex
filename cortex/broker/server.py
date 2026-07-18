@@ -7,6 +7,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,7 @@ from websockets.exceptions import ConnectionClosed
 from cortex.broker.dedup import Deduplicator
 from cortex.broker.registry import OrgRegistry
 from cortex.broker.routing import Router, Subscriber
+from cortex.core.envelope import Envelope, EnvelopeType, envelope_to_json
 
 log = logging.getLogger(__name__)
 
@@ -34,37 +36,41 @@ def _now_unix() -> int:
     return int(time.time())
 
 
-def _ack(env: dict) -> dict:
-    return {
-        "type": "ack",
-        "msg_id": str(uuid.uuid4()),
-        "src": "broker",
-        "dst": env.get("src", "*"),
-        "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "payload": {"ack_of": env.get("msg_id")},
-    }
+def _ts() -> datetime:
+    return datetime.now(tz=timezone.utc)
 
 
-def _error(dst: Any, code: str, detail: str = "") -> dict:
-    return {
-        "type": "error",
-        "msg_id": str(uuid.uuid4()),
-        "src": "broker",
-        "dst": dst if isinstance(dst, str) else "*",
-        "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "payload": {"code": code, "detail": detail},
-    }
+def _ack(env: dict) -> str:
+    return envelope_to_json(Envelope(
+        type=EnvelopeType.ACK,
+        msg_id=str(uuid.uuid4()),
+        src="broker",
+        dst=env.get("src", "*"),
+        ts=_ts(),
+        payload={"ack_of": env.get("msg_id")},
+    ))
 
 
-def _event(event_name: str, data: dict) -> dict:
-    return {
-        "type": "event",
-        "msg_id": str(uuid.uuid4()),
-        "src": "broker",
-        "dst": "*",
-        "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "payload": {"event": event_name, "data": data},
-    }
+def _error(dst: Any, code: str, detail: str = "") -> str:
+    return envelope_to_json(Envelope(
+        type=EnvelopeType.ERROR,
+        msg_id=str(uuid.uuid4()),
+        src="broker",
+        dst=dst if isinstance(dst, str) else "*",
+        ts=_ts(),
+        payload={"code": code, "detail": detail},
+    ))
+
+
+def _event(event_name: str, data: dict) -> str:
+    return envelope_to_json(Envelope(
+        type=EnvelopeType.EVENT,
+        msg_id=str(uuid.uuid4()),
+        src="broker",
+        dst="*",
+        ts=_ts(),
+        payload={"event": event_name, "data": data},
+    ))
 
 
 class BrokerServer:
@@ -128,17 +134,17 @@ class BrokerServer:
         try:
             env = json.loads(first_raw)
         except json.JSONDecodeError:
-            await ws.send(json.dumps(_error("*", "UNKNOWN_PRODUCER", "handshake-not-json")))
+            await ws.send(_error("*", "UNKNOWN_PRODUCER", "handshake-not-json"))
             return
-        if env.get("type") != "subscribe":
-            await ws.send(json.dumps(_error(env.get("src", "*"), "UNKNOWN_PRODUCER",
-                                            "first envelope must be subscribe")))
+        if env.get("type") != EnvelopeType.SUBSCRIBE.value:
+            await ws.send(_error(env.get("src", "*"), "UNKNOWN_PRODUCER",
+                                            "first envelope must be subscribe"))
             return
         src_org = env.get("src", "")
         org = self.registry.get(src_org)
         if org is None:
-            await ws.send(json.dumps(_error(src_org or "*", "UNKNOWN_PRODUCER",
-                                             f"unknown org_did {src_org!r}")))
+            await ws.send(_error(src_org or "*", "UNKNOWN_PRODUCER",
+                                             f"unknown org_did {src_org!r}"))
             return
         payload = env.get("payload") or {}
         node_id = payload.get("node_id", src_org)
@@ -150,7 +156,7 @@ class BrokerServer:
             ws=ws,
         )
         self.router.subscribe(sub)
-        await ws.send(json.dumps(_ack(env)))
+        await ws.send(_ack(env))
         await self._broadcast_event(_event("broker.peer_connected",
                                            {"node_id": node_id, "org": src_org}))
         try:
@@ -158,7 +164,7 @@ class BrokerServer:
                 try:
                     env = json.loads(raw)
                 except json.JSONDecodeError:
-                    await ws.send(json.dumps(_error(src_org, "UNKNOWN_PRODUCER", "bad-json")))
+                    await ws.send(_error(src_org, "UNKNOWN_PRODUCER", "bad-json"))
                     continue
                 await self._dispatch(ws, env, src_org, node_id)
         finally:
@@ -174,8 +180,8 @@ class BrokerServer:
         now = _now_unix()
 
         if msg_id and abs(now - ts_unix) > self.dedup.replay_window_sec:
-            await ws.send(json.dumps(_error(src_org, "DEADLINE_EXCEEDED",
-                                            "envelope ts outside replay window")))
+            await ws.send(_error(src_org, "DEADLINE_EXCEEDED",
+                                            "envelope ts outside replay window"))
             return
 
         if msg_id and msg_id in self.dedup._seen:  # noqa: SLF001
@@ -184,28 +190,28 @@ class BrokerServer:
         if msg_id:
             self.dedup.record(msg_id, ts_unix)
 
-        if etype == "publish":
+        if etype == EnvelopeType.PUBLISH.value:
             await self._handle_publish(ws, env, src_org, node_id)
-        elif etype == "query":
+        elif etype == EnvelopeType.QUERY.value:
             query_src = env.get("src", "")
             if query_src == src_org:
                 await self._handle_query(ws, env, src_org, node_id)
             else:
                 await self._handle_forwarded_query(ws, env, src_org, node_id)
-        elif etype == "query_result":
+        elif etype == EnvelopeType.QUERY_RESULT.value:
             await self._handle_query_result(ws, env, src_org, node_id)
-        elif etype == "derive":
+        elif etype == EnvelopeType.DERIVE.value:
             await self._forward_to_subscribers(env, src_org, node_id,
                                               topic=env.get("payload", {}).get("topic", "*"),
                                               scope="public")
-            await ws.send(json.dumps(_ack(env)))
-        elif etype == "metrics":
+            await ws.send(_ack(env))
+        elif etype == EnvelopeType.METRICS.value:
             await self._broadcast_metrics(env)
-            await ws.send(json.dumps(_ack(env)))
-        elif etype == "event":
-            await ws.send(json.dumps(_error(src_org, "SCOPE_VIOLATION",
-                                            "nodes may not emit 'event' envelopes")))
-        elif etype == "subscribe":
+            await ws.send(_ack(env))
+        elif etype == EnvelopeType.EVENT.value:
+            await ws.send(_error(src_org, "SCOPE_VIOLATION",
+                                            "nodes may not emit 'event' envelopes"))
+        elif etype == EnvelopeType.SUBSCRIBE.value:
             payload = env.get("payload") or {}
             sub = self.router.all_subscribers()
             for s in sub:
@@ -213,12 +219,12 @@ class BrokerServer:
                     s.topics |= set(payload.get("topics", []))
                     s.scopes |= set(payload.get("scopes", []))
                     break
-            await ws.send(json.dumps(_ack(env)))
-        elif etype == "ack":
+            await ws.send(_ack(env))
+        elif etype == EnvelopeType.ACK.value:
             await self._record_ack(env, node_id)
         else:
-            await ws.send(json.dumps(_error(src_org, "UNKNOWN_PRODUCER",
-                                            f"unsupported envelope type {etype!r}")))
+            await ws.send(_error(src_org, "UNKNOWN_PRODUCER",
+                                            f"unsupported envelope type {etype!r}"))
 
     async def _handle_publish(self, ws: Any, env: dict, src_org: str, node_id: str) -> None:
         payload = env.get("payload") or {}
@@ -226,7 +232,7 @@ class BrokerServer:
         scope = article.get("scope", "private")
         topic = article.get("topic", "*")
         await self._forward_to_subscribers(env, src_org, node_id, topic=topic, scope=scope)
-        await ws.send(json.dumps(_ack(env)))
+        await ws.send(_ack(env))
         await self._broadcast_event(_event("article.published", {
             "article_id": article.get("id"), "src_org": src_org, "topic": topic,
             "scope": scope,
@@ -291,16 +297,16 @@ class BrokerServer:
             merged.extend(res)
         merged.sort(key=lambda r: r.get("score", 0.0), reverse=True)
         merged = merged[:top_k]
-        out = {
-            "type": "query_result",
-            "msg_id": str(uuid.uuid4()),
-            "src": "broker",
-            "dst": src_org,
-            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "payload": {"query_id": query_id, "results": merged,
-                        "partial": len(results_per_target) < len(targets)},
-        }
-        await ws.send(json.dumps(out))
+        out = envelope_to_json(Envelope(
+            type=EnvelopeType.QUERY_RESULT,
+            msg_id=str(uuid.uuid4()),
+            src="broker",
+            dst=src_org,
+            ts=_ts(),
+            payload={"query_id": query_id, "results": merged,
+                     "partial": len(results_per_target) < len(targets)},
+        ))
+        await ws.send(out)
         await self._broadcast_event(_event("broker.query_completed",
                                            {"query_id": query_id,
                                             "merged_count": len(merged)}))
@@ -384,8 +390,7 @@ class BrokerServer:
         for c in dead:
             self._metrics_clients.discard(c)
 
-    async def _broadcast_event(self, env: dict) -> None:
-        text = json.dumps(env)
+    async def _broadcast_event(self, text: str) -> None:
         dead: list[Any] = []
         for c in list(self._event_clients):
             try:
