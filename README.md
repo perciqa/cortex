@@ -114,9 +114,90 @@ Articles with `private` scope never leave the local node. `partner:<org_did>` ar
 
 ---
 
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.11+
+- AMD Radeon GPU with ROCm 6.1+ (recommended) _or_ any CUDA-capable GPU _or_ CPU-only (fallback)
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/perciqa/cortex.git
+cd cortex
+
+# 2. Create and activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# 3. Install the package with dependencies
+pip install -e ".[dev,cpu]"       # CPU-only fallback
+# OR for GPU support:
+pip install -e ".[dev,gpu]"       # Requires ROCm/CUDA PyTorch
+
+# 4. Verify installation
+pytest -q tests/
+```
+
+### Running the Demo
+
+```bash
+# End-to-end F1 SOC consortium demo (two tenants, broker, agents)
+python scenarios/soc_consortium/demo_run.py
+
+# Start the Console UI (separate terminal)
+python -m cortex.console --broker ws://localhost:7432 --port 8080
+# Open http://localhost:8080 in your browser
+```
+
+### Environment Configuration
+
+See `scenarios/soc_consortium/configs/` for YAML configuration templates:
+
+| File | Purpose |
+|---|---|
+| `broker.yaml` | Broker WebSocket port, registry path, replay window |
+| `node-alpha.yaml` | SOC Alpha node config (org DID, keys, embedder, vector index) |
+| `node-beta.yaml` | SOC Beta node config |
+| `org_registry.json` | Org public keys for signature verification |
+
+Key environment overrides:
+
+| Variable | Purpose |
+|---|---|
+| `CORTEX_BROKER_URL` | Override broker WebSocket URL |
+| `CORTEX_EMBED_BACKEND` | Force `gpu` or `cpu` embedding backend |
+| `CORTEX_LOG_LEVEL` | Set logging verbosity (`DEBUG`, `INFO`, `WARN`) |
+
+### Running Tests
+
+```bash
+pytest -q tests/                 # All tests (~213)
+pytest tests/unit/               # Unit tests only
+pytest tests/integration/        # Integration tests (broker + two-node)
+pytest tests/e2e/                # End-to-end demo scenario tests
+```
+
+### Project Structure
+
+```
+cortex/
+├── core/          # Data model, crypto, canonical JSON, envelope protocol
+├── node/          # Local tenant node (embedder, store, vector index, trust engine)
+├── broker/        # Federated pub/sub WebSocket server with ACL
+├── sdk/           # Agent-facing client + LangChain/LlamaIndex adapters
+├── bench/         # GPU vs CPU benchmark harness
+├── console/       # FastAPI backend + React SPA web UI
+└── scenarios/     # F1 SOC consortium demo data and agent scripts
+```
+
 ## License
 
-TBD. See [LICENSE](LICENSE).
+TBD.
 
 ---
 

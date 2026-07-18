@@ -1,2 +1,46 @@
-docs/
+# OS
 .DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Node
+node_modules/
+
+# Runtime data
+cortex-node/
+vectors/
+keys/
+logs/
+*.sqlite
+*.bin
+.cache/
+
+# Secrets & credentials
+.env
+.env.*
+*.pem
+*.key
+*.cert
+**/service-account.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build / dist
+dist/
+build/
+*.whl
