@@ -1,11 +1,12 @@
 import pytest
+
 from cortex.sdk.client import CortexClient
 
 
 @pytest.mark.asyncio
 async def test_alpha_counts_insight_with_three_sources(soc_e2e_env):
-    from scenarios.soc_consortium.seed import seed_articles
     from scenarios.soc_consortium.agent_alpha import run as alpha_run
+    from scenarios.soc_consortium.seed import seed_articles
 
     seed_articles(soc_e2e_env.alpha_node, soc_e2e_env.beta_node)
 
@@ -31,9 +32,10 @@ def node_get_article(node, article_id: str):
     row = node.store.get(article_id)
     if row is None:
         return None
-    from cortex.core.article import ArticleType, MemoryArticle, Provenance
     import json
     from datetime import datetime
+
+    from cortex.core.article import MemoryArticle, Provenance
     prov = Provenance(
         producer_agent="", producer_org="",
         computation_ref=None, source_data_hash=None,

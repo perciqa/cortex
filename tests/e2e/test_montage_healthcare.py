@@ -1,4 +1,5 @@
 import pytest
+
 from cortex.sdk.client import CortexClient
 
 

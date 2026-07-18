@@ -2,7 +2,6 @@ import asyncio
 import json
 
 import pytest
-import websockets
 from websockets.asyncio.server import serve
 
 from cortex.console.broker_subscriber import BrokerSubscriber

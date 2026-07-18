@@ -2,10 +2,9 @@ import asyncio
 import json
 from pathlib import Path
 
-import pytest
 import httpx
+import pytest
 from httpx import ASGITransport, AsyncClient
-import websockets
 from websockets.asyncio.client import connect
 
 from cortex.console.backend import create_app, create_app_with_broker
