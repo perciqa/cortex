@@ -4,7 +4,7 @@ import torch
 from torch import Tensor
 from transformers import AutoModel, AutoTokenizer
 
-MODEL = "BAAI/bge-small-en-v1.5"
+MODEL = "BAAI/bge-small-en-v1.5"  # or local path like "/tmp/bge-model-raw"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
