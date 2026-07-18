@@ -87,6 +87,7 @@ def agent_step(
     tools: dict,
     llm,
     max_iters: int = 5,
+    memory: Any | None = None,
 ) -> str:
     """Minimal ReAct loop.
 
@@ -117,10 +118,10 @@ def agent_step(
         return "<max_iters reached>"
 
     # vLLMClient path
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user},
-    ]
+    messages = [{"role": "system", "content": system_prompt}]
+    if memory is not None:
+        messages.extend(memory.to_messages())
+    messages.append({"role": "user", "content": user})
     for _ in range(max_iters):
         out = llm.chat(messages)
         if out.startswith("FINAL:"):

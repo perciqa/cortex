@@ -6,16 +6,20 @@ from cortex.sdk.client import CortexClient
 from cortex.sdk.exceptions import map_node_error
 from cortex.sdk.langchain_adapter import CortexRetriever
 from cortex.sdk.llm import agent_step
+from cortex.sdk.memory import ConversationMemory
 
 _DEFAULT_TOOLS_BUILDER: Callable | None = None
 
 
 class CortexAgent:
-    """Runnable agent: client + retriever + reasoner + persona.
+    """Runnable agent: client + retriever + reasoner + persona + memory.
 
     `run_task(task)` runs the ReAct loop in cortex.sdk.llm.agent_step
     using CortexRetriever + CortexPublishTool. The persona string is
     used verbatim as the LangChain system prompt base.
+
+    `chat(user_input)` appends to conversational memory, runs the
+    ReAct loop, and stores the response.
     """
 
     def __init__(
@@ -26,6 +30,7 @@ class CortexAgent:
         persona: str,
         tools_builder: Callable | None = None,
         max_iters: int = 5,
+        memory: ConversationMemory | None = None,
     ):
         self.client = client
         self.retriever = retriever
@@ -33,6 +38,7 @@ class CortexAgent:
         self.persona = persona
         self.tools_builder = tools_builder or _default_tools_builder
         self.max_iters = max_iters
+        self.memory = memory or ConversationMemory()
 
     def _build_tools(self) -> dict:
         return self.tools_builder(self.retriever, self.client)
@@ -46,9 +52,16 @@ class CortexAgent:
                 tools=tools,
                 llm=self.llm,
                 max_iters=self.max_iters,
+                memory=self.memory,
             )
         except Exception as exc:
             raise map_node_error(exc) from exc
+
+    def chat(self, user_input: str) -> str:
+        self.memory.add_turn("user", user_input)
+        response = self.run_task(user_input)
+        self.memory.add_turn("assistant", response)
+        return response
 
 
 def _default_tools_builder(retriever: CortexRetriever, client: CortexClient) -> dict:
