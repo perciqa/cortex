@@ -76,7 +76,7 @@ Archived -> (terminal)
 - Create: `tests/unit/core/conftest.py`
 - Test: `tests/unit/core/test_errors.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/core/test_errors.py
@@ -141,12 +141,12 @@ def test_transition_illegal_raises():
         transition(None, ArticleState.PUBLISHED, ArticleState.SIGNED)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_errors.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'cortex'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/__init__.py
@@ -259,12 +259,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_errors.py -v`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/__init__.py cortex/core/__init__.py cortex/core/errors.py \
@@ -284,7 +284,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/crypto.py` (create)
 - Test: `tests/unit/core/test_article.py` (create, this task only covers DID section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/core/test_article.py
@@ -319,12 +319,12 @@ def test_did_for_agent_generates_uuid_v4_when_omitted():
     assert uuid_part[19] in ("8", "9", "a", "b")
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_article.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'cortex.core.article'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/core/article.py
@@ -357,12 +357,12 @@ def did_for_org(slug: str) -> str:
     return f"{_ORG_DID_PREFIX}{slug}"
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_article.py -v`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/article.py cortex/core/crypto.py tests/unit/core/test_article.py
@@ -379,7 +379,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/article.py`
 - Test: `tests/unit/core/test_article.py` (append section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/core/test_article.py`:
 
@@ -420,12 +420,12 @@ def test_scope_is_frozen():
         s.value = "public"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_article.py -v`
 Expected: FAIL with `ImportError: cannot import name 'ArticleType'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Modify `cortex/core/article.py` to:
 
@@ -475,12 +475,12 @@ class Scope:
         return self.value
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_article.py -v`
 Expected: PASS (9 tests across Tasks 2+3)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/article.py tests/unit/core/test_article.py
@@ -497,7 +497,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/article.py`
 - Test: `tests/unit/core/test_article.py` (append section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/core/test_article.py`:
 
@@ -552,12 +552,12 @@ def test_provenance_is_frozen():
         p.run_id = "other"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_article.py -v`
 Expected: FAIL with `ImportError: cannot import name 'Provenance'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `cortex/core/article.py`:
 
@@ -588,12 +588,12 @@ from typing import ClassVar, TypeAlias
 ```
 )
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_article.py -v`
 Expected: PASS (12 tests across Tasks 2-4)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/article.py tests/unit/core/test_article.py
@@ -610,7 +610,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/article.py`
 - Test: `tests/unit/core/test_article.py` (append section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/core/test_article.py`:
 
@@ -690,12 +690,12 @@ def test_memory_article_is_frozen():
         a.content = "y"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_article.py -v`
 Expected: FAIL with `ImportError: cannot import name 'MemoryArticle'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `cortex/core/article.py`:
 
@@ -730,12 +730,12 @@ class MemoryArticle:
             )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_article.py -v`
 Expected: PASS (16 tests across Tasks 2-5)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/article.py tests/unit/core/test_article.py
@@ -752,7 +752,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/canonical.py` (create)
 - Test: `tests/unit/core/test_canonical.py` (create)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/core/test_canonical.py
@@ -784,12 +784,12 @@ def test_canonical_naive_datetime_normalized_to_utc():
     assert out == b'{"t":"2026-07-15T12:34:56.789012Z"}'
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_canonical.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'cortex.core.canonical'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/core/canonical.py
@@ -828,12 +828,12 @@ def canonical_bytes(signed_fields: dict) -> bytes:
     )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_canonical.py -v`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/canonical.py tests/unit/core/test_canonical.py
@@ -850,7 +850,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/canonical.py`
 - Test: `tests/unit/core/test_canonical.py` (append section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/core/test_canonical.py`:
 
@@ -874,12 +874,12 @@ def test_compute_article_id_known_vector():
     assert len(compute_article_id(canonical)) == 64
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_canonical.py -v`
 Expected: FAIL with `ImportError: cannot import name 'compute_article_id'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `cortex/core/canonical.py`:
 
@@ -897,12 +897,12 @@ def compute_article_id(canonical: bytes) -> str:
 
 (Move `import hashlib` to the top of the file with the other imports.)
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_canonical.py -v`
 Expected: PASS (6 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/canonical.py tests/unit/core/test_canonical.py
@@ -919,7 +919,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/crypto.py`
 - Test: `tests/unit/core/test_crypto.py` (create)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/core/test_crypto.py
@@ -968,12 +968,12 @@ def test_generate_keypairs_unique():
     assert p1[1] != p2[1]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_crypto.py -v`
 Expected: FAIL with `ImportError: cannot import name 'generate_org_keypair'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `cortex/core/crypto.py` (after the existing DID helpers), and add imports at top:
 
@@ -1028,12 +1028,12 @@ def did_for_org(slug: str) -> str:
 
 (Merge these with the existing DID helper functions from Task 2 — keep only one copy of `did_for_agent` and `did_for_org`.)
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_crypto.py -v`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/crypto.py tests/unit/core/test_crypto.py
@@ -1052,7 +1052,7 @@ The known vector uses a fixed 32-byte Ed25519 seed (`00...01`) so the PEM and si
 - Modify: `cortex/core/crypto.py`
 - Test: `tests/unit/core/test_crypto.py` (append section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/core/test_crypto.py`:
 
@@ -1110,12 +1110,12 @@ def test_load_private_pem_returns_string(tmp_path):
     assert load_private_pem(p) == _FIXED_PRIVATE_PEM
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_crypto.py -v`
 Expected: FAIL with `ImportError: cannot import name 'sign'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `cortex/core/crypto.py`:
 
@@ -1143,12 +1143,12 @@ def load_private_pem(path) -> str:
     return Path(path).read_text(encoding="utf-8")
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_crypto.py -v`
 Expected: PASS (10 tests across Tasks 8+9)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/crypto.py tests/unit/core/test_crypto.py
@@ -1165,7 +1165,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/canonical.py`
 - Test: `tests/unit/core/test_canonical.py` (append section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/core/test_canonical.py`:
 
@@ -1223,12 +1223,12 @@ def test_article_canonical_bytes_includes_signed_fields():
     assert b'"run_id":"run-1"' in cb
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_canonical.py::test_article_canonical_bytes_excludes_embedding_and_trust -v`
 Expected: FAIL with `ImportError: cannot import name 'article_canonical_bytes'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `cortex/core/canonical.py`:
 
@@ -1264,12 +1264,12 @@ def article_canonical_bytes(article) -> bytes:
     return canonical_bytes(signed)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_canonical.py -v`
 Expected: PASS (8 tests across Tasks 6, 7, 10)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/canonical.py tests/unit/core/test_canonical.py
@@ -1285,7 +1285,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Test: `tests/unit/core/test_canonical.py` (append section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/core/test_canonical.py`:
 
@@ -1347,21 +1347,21 @@ def test_article_id_invariant_to_embedding_changes():
     assert id_base == id_alt
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_canonical.py -v`
 Expected: FAIL — only the 8 tests from prior tasks pass; the 3 new tests have nothing to import failures (they reuse already-imported `compute_article_id`), so they should already PASS. If they pass on first run, the task is verified by determinism of the existing implementation; commit without a red phase.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 No new code required — Tasks 7 and 10 already provide the primitives this task verifies end-to-end. If any new test fails, fix `article_canonical_bytes` or `compute_article_id` minimally.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_canonical.py -v`
 Expected: PASS (11 tests across Tasks 6, 7, 10, 11)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/unit/core/test_canonical.py
@@ -1377,7 +1377,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 **Files:**
 - Test: `tests/unit/core/test_crypto.py` (append section)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/unit/core/test_crypto.py`:
 
@@ -1401,21 +1401,21 @@ def test_sign_then_verify_roundtrip_with_fresh_keypair():
     assert verify(msg, sig, pub_pem) is True
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_crypto.py -v`
 Expected: PASS already (Ed25519 is deterministic; Tasks 8-9 implemented the primitives). If any test fails, fix the implementation.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 No new implementation code — verify behaviour comes from Task 9. If `test_sign_is_deterministic_same_message_same_key` fails, ensure `sign()` calls `priv.sign(...)` directly (Ed25519 is determinstic by spec; the cryptography library does not randomize it).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_crypto.py -v`
 Expected: PASS (13 tests across Tasks 8, 9, 12)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/unit/core/test_crypto.py
@@ -1432,7 +1432,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/envelope.py` (create)
 - Test: `tests/unit/core/test_envelope.py` (create)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/core/test_envelope.py
@@ -1527,12 +1527,12 @@ def test_envelope_from_json_rejects_unknown_type():
         )
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_envelope.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'cortex.core.envelope'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/core/envelope.py
@@ -1606,12 +1606,12 @@ def envelope_from_json(s: str) -> Envelope:
     )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_envelope.py -v`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/envelope.py tests/unit/core/test_envelope.py
@@ -1628,7 +1628,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Create: `tests/integration/__init__.py`
 - Test: `tests/integration/test_core_roundtrip.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/integration/__init__.py
@@ -1726,21 +1726,21 @@ def test_full_core_roundtrip():
     assert '"id"' not in verified_canonical.decode("utf-8")
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/integration/test_core_roundtrip.py -v`
 Expected: FAIL with `ModuleNotFoundError` until prior tasks land; once Tasks 1-13 are committed this should PASS. If it fails on canonical stability, fix `article_canonical_bytes` to exclude signatures (per Task 10 contract).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 No new production code. This test exercises the public surface assembled by Tasks 1-13. If the test fails, the failing assertion names the module to fix.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/integration/test_core_roundtrip.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/integration/__init__.py tests/integration/test_core_roundtrip.py
@@ -1757,7 +1757,7 @@ Co-authored-by: excelle <7961300+excelle@users.noreply.github.com>"
 - Modify: `cortex/core/__init__.py`
 - Test: `tests/unit/core/test_public_api.py` (create)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/core/test_public_api.py
@@ -1808,12 +1808,12 @@ def test_transitive_callable():
     )
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/unit/core/test_public_api.py -v`
 Expected: FAIL with `ImportError: cannot import name 'ArticleId' from 'cortex.core'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # cortex/core/__init__.py
@@ -1894,12 +1894,12 @@ __all__ = [
 ]
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/unit/core/test_public_api.py -v`
 Expected: PASS (2 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cortex/core/__init__.py tests/unit/core/test_public_api.py
