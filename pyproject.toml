@@ -28,6 +28,12 @@ cpu = [
     "hnswlib>=0.8",
     "sentence-transformers>=3.0",
 ]
+sdk = [
+    "langchain>=0.2",
+    "langchain-core>=0.2",
+    "llama-index>=0.10",
+    "httpx>=0.27",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
