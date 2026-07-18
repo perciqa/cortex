@@ -6,6 +6,7 @@ import logging
 import sys
 from collections.abc import Callable
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from cortex.bench.embed_probe import EmbedProbe
@@ -17,6 +18,7 @@ from cortex.bench.targets import (
     BENCH_QUERY_COUNT,
     BENCH_TICK_INTERVAL_SEC,
 )
+from cortex.core.article import ArticleType, MemoryArticle, Provenance
 from cortex.node.broker_client import BrokerClient
 from cortex.node.embedder import Embedder
 from cortex.node.node import CortexNode
@@ -28,7 +30,63 @@ def _default_broker_client(url: str) -> BrokerClient:
     return BrokerClient(url)
 
 
+def _make_bench_node(node_id: str, embed_backend: str, tmp_root: Path) -> CortexNode:
+    keys_dir = tmp_root / node_id
+    keys_dir.mkdir(parents=True, exist_ok=True)
+    from cortex.node.keys import ensure_keys
+    keys = {"org": ensure_keys(keys_dir / "org.pem"),
+            "agent": ensure_keys(keys_dir / "agent.pem", kind="agent")}
+    reg = tmp_root / "reg.json"
+    if not reg.exists():
+        reg.write_text('{}')
+    cfg = tmp_root / f"{node_id}.yaml"
+    if not cfg.exists():
+        cfg.write_text(f"""\
+node:
+  org_did: {node_id}
+  agent_did: did:percq:agent:bench
+  key_paths:
+    org: {keys['org']}
+    agent: {keys['agent']}
+broker:
+  url: ws://localhost:7432
+  registry: {reg}
+  replay_window_sec: 600
+embedder:
+  model: BAAI/bge-small-en-v1.5
+  backend: {embed_backend}
+  batch_size: 4
+vector_index:
+  backend: hnswlib
+  metric: cosine
+  hnsw:
+    M: 16
+    ef_construction: 100
+    ef_search: 32
+trust:
+  default_org_reputation: 0.85
+  half_life_days: 90
+  min_trust_default: 0.3
+query:
+  default_top_k: 5
+  deadline_ms: 400
+  min_trust: 0.0
+logging:
+  level: WARNING
+""")
+    return CortexNode(
+        org_did=node_id,
+        agent_did="did:percq:agent:bench",
+        key_paths=keys,
+        broker_url="ws://localhost:7432",
+        config_path=cfg,
+        embedder_backend_override=embed_backend,
+    )
+
+
 def _default_probe_factory(node_id: str):
+    import tempfile
+    tmp_root = Path(tempfile.mkdtemp(prefix="cortex-bench-"))
     text_pool = [
         "APT29 leveraged encoded PowerShell T1059.001",
         "Lateral movement via WMI T1021.006",
@@ -40,13 +98,10 @@ def _default_probe_factory(node_id: str):
         "lateral movement evidence",
     ] * 4
 
-    def build_embedder(backend: str) -> Embedder:
-        return Embedder(backend=backend)
-
     embed_radeon = EmbedProbe(text_pool, batch_size=BENCH_EMBED_BATCH, mode="radeon")
     embed_cpu = EmbedProbe(text_pool, batch_size=BENCH_EMBED_BATCH, mode="cpu")
-    node_radeon = CortexNode(org_did=node_id, config={"embedder": {"backend": "gpu"}})
-    node_cpu = CortexNode(org_did=node_id, config={"embedder": {"backend": "cpu"}})
+    node_radeon = _make_bench_node(node_id, "gpu", tmp_root)
+    node_cpu = _make_bench_node(node_id, "cpu", tmp_root)
     _seed_synthetic_store(node_radeon, text_pool)
     _seed_synthetic_store(node_cpu, text_pool)
     query_radeon = QueryProbe(node_radeon, query_pool, top_k=5, count=BENCH_QUERY_COUNT)
@@ -62,7 +117,19 @@ def _default_probe_factory(node_id: str):
 def _seed_synthetic_store(node: CortexNode, texts: list[str]) -> None:
     try:
         for t in texts[:8]:
-            node.publish(content=t, scope="public", topics=["bench"])
+            art = MemoryArticle(
+                id="", type=ArticleType.FINDING, content=t,
+                payload={}, embedding=None, embedding_model=None,
+                provenance=Provenance(
+                    producer_agent="did:percq:agent:bench",
+                    producer_org=node.org_did,
+                    run_id="bench-seed",
+                    timestamp=datetime.now(UTC),
+                ),
+                scope="public", agent_signature=b"",
+                cites=[], trust_score=None, trust_expiration=None,
+            )
+            node.publish(art)
     except Exception:
         pass
 

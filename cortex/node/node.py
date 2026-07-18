@@ -8,10 +8,14 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from cortex.core.article import MemoryArticle, Provenance, Scope
 from cortex.core.canonical import article_canonical_bytes, compute_article_id
 from cortex.core.crypto import sign
 from cortex.core.envelope import EnvelopeType
+from cortex.core.errors import ArticleState, transition
+from cortex.node.receiver import receive_publish_envelope
 from cortex.node.broker_client import BrokerClient
 from cortex.node.config import NodeConfig, load_config
 from cortex.node.embedder import Embedder
@@ -20,7 +24,7 @@ from cortex.node.provenance import ProvenanceGraph
 from cortex.node.query import QueryResult, retrieve
 from cortex.node.store import ArticleStore
 from cortex.node.trust import TrustEngine
-from cortex.node.vector_index import HNSWIndex
+from cortex.node.vector_index import FAISSGPUIndex, HNSWIndex
 
 log = logging.getLogger("cortex.node")
 
@@ -59,7 +63,14 @@ class CortexNode:
     async def start(self) -> None:
         self.store = ArticleStore(self.data_dir / "articles.sqlite")
         self.provenance = ProvenanceGraph(self.data_dir / "provenance.sqlite")
-        self.vector_index = HNSWIndex(dim=384)
+        backend = self.config.vector_index.backend
+        if backend == "faiss-gpu":
+            self.vector_index = FAISSGPUIndex(dim=384)
+        else:
+            self.vector_index = HNSWIndex(dim=384,
+                                          M=self.config.vector_index.hnsw.M,
+                                          ef_construction=self.config.vector_index.hnsw.ef_construction,
+                                          ef_search=self.config.vector_index.hnsw.ef_search)
         self.trust = TrustEngine(
             default_org_reputation=self.config.trust.default_org_reputation,
             reputation_overrides=self.config.trust.reputation_overrides,
@@ -78,6 +89,8 @@ class CortexNode:
             registry_path=Path(self.config.broker.registry),
             replay_window_sec=self.config.broker.replay_window_sec,
             on_event=self._on_broker_event,
+            on_publish=self._on_broker_publish,
+            on_query=self._on_broker_query,
         )
         await self.broker.connect()
         self._health_task = asyncio.create_task(self._health_loop())
@@ -100,6 +113,46 @@ class CortexNode:
     def _on_broker_event(self, event: str, article_id: str | None, payload: dict) -> None:
         if self.store:
             self.store.event_log_append(event, article_id, payload)
+
+    async def _on_broker_publish(self, env: dict) -> None:
+        payload = env.get("payload", {})
+        canonical_hex = payload.get("canonical", "")
+        article_dict = payload.get("article")
+        if not canonical_hex or not article_dict:
+            log.warning("received publish envelope missing canonical or article")
+            return
+        expected_canonical = bytes.fromhex(canonical_hex)
+        article = MemoryArticle.from_dict(article_dict)
+        embedding_list = payload.get("embedding")
+        try:
+            reg_path = Path(self.config.broker.registry)
+            reg_data = json.loads(reg_path.read_text()) if reg_path.exists() else {}
+            registry = _RegistryAdapter(reg_data)
+            receive_publish_envelope(article, expected_canonical, registry, self.store)
+        except Exception as exc:
+            log.warning("inbound publish rejected: %s", exc)
+            if self.store:
+                self.store.event_log_append("inbound.publish.rejected", article.id, {"error": str(exc)})
+            return
+        if self.embedder is not None and self.vector_index is not None:
+            try:
+                if embedding_list is not None:
+                    embedding = np.asarray(embedding_list, dtype=np.float16).astype(np.float32)
+                else:
+                    embedding = self.embedder.embed_one(article.content)
+                self.vector_index.add(article.id, embedding)
+                self.store.set_state(article.id, "indexed")
+            except Exception as exc:
+                log.warning("inbound publish embed/index failed: %s", exc)
+                self.store.event_log_append("inbound.publish.index_failed", article.id, {"error": str(exc)})
+                return
+        if self.trust is not None:
+            now = _dt.datetime.now(_dt.UTC)
+            gv = self.provenance.graph_version if self.provenance is not None else 0
+            score = self.trust.trust_for(article, now, _StoreAdapter(self.store), graph_version=gv)
+            self.store.set_state(article.id, "published")
+            self.store.event_log_append("inbound.publish.received", article.id,
+                                        {"trust_score": score, "src": env.get("src", "")})
 
     async def _health_loop(self) -> None:
         while True:
@@ -134,7 +187,9 @@ class CortexNode:
         trust_score = self.trust.trust_for(article, now, _StoreAdapter(self.store), graph_version=self.provenance.graph_version)
         trust_expires = now + _dt.timedelta(days=self.config.trust.half_life_days)
         article = replace(article, trust_score=trust_score, trust_expiration=trust_expires)
+        transition(article, ArticleState.DRAFTED, ArticleState.SIGNED)
         self.store.put(article, state="signed")
+        transition(article, ArticleState.SIGNED, ArticleState.INDEXED)
         self.vector_index.add(art_id, embedding)
         self.store.set_state(art_id, "indexed")
         if article.scope != Scope.PRIVATE:
@@ -143,22 +198,44 @@ class CortexNode:
                 "type": EnvelopeType.PUBLISH.value, "msg_id": str(uuid.uuid4()),
                 "src": self.org_did, "dst": "*",
                 "ts": _dt.datetime.now(_dt.UTC).isoformat(),
-                "payload": {"article_id": art_id, "canonical": canonical.hex(),
-                            "embedding": embedding.astype("float16").tolist()},
+                "payload": {
+                    "article_id": art_id,
+                    "canonical": canonical.hex(),
+                    "embedding": embedding.astype("float16").tolist(),
+                    "article": article.to_dict(),
+                },
             }
             try:
                 loop = asyncio.get_running_loop()
                 loop.create_task(self.broker.publish_envelope(env_dict))
             except RuntimeError:
                 asyncio.run(self.broker.publish_envelope(env_dict))
+            transition(article, ArticleState.INDEXED, ArticleState.PUBLISHED)
             self.store.set_state(art_id, "published")
             self.store.event_log_append("node.article.published", art_id, {"scope": article.scope})
         else:
             self.store.event_log_append("node.article.indexed_private", art_id, {})
         return art_id
 
-    def query(self, query_text: str, topic_filter: list[str], scope_filter: list[str],
-              top_k: int, min_trust: float, deadline_ms: int) -> list[QueryResult]:
+    def _on_broker_query(self, env: dict) -> list[dict]:
+        payload = env.get("payload", {})
+        results = self._local_retrieve(
+            query_text=payload.get("query_text", ""),
+            topic_filter=payload.get("topic_filter", []),
+            scope_filter=payload.get("scope_filter", []),
+            top_k=int(payload.get("top_k", 5)),
+            min_trust=float(payload.get("min_trust", 0.3)),
+            deadline_ms=int(payload.get("deadline_ms", 400)),
+        )
+        return [
+            {"article_id": r.article_id, "score": r.hybrid_score,
+             "trust_score": r.trust_score, "content": r.article.content[:200]}
+            for r in results
+        ]
+
+    def _local_retrieve(self, query_text: str, topic_filter: list[str],
+                        scope_filter: list[str], top_k: int, min_trust: float,
+                        deadline_ms: int) -> list[QueryResult]:
         assert self.store and self.vector_index and self.embedder
         adapter = _StoreAdapter(self.store)
         return retrieve(
@@ -166,6 +243,57 @@ class CortexNode:
             query_text=query_text, topic_filter=topic_filter, scope_filter=scope_filter,
             top_k=top_k, min_trust=min_trust, deadline_ms=deadline_ms,
         )
+
+    def query(self, query_text: str, topic_filter: list[str], scope_filter: list[str],
+              top_k: int, min_trust: float, deadline_ms: int) -> list[QueryResult]:
+        local = self._local_retrieve(query_text, topic_filter, scope_filter,
+                                     top_k, min_trust, deadline_ms)
+        if self.broker is None:
+            return local
+        remote_results = self._fanout_query(query_text, topic_filter,
+                                            scope_filter, top_k, min_trust, deadline_ms)
+        seen: set[str] = set(r.article_id for r in local)
+        merged = list(local)
+        for r in remote_results:
+            rid = r.get("article_id", "")
+            if rid not in seen:
+                seen.add(rid)
+                merged.append(QueryResult(
+                    article=None, article_id=rid,
+                    hybrid_score=r.get("score", 0.0),
+                    trust_score=r.get("trust_score", 0.0),
+                    provenance_summary={},
+                ))
+        merged.sort(key=lambda r: -r.hybrid_score)
+        return merged[:top_k]
+
+    def _fanout_query(self, query_text: str, topic_filter: list[str],
+                      scope_filter: list[str], top_k: int, min_trust: float,
+                      deadline_ms: int) -> list[dict]:
+        import uuid
+        qid = str(uuid.uuid4())
+        env = {
+            "type": EnvelopeType.QUERY.value, "msg_id": qid,
+            "src": self.org_did, "dst": "*",
+            "ts": _dt.datetime.now(_dt.UTC).isoformat(),
+            "payload": {
+                "query_id": qid, "query_text": query_text,
+                "topic_filter": topic_filter or [],
+                "scope_filter": scope_filter or [],
+                "top_k": top_k, "min_trust": min_trust, "deadline_ms": deadline_ms,
+            },
+        }
+        try:
+            loop = asyncio.get_running_loop()
+            fut = asyncio.run_coroutine_threadsafe(
+                self.broker.query_fanout(env), loop
+            )
+            result = fut.result(timeout=(deadline_ms / 1000.0) + 2.0)
+        except Exception:
+            return []
+        if isinstance(result, dict):
+            return (result.get("payload") or {}).get("results", [])
+        return []
 
     def derive(self, new_article: MemoryArticle, cited_article_ids: list[str]) -> str:
         assert self.provenance
@@ -188,6 +316,20 @@ class CortexNode:
         return art_id
 
 
+class _RegistryAdapter:
+    def __init__(self, data: dict) -> None:
+        self._data = data
+
+    def lookup(self, org_did: str) -> bytes | None:
+        entry = self._data.get(org_did)
+        if entry is None:
+            return None
+        pubkey = entry.get("pubkey") if isinstance(entry, dict) else entry
+        if isinstance(pubkey, str):
+            return pubkey.encode("utf-8")
+        return pubkey
+
+
 class _StoreAdapter:
     def __init__(self, store: ArticleStore) -> None:
         self._store = store
@@ -198,16 +340,31 @@ class _StoreAdapter:
 
 
 def _row_to_article(row: Any) -> MemoryArticle | None:
+    try:
+        created = _dt.datetime.fromisoformat(row["created_at"])
+    except Exception:
+        created = _dt.datetime.now(_dt.UTC)
+    get_col = lambda k, d=None: row[k] if k in row and row[k] is not None else d
     prov = Provenance(
-        producer_agent="", producer_org="",
+        producer_agent=get_col("producer_agent", ""),
+        producer_org=get_col("producer_org", ""),
         computation_ref=None, source_data_hash=None,
-        source_data_schema=None, run_id="",
-        timestamp=_dt.datetime.fromisoformat(row["created_at"]),
+        source_data_schema=None, run_id=get_col("run_id", ""),
+        timestamp=created,
     )
-    cites = json.loads(row["cites_json"] or "[]")
+    payload = json.loads(get_col("payload_json", "{}"))
+    cites = json.loads(get_col("cites_json", "[]"))
+    trust_exp = None
+    if get_col("trust_expires"):
+        try:
+            trust_exp = _dt.datetime.fromisoformat(get_col("trust_expires"))
+        except Exception:
+            pass
     return MemoryArticle(
         id=row["id"], type=row["type"], content=row["content"],
-        payload={}, embedding=None, embedding_model=None,
-        provenance=prov, scope=row["scope"], agent_signature=b"", org_signature=row["org_sig"],
-        cites=cites, trust_score=row["trust_score"], trust_expiration=None,
+        payload=payload, embedding=None, embedding_model=None,
+        provenance=prov, scope=row["scope"], topic=get_col("topic", "*"),
+        agent_signature=get_col("agent_sig") or b"",
+        org_signature=get_col("org_sig"),
+        cites=cites, trust_score=row["trust_score"], trust_expiration=trust_exp,
     )
