@@ -4,7 +4,6 @@ from collections.abc import Callable
 
 from cortex.sdk.client import CortexClient
 from cortex.sdk.exceptions import map_node_error
-from cortex.sdk.langchain_adapter import CortexRetriever
 from cortex.sdk.llm import agent_step
 from cortex.sdk.memory import ConversationMemory
 
@@ -64,9 +63,9 @@ class CortexAgent:
         return response
 
 
-def _default_tools_builder(retriever: CortexRetriever, client: CortexClient) -> dict:
-    # Late import to avoid a circular dep at module load time.
-    from cortex.sdk.langchain_adapter import CortexPublishTool
+def _default_tools_builder(retriever: object, client: CortexClient) -> dict:
+    # Late imports: langchain_adapter is an optional [sdk] dependency.
+    from cortex.sdk.langchain_adapter import CortexPublishTool, CortexRetriever  # noqa: F401
 
     search_tool = retriever.as_tool()
     publish_tool = CortexPublishTool(node=client.node)
