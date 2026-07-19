@@ -97,11 +97,21 @@ class BrokerServer:
         self._server: Any = None
         self._serve_task: asyncio.Task | None = None
         self._pending_queries: dict[str, asyncio.Future] = {}
+        self._healthy = True
         self._response_registry: dict[str, list[dict]] = {}
+
+    async def _health_http(self, path: str, request_headers: Any) -> tuple | None:
+        if path in ("/health", "/healthz", "/readyz"):
+            status = 200 if self._healthy else 503
+            body = json.dumps({"status": "ok" if self._healthy else "unhealthy"}).encode()
+            return ({"Content-Type": "application/json"}, status, body)
+        return None
 
     async def serve(self) -> None:
         self._server = await websockets.serve(
-            self._handler, self.host, self.port, ping_interval=20, ping_timeout=10,
+            self._handler, self.host, self.port,
+            ping_interval=20, ping_timeout=10,
+            process_request=self._health_http,
         )
         log.info("broker listening on %s:%s", self.host, self.port)
         await asyncio.Future()

@@ -29,6 +29,7 @@ logs/
 # Secrets & credentials
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 *.cert

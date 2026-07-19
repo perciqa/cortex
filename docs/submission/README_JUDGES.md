@@ -11,10 +11,11 @@ machine-verifiable trust score.
 
 | Artifact | Path |
 |---|---|
-| Pitch deck outline | [`./slides_outline.md`](./slides_outline.md) |
+| Pitch deck outline | [`docs/submission/slides_outline.md`](../submission/slides_outline.md) |
 | End-to-end smoke test | `pytest tests/e2e/test_demo_e2e_smoke.py` |
-| Source code | [scenarios/soc_consortium/](../../scenarios/soc_consortium/) |
-| Demo narration script | [scenarios/soc_consortium/demo_script.md](../../scenarios/soc_consortium/demo_script.md) |
+| Source code | [`scenarios/soc_consortium/`](../../scenarios/soc_consortium/) |
+| Demo narration script | [`scenarios/soc_consortium/demo_script.md`](../../scenarios/soc_consortium/demo_script.md) |
+| Console password | `judge@amd-hackathon.dev` / `cortex-demo-2026` |
 
 ## Architecture in one paragraph
 

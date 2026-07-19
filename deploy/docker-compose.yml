@@ -8,41 +8,74 @@ services:
     ports:
       - "7432:7432"
     volumes:
+      - ./config:/app/config
       - ./registry:/app/registry
       - ./logs:/app/logs
     environment:
       - CORTEX_LOG_LEVEL=INFO
-    command: ["python", "-m", "cortex.broker.server", "--host", "0.0.0.0", "--port", "7432", "--registry", "/app/registry/org_registry.json"]
+    command: ["python", "-m", "cortex.broker", "--config", "/app/config/broker.yaml"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request, json; b=urllib.request.urlopen('http://localhost:7432/health'); assert json.loads(b.read())['status']=='ok'"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   node-alpha:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy
     volumes:
-      - ./config/alpha:/app/config
-      - ./data/alpha:/app/data
+      - ./config:/app/config
       - ./registry:/app/registry:ro
     environment:
-      - CORTEX_BROKER_URL=ws://broker:7432
       - CORTEX_LOG_LEVEL=INFO
+      - CORTEX_EMBED_BACKEND=${CORTEX_EMBED_BACKEND:-cpu}
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/alpha.yaml"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0 if open('/app/config/.node-healthy').read().strip()=='healthy' else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: amd
+              count: 1
+              capabilities: [gpu]
 
   node-beta:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy
     volumes:
-      - ./config/beta:/app/config
-      - ./data/beta:/app/data
+      - ./config:/app/config
       - ./registry:/app/registry:ro
     environment:
-      - CORTEX_BROKER_URL=ws://broker:7432
       - CORTEX_LOG_LEVEL=INFO
+      - CORTEX_EMBED_BACKEND=${CORTEX_EMBED_BACKEND:-cpu}
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/beta.yaml"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0 if open('/app/config/.node-healthy').read().strip()=='healthy' else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: amd
+              count: 1
+              capabilities: [gpu]
 
   console:
     build:

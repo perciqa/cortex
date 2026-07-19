@@ -26,6 +26,7 @@ def _start(args: argparse.Namespace) -> int:
         "agent": ensure_keys(Path(cfg.node.key_paths["agent"]), kind="agent"),
     }
 
+    health_file = config_path.parent / ".node-healthy"
     node = CortexNode(
         org_did=cfg.node.org_did,
         agent_did=cfg.node.agent_did,
@@ -46,10 +47,12 @@ def _start(args: argparse.Namespace) -> int:
             loop.add_signal_handler(sig, _handle_sig)
 
         await node.start()
+        health_file.write_text("healthy")
         logging.getLogger("cortex.cli").info(
             "Node %s started, broker=%s", cfg.node.agent_did, cfg.broker.url
         )
         await stop_event.wait()
+        health_file.write_text("stopped")
         logging.getLogger("cortex.cli").info("Shutting down...")
         await node.stop()
 
