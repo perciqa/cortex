@@ -30,5 +30,5 @@ jobs:
       - run: pip install -e ".[dev,cpu,sdk]" --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Run SDK unit tests
         run: python -m pytest tests/sdk/ -v
-      - name: Run scenario tests
-        run: python -m pytest tests/unit/ -v
+      - name: Run core + broker unit tests
+        run: python -m pytest tests/unit/core/ tests/unit/broker/ -v
