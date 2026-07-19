@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: pip install -e ".[dev,cpu]" --extra-index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -e ".[dev,cpu,sdk]" --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Run SDK unit tests
         run: python -m pytest tests/sdk/ -v
       - name: Run scenario tests
