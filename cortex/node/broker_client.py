@@ -19,6 +19,10 @@ class BrokerClient:
         replay_window_sec: int = 600,
         on_event: Callable[..., None] | None = None,
         on_metrics: Callable[..., None] | None = None,
+        on_publish: Callable[..., None] | None = None,
+        on_query: Callable[..., list[dict]] | None = None,
+        on_derive: Callable[..., None] | None = None,
+        on_subscribe: Callable[..., None] | None = None,
         outbound_spill_dir: Path = Path("./cortex-node/outbound"),
         outbound_cap: int = 10000,
         spill_threshold: int = 10000,
@@ -29,6 +33,10 @@ class BrokerClient:
         self.replay_window_sec = replay_window_sec
         self.on_event = on_event or (lambda *_: None)
         self.on_metrics = on_metrics or (lambda *_: None)
+        self.on_publish = on_publish or (lambda *_: None)
+        self.on_query = on_query or (lambda e: [])
+        self.on_derive = on_derive or (lambda *_: None)
+        self.on_subscribe = on_subscribe or (lambda *_: None)
         self.outbound_spill_dir = Path(outbound_spill_dir)
         self.outbound_cap = outbound_cap
         self.spill_threshold = spill_threshold
@@ -39,6 +47,7 @@ class BrokerClient:
         self._sender_task: asyncio.Task | None = None
         self._reader_task: asyncio.Task | None = None
         self._spill_seq = 0
+        self._pending_query_results: dict[str, asyncio.Future] = {}
 
     async def _connect_socket(self) -> None:
         import websockets
@@ -65,6 +74,36 @@ class BrokerClient:
                     self.on_event(env.get("event"), env.get("article_id"), env.get("payload", {}))
                 elif t == "metrics":
                     self.on_metrics(env.get("payload", {}))
+                elif t == "publish":
+                    result = self.on_publish(env)
+                    if asyncio.iscoroutine(result):
+                        asyncio.ensure_future(result)
+                elif t == "query_result":
+                    qid = (env.get("payload") or {}).get("query_id")
+                    if qid and qid in self._pending_query_results:
+                        self._pending_query_results[qid].set_result(env)
+                elif t == "derive":
+                    result = self.on_derive(env)
+                    if asyncio.iscoroutine(result):
+                        asyncio.ensure_future(result)
+                elif t == "subscribe":
+                    result = self.on_subscribe(env)
+                    if asyncio.iscoroutine(result):
+                        asyncio.ensure_future(result)
+                elif t == "query":
+                    results = self.on_query(env) or []
+                    resp = {
+                        "type": "query_result",
+                        "msg_id": env.get("msg_id", ""),
+                        "src": self.org_did,
+                        "dst": env.get("src", "*"),
+                        "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "payload": {
+                            "query_id": (env.get("payload") or {}).get("query_id", ""),
+                            "results": results,
+                        },
+                    }
+                    asyncio.ensure_future(self.publish_envelope(resp))
         except Exception:
             self._connected = False
 
@@ -90,8 +129,18 @@ class BrokerClient:
         await self._outbound.put(env)
 
     async def query_fanout(self, query_env: dict) -> dict:
+        qid = (query_env.get("payload") or {}).get("query_id", query_env.get("msg_id"))
+        fut: asyncio.Future = asyncio.get_running_loop().create_future()
+        self._pending_query_results[qid] = fut
         await self.publish_envelope(query_env)
-        return {"type": "query_result", "results": [], "src": self.org_did}
+        deadline_ms = int((query_env.get("payload") or {}).get("deadline_ms", 500))
+        try:
+            result = await asyncio.wait_for(fut, timeout=deadline_ms / 1000.0 + 0.5)
+        except (TimeoutError, asyncio.CancelledError):
+            result = {"type": "query_result", "results": [], "src": self.org_did}
+        finally:
+            self._pending_query_results.pop(qid, None)
+        return result
 
     def _spill_to_disk(self, env: dict) -> None:
         self.outbound_spill_dir.mkdir(parents=True, exist_ok=True)

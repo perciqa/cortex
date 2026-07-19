@@ -65,9 +65,7 @@ def article_canonical_bytes(article) -> bytes:
             "run_id": p.run_id,
             "timestamp": p.timestamp,
         },
-        "scope": article.scope.value
-        if hasattr(article.scope, "value")
-        else str(article.scope),
+        "scope": article.scope.value if hasattr(article.scope, "value") else str(article.scope),
         "cites": list(article.cites),
     }
     return canonical_bytes(signed)

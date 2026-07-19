@@ -15,6 +15,10 @@ CREATE TABLE IF NOT EXISTS articles (
   content       TEXT NOT NULL,
   payload_json  TEXT NOT NULL,
   scope         TEXT NOT NULL,
+  topic         TEXT NOT NULL DEFAULT '*',
+  producer_agent TEXT NOT NULL DEFAULT '',
+  producer_org   TEXT NOT NULL DEFAULT '',
+  run_id         TEXT NOT NULL DEFAULT '',
   agent_sig     BLOB NOT NULL,
   org_sig       BLOB,
   cites_json    TEXT NOT NULL DEFAULT '[]',
@@ -55,6 +59,14 @@ class ArticleStore:
         self._conn = sqlite3.connect(self.db_path, isolation_level=None)
         self._conn.row_factory = sqlite3.Row
         self._conn.executescript(SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        for col in ("topic", "producer_agent", "producer_org", "run_id"):
+            try:
+                self._conn.execute(f"ALTER TABLE articles ADD COLUMN {col} TEXT")
+            except Exception:
+                pass
 
     def close(self) -> None:
         self._conn.close()
@@ -62,13 +74,18 @@ class ArticleStore:
     def put(self, article: Any, state: str) -> None:
         self._exec_retry(
             """INSERT OR REPLACE INTO articles
-               (id, type, content, payload_json, scope, agent_sig, org_sig,
+               (id, type, content, payload_json, scope, topic,
+                producer_agent, producer_org, run_id,
+                agent_sig, org_sig,
                 cites_json, state, created_at, published_at, trust_score, trust_expires)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 article.id, article.type, article.content,
                 json.dumps(article.payload, sort_keys=True, separators=(",", ":")),
-                article.scope, bytes(article.agent_signature),
+                article.scope, getattr(article, "topic", "*"),
+                article.provenance.producer_agent, article.provenance.producer_org,
+                article.provenance.run_id,
+                bytes(article.agent_signature),
                 bytes(article.org_signature) if article.org_signature else None,
                 json.dumps(list(article.cites), separators=(",", ":")),
                 state, _ts_iso(article.provenance.timestamp), None,
@@ -98,6 +115,13 @@ class ArticleStore:
         cur = self._exec_retry("SELECT id FROM articles", ())
         for row in cur.fetchall():
             yield row[0]
+
+    def update_trust(self, article_id: str, score: float, expiration: Any) -> None:
+        exp_iso = _ts_iso(expiration) if hasattr(expiration, "isoformat") else str(expiration)
+        self._exec_retry(
+            "UPDATE articles SET trust_score=?, trust_expires=? WHERE id=?",
+            (score, exp_iso, article_id),
+        )
 
     def event_log_append(self, event: str, article_id: str | None, payload: dict) -> None:
         self._exec_retry(

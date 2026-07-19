@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { Network, DataSet } from "vis-network";
+import { Network } from "vis-network";
+import { DataSet } from "vis-data";
 
 export interface GraphArticle {
   id: string;

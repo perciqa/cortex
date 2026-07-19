@@ -1,11 +1,12 @@
 import pytest
+
 from cortex.sdk.client import CortexClient
 
 
 @pytest.mark.asyncio
 async def test_alpha_query_returns_findings(soc_e2e_env):
-    from scenarios.soc_consortium.seed import seed_articles
     from scenarios.soc_consortium.agent_alpha import run as alpha_run
+    from scenarios.soc_consortium.seed import seed_articles
 
     seed_articles(soc_e2e_env.alpha_node, soc_e2e_env.beta_node)
 

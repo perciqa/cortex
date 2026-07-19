@@ -17,7 +17,13 @@ def _free_port() -> int:
     return port
 
 
-async def run_demo(state_dir: Path, video_dir: Path, no_record: bool = False) -> dict:
+async def run_demo(
+    state_dir: Path,
+    video_dir: Path,
+    no_record: bool = False,
+    reasoner: str = "scripted",
+    vllm_url: str = "http://localhost:8000/v1",
+) -> dict:
     import tempfile
 
     from cortex.broker.server import BrokerServer
@@ -93,10 +99,10 @@ logging:
 
     node_a = CortexNode(org_did="did:percq:org:soc-alpha", agent_did="did:percq:agent:alpha-bot-1",
                         key_paths=keys_a, broker_url=b_url, config_path=cfg_a,
-                        embedder_backend_override="cpu")
+                        embedder_backend_override="auto")
     node_b = CortexNode(org_did="did:percq:org:soc-beta", agent_did="did:percq:agent:beta-bot-1",
                         key_paths=keys_b, broker_url=b_url, config_path=cfg_b,
-                        embedder_backend_override="cpu")
+                        embedder_backend_override="auto")
     print("starting node-alpha...")
     await node_a.start()
     print("node-alpha started")
@@ -113,9 +119,9 @@ logging:
     from scenarios.soc_consortium.agent_alpha import run as alpha_run
     from scenarios.soc_consortium.agent_beta import run as beta_run
 
-    print("running agent-alpha...")
+    print(f"running agent-alpha (reasoner={reasoner})...")
     client_a = CortexClient(node_a)
-    alpha_result = alpha_run(client_a, step="all")
+    alpha_result = alpha_run(client_a, step="all", reasoner=reasoner, vllm_url=vllm_url)
     print(f"alpha done (insight: {alpha_result.get('insight_article_id', 'N/A')})")
 
     print("running agent-beta...")
@@ -141,7 +147,13 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-record-optional", action="store_true",
                     help="Skip recorder (used by tests).")
+    ap.add_argument("--reasoner", choices=["scripted", "vllm"], default="scripted",
+                    help="Agent reasoning backend (default: scripted). Use 'vllm' for live LLM.")
+    ap.add_argument("--vllm-url", default="http://localhost:8000/v1",
+                    help="vLLM OpenAI-compatible API endpoint (default: http://localhost:8000/v1). "
+                         "Overridden by VLLM_URL env var.")
     args = ap.parse_args()
+    vllm_url = os.environ.get("VLLM_URL", args.vllm_url)
 
     state_dir = Path(os.environ.get("DEMO_STATE_DIR", str(REPO / "docs" / "submission")))
     video_dir = Path(os.environ.get("DEMO_VIDEO_DIR", str(state_dir)))
@@ -149,7 +161,8 @@ def main() -> int:
     video_dir.mkdir(parents=True, exist_ok=True)
 
     async def _run():
-        await run_demo(state_dir, video_dir, no_record=args.no_record_optional)
+        await run_demo(state_dir, video_dir, no_record=args.no_record_optional,
+                       reasoner=args.reasoner, vllm_url=vllm_url)
         return 0
 
     return asyncio.run(_run())

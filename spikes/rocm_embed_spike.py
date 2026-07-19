@@ -1,5 +1,6 @@
 """Day-1 ROCm spike: get bge-small-en-v1.5 producing embeddings on Radeon (or fallback)."""
 import time
+
 import torch
 from torch import Tensor
 from transformers import AutoModel, AutoTokenizer

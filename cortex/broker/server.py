@@ -7,7 +7,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +17,8 @@ from websockets.exceptions import ConnectionClosed
 from cortex.broker.dedup import Deduplicator
 from cortex.broker.registry import OrgRegistry
 from cortex.broker.routing import Router, Subscriber
+from cortex.core.canonical import article_canonical_bytes
+from cortex.core.crypto import verify
 from cortex.core.envelope import Envelope, EnvelopeType, envelope_to_json
 
 log = logging.getLogger(__name__)
@@ -37,7 +39,7 @@ def _now_unix() -> int:
 
 
 def _ts() -> datetime:
-    return datetime.now(tz=timezone.utc)
+    return datetime.now(tz=UTC)
 
 
 def _ack(env: dict) -> str:
@@ -201,10 +203,15 @@ class BrokerServer:
         elif etype == EnvelopeType.QUERY_RESULT.value:
             await self._handle_query_result(ws, env, src_org, node_id)
         elif etype == EnvelopeType.DERIVE.value:
-            await self._forward_to_subscribers(env, src_org, node_id,
-                                              topic=env.get("payload", {}).get("topic", "*"),
-                                              scope="public")
-            await ws.send(_ack(env))
+            der_scope = env.get("payload", {}).get("scope", "public")
+            ok = await self._forward_to_subscribers(env, src_org, node_id,
+                                                    topic=env.get("payload", {}).get("topic", "*"),
+                                                    scope=der_scope)
+            if ok:
+                await ws.send(_ack(env))
+            else:
+                await ws.send(_error(src_org, "SCOPE_VIOLATION",
+                                     "no subscribers for derive scope"))
         elif etype == EnvelopeType.METRICS.value:
             await self._broadcast_metrics(env)
             await ws.send(_ack(env))
@@ -229,9 +236,39 @@ class BrokerServer:
     async def _handle_publish(self, ws: Any, env: dict, src_org: str, node_id: str) -> None:
         payload = env.get("payload") or {}
         article = payload.get("article") or {}
+        canonical_hex = payload.get("canonical", "")
         scope = article.get("scope", "private")
         topic = article.get("topic", "*")
-        await self._forward_to_subscribers(env, src_org, node_id, topic=topic, scope=scope)
+        if canonical_hex:
+            try:
+                from cortex.core.article import MemoryArticle
+                art = MemoryArticle.from_dict(article)
+                expected = bytes.fromhex(canonical_hex)
+                canonical = article_canonical_bytes(art)
+                if canonical != expected:
+                    await ws.send(_error(src_org, "INVALID_CANONICAL",
+                                         "canonical mismatch"))
+                    return
+                pub_pem = self.registry.lookup(src_org)
+                if pub_pem is None:
+                    await ws.send(_error(src_org, "INVALID_SIGNATURE",
+                                         "unknown publisher"))
+                    return
+                if isinstance(pub_pem, bytes):
+                    pub_pem = pub_pem.decode("utf-8")
+                if not verify(canonical, art.agent_signature, pub_pem):
+                    await ws.send(_error(src_org, "INVALID_SIGNATURE",
+                                         "agent signature verification failed"))
+                    return
+            except Exception as exc:
+                log.warning("publish verification failed: %s", exc)
+                await ws.send(_error(src_org, "INVALID_SIGNATURE", str(exc)))
+                return
+        ok = await self._forward_to_subscribers(env, src_org, node_id, topic=topic, scope=scope)
+        if not ok:
+            await ws.send(_error(src_org, "SCOPE_VIOLATION",
+                                 "no subscribers for scope"))
+            return
         await ws.send(_ack(env))
         await self._broadcast_event(_event("article.published", {
             "article_id": article.get("id"), "src_org": src_org, "topic": topic,
@@ -337,7 +374,7 @@ class BrokerServer:
             pending["event"].set()
 
     async def _forward_to_subscribers(self, env: dict, src_org: str, node_id: str,
-                                      topic: str, scope: str) -> None:
+                                      topic: str, scope: str) -> bool:
         targets = self.router.subscribers_for(topic=topic, scope=scope, src_org=src_org)
         targets = [s for s in targets if s.node_id != node_id]
         if not targets and scope != "public":
@@ -345,7 +382,7 @@ class BrokerServer:
                 "src_org": src_org, "topic": topic, "scope": scope,
                 "msg_id": env.get("msg_id"),
             }))
-            return
+            return False
         text = json.dumps(env)
         for sub in targets:
             if sub.ws is None:
@@ -363,6 +400,7 @@ class BrokerServer:
                 "src_org": src_org, "topic": topic, "scope": scope,
                 "msg_id": env.get("msg_id"), "detail": "no-subscribers",
             }))
+        return True
 
     @staticmethod
     def _parse_ts(ts: str) -> int:

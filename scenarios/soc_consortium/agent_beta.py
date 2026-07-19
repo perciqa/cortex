@@ -159,7 +159,7 @@ logging:
             org_did="did:percq:org:soc-beta",
             agent_did="did:percq:agent:beta-bot-1",
             key_paths=keys, broker_url=args.broker, config_path=cfg,
-            embedder_backend_override="cpu",
+            embedder_backend_override="auto",
         )
         await node.start()
         client = CortexClient(node)

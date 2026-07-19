@@ -1,7 +1,6 @@
 import json
-import pytest
 
-from cortex.sdk.client import CortexClient
+import pytest
 
 
 @pytest.mark.asyncio
