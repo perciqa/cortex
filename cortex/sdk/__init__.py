@@ -13,8 +13,8 @@ from cortex.sdk.provenance import ProvenanceHelpers
 # Optional framework adapters — only available when [sdk] extras are installed.
 # Guard with try/except so base imports succeed in CI and lightweight envs.
 try:
-    from cortex.sdk.langchain_adapter import CortexPublishTool, CortexRetriever
     from cortex.sdk.agent import CortexAgent
+    from cortex.sdk.langchain_adapter import CortexPublishTool, CortexRetriever
 except ImportError:
     CortexPublishTool = None  # type: ignore[assignment,misc]
     CortexRetriever = None  # type: ignore[assignment,misc]

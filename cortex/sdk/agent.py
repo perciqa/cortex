@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from cortex.sdk.client import CortexClient
 from cortex.sdk.exceptions import map_node_error
 from cortex.sdk.llm import agent_step
 from cortex.sdk.memory import ConversationMemory
+
+if TYPE_CHECKING:
+    from cortex.sdk.langchain_adapter import CortexRetriever
 
 _DEFAULT_TOOLS_BUILDER: Callable | None = None
 
