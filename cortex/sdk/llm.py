@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -7,24 +8,26 @@ import httpx
 
 
 class vLLMClient:
-    """Thin OpenAI-compatible client pointing at a vLLM-on-ROCm server.
+    """Thin OpenAI-compatible client pointing at a vLLM server (typically on ROCm).
 
     Used by `agent_step` for the ReAct reasoning loop. Default model is
-    Llama-3-8B-Instruct (decision D2); Qwen-2.5-7B can be substituted by
-    changing `model` at construction time.
+    google/gemma-4-12B—the Gemma 4 12B instruct model served by the
+    inference pod. Override with the `model` param or `VLLM_MODEL` env var.
     """
 
     def __init__(
         self,
         base_url: str = "http://localhost:8000/v1",
-        model: str = "meta-llama/Llama-3-8B-Instruct",
+        model: str = "google/gemma-4-12B",
+        api_key: str | None = None,
         temperature: float = 0.2,
         max_tokens: int = 512,
         timeout: float = 30.0,
         transport: Any | None = None,
     ):
         self.base_url = base_url.rstrip("/")
-        self.model = model
+        self.model = os.environ.get("VLLM_MODEL", model)
+        self.api_key = api_key or os.environ.get("VLLM_API_KEY")
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
@@ -39,10 +42,13 @@ class vLLMClient:
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
         }
+        headers = {"content-type": "application/json"}
+        if self.api_key:
+            headers["authorization"] = f"Bearer {self.api_key}"
         resp = self._client.post(
             f"{self.base_url}/chat/completions",
             json=payload,
-            headers={"content-type": "application/json"},
+            headers=headers,
         )
         resp.raise_for_status()
         data = resp.json()
