@@ -58,7 +58,8 @@ def run(client, queries: str = "T1059.001 APT29 indicators",
     """Run agent alpha: query and/or derive. Returns result dict."""
     llm: vLLMClient | None = None
     if reasoner == "vllm":
-        llm = vLLMClient(base_url=vllm_url)
+        api_key = os.environ.get("VLLM_API_KEY")
+        llm = vLLMClient(base_url=vllm_url, api_key=api_key)
 
     result = {}
     if step in ("query", "all"):

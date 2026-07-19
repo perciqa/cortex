@@ -43,7 +43,7 @@ def test_chat_posts_to_chat_completions_with_expected_body():
 
     client = vLLMClient(
         base_url="http://localhost:8000/v1",
-        model="meta-llama/Llama-3-8B-Instruct",
+        model="google/gemma-4-12B",
         transport=transport,
     )
 
@@ -57,7 +57,7 @@ def test_chat_posts_to_chat_completions_with_expected_body():
     assert out == "FINAL: padded paddock"
     assert captured["url"].endswith("/chat/completions")
     assert captured["headers"]["content-type"] == "application/json"
-    assert received["body"]["model"] == "meta-llama/Llama-3-8B-Instruct"
+    assert received["body"]["model"] == "google/gemma-4-12B"
     assert received["body"]["temperature"] == 0.2
     assert received["body"]["max_tokens"] == 512
     assert received["body"]["messages"][0]["role"] == "system"

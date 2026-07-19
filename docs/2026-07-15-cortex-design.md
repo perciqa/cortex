@@ -1065,7 +1065,7 @@ cortex/
 | # | Decision | Default | Owner decision needed |
 |---|---|---|---|
 | D1 | Headline embedder model | `bge-small-en-v1.5` | confirm or prefer nomic |
-| D2 | Headline agent reasoning model | small open LLM via vLLM-on-ROCm; Aurora as stretch | confirmed stretch behavior? |
+| D2 | Headline agent reasoning model | Gemma 4 12B instruct on the inference pod (vLLM-on-ROCm); swappable via `VLLM_MODEL` env var | resolved — Gemma 4 12B |
 | D3 | UI framework | React + FastAPI backend | confirm or prefer htmx/htmx |
 | D4 | Bench sidecar per node vs single central bench | per node (richer UI) | confirm |
 | D5 | Article body field cap | 2k chars natural-language | confirm or extend |

@@ -291,7 +291,7 @@ The 40-point AMD/ROCm axis is the load-bearing differentiator. Cortex's value pr
 |---|---|---|
 | Article embedding (publish time) | `nomic-embed-text` or `bge-small-en` (~130M params) | vLLM-on-ROCm or PyTorch-direct with ROCm wheel |
 | Semantic retrieval (query time) | Same embedder + FAISS-gpu or HNSW | ROCm-supported FAISS build, or PyTorch tensor ops |
-| Agent reasoning over retrieved articles | Open LLM (4–8B params) — stretch goal Aurora 30.5B MoE | vLLM-on-ROCm |
+| Agent reasoning over retrieved articles | Gemma 4 12B instruct (running on inference pod) — also supports any OpenAI-compatible model via `VLLM_MODEL` | vLLM-on-ROCm |
 | Trust scoring / provenance graph | NetworkX-style graph algorithms, GPU-accelerated where useful | PyTorch-ROCm for matrix/graph ops |
 | Benchmark panel | Queries/sec with vs without GPU | Same stack, dual measurements |
 
@@ -370,7 +370,7 @@ Track 2 (Agentic AI) — 100 points total.
 
 1. **Demo scenario** — Which of the candidates (F1 SOC / Healthcare / Legal / Finance / F2 Pharma / F3 Public health / F4 AV / F5 AI-safety registry) is the committed demo scenario?
 2. **Montage vs single scenario** — Build Cortex domain-agnostic, demo with one main walkthrough + 30-second "also works in X" montage, or ship narrow with only one scenario?
-3. **Headline agent LLM** — Aurora 30.5B MoE (high wow, AMD-supported officially, higher inference integration risk) vs smaller open model (Llama/Qwen 4–8B, lower risk, less dramatic)?
+3. **Headline agent LLM** — Gemma 4 12B instruct (currently running on the inference pod, good quality/speed trade-off) vs Aurora 30.5B MoE (higher wow, higher risk)? The `VLLM_MODEL` env var makes it swappable without code changes.
 4. **UI surface** — Web (browser-based Console) vs TUI (terminal-based console)?
 5. **Submission format** — Live demo vs pre-recorded video (per hackathon rules check).
 6. **Name reservation** — Is "Cortex" the final product name, or a working title? Does Perciqa want to reserve a different label?

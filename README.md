@@ -172,6 +172,25 @@ Key environment overrides:
 | `CORTEX_BROKER_URL` | Override broker WebSocket URL |
 | `CORTEX_EMBED_BACKEND` | Force `gpu` or `cpu` embedding backend |
 | `CORTEX_LOG_LEVEL` | Set logging verbosity (`DEBUG`, `INFO`, `WARN`) |
+| `VLLM_URL` | OpenAI-compatible API endpoint for live LLM reasoning |
+| `VLLM_API_KEY` | API key for the LLM endpoint (if required) |
+| `VLLM_MODEL` | Model name override (default: `google/gemma-4-12B`) |
+
+When `VLLM_URL` or `VLLM_API_KEY` is set, the demo automatically routes agent reasoning through the live LLM instead of using scripted responses.
+
+### Running with Live LLM Reasoning
+
+```bash
+# Using the Gemma 4 12B inference pod (via SSH tunnel):
+ssh -i ~/.ssh/rocm_pod -p 31047 -fNL 8000:localhost:8000 root@36.150.116.206
+VLLM_URL=http://localhost:8000/v1 python scenarios/soc_consortium/demo_run.py
+
+# Or with a hosted API (Groq, Together AI, etc.):
+VLLM_URL=https://api.groq.com/openai/v1 \
+  VLLM_API_KEY=gsk_... \
+  VLLM_MODEL=llama-3.1-8b-instant \
+  python scenarios/soc_consortium/demo_run.py
+```
 
 ### Running Tests
 

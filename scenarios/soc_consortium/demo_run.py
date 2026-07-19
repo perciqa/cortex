@@ -147,13 +147,18 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-record-optional", action="store_true",
                     help="Skip recorder (used by tests).")
-    ap.add_argument("--reasoner", choices=["scripted", "vllm"], default="scripted",
-                    help="Agent reasoning backend (default: scripted). Use 'vllm' for live LLM.")
+    ap.add_argument("--reasoner", choices=["scripted", "vllm", "auto"], default="auto",
+                    help="Agent reasoning backend (default: auto). Use 'vllm' for live LLM. "
+                         "'auto' picks vllm if VLLM_URL or VLLM_API_KEY is set.")
     ap.add_argument("--vllm-url", default="http://localhost:8000/v1",
                     help="vLLM OpenAI-compatible API endpoint (default: http://localhost:8000/v1). "
                          "Overridden by VLLM_URL env var.")
     args = ap.parse_args()
     vllm_url = os.environ.get("VLLM_URL", args.vllm_url)
+    reasoner = args.reasoner
+    if reasoner == "auto":
+        has_vllm_env = os.environ.get("VLLM_URL") or os.environ.get("VLLM_API_KEY")
+        reasoner = "vllm" if has_vllm_env else "scripted"
 
     state_dir = Path(os.environ.get("DEMO_STATE_DIR", str(REPO / "docs" / "submission")))
     video_dir = Path(os.environ.get("DEMO_VIDEO_DIR", str(state_dir)))
@@ -162,7 +167,7 @@ def main() -> int:
 
     async def _run():
         await run_demo(state_dir, video_dir, no_record=args.no_record_optional,
-                       reasoner=args.reasoner, vllm_url=vllm_url)
+                       reasoner=reasoner, vllm_url=vllm_url)
         return 0
 
     return asyncio.run(_run())
