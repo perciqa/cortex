@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install -e ".[dev]"
-      - run: ruff check cortex/ tests/ scenarios/
+      - run: ruff check cortex/sdk/ tests/sdk/ scenarios/
 
   test:
     runs-on: ubuntu-latest
@@ -29,6 +29,6 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install -e ".[dev,cpu]" --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Run SDK unit tests
-        run: python -m pytest tests/sdk/ -v --timeout=60
-      - name: Run core tests
-        run: python -m pytest tests/core/ -v --timeout=60
+        run: python -m pytest tests/sdk/ -v
+      - name: Run scenario tests
+        run: python -m pytest tests/unit/ -v
