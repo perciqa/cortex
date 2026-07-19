@@ -42,5 +42,6 @@ logs/
 
 # Build / dist
 dist/
+!cortex/console/frontend/dist/
 build/
 *.whl

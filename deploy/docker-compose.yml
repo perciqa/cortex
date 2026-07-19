@@ -43,3 +43,17 @@ services:
       - CORTEX_BROKER_URL=ws://broker:7432
       - CORTEX_LOG_LEVEL=INFO
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/beta.yaml"]
+
+  console:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    depends_on:
+      - broker
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./registry:/app/registry:ro
+    environment:
+      - CORTEX_LOG_LEVEL=INFO
+    command: ["python", "-m", "cortex.console", "--broker", "ws://broker:7432", "--port", "8080", "--host", "0.0.0.0", "--static", "/app/cortex/console/frontend/dist"]
