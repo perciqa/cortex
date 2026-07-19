@@ -1355,3 +1355,8 @@ body {
   overflow: hidden;
 }
 
+.mantine-Tooltip-tooltip {
+  font-family: var(--lato) !important;
+  font-size: 12px !important;
+}
+

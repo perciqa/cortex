@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCortexEvents } from "@/hooks/useCortexEvents";
+import { PageInfo } from "@/components/PageInfo";
 
 const ATTACK_TECHNIQUES = [
   "T1","T2","T3","T4","T5","T6","T7","T8","T9","T10",
@@ -25,7 +26,10 @@ export default function AttackMatrixPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>Attack Matrix</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Attack Matrix
+            <PageInfo description="MITRE ATT&CK-style heatmap showing which attack techniques are detected in Cortex articles." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Cortex</span></li>
             <li className="breadcrumb-sep">›</li>

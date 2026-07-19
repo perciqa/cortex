@@ -2,6 +2,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useCortexMetrics } from "@/hooks/useCortexMetrics";
+import { PageInfo } from "@/components/PageInfo";
 
 export default function BenchPanelPage() {
   const { byNode, connected } = useCortexMetrics();
@@ -13,7 +14,10 @@ export default function BenchPanelPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>Bench Panel</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Bench Panel
+            <PageInfo description="Real-time GPU vs CPU benchmark comparison for embeddings and query processing across fabric nodes." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Cortex</span></li>
             <li className="breadcrumb-sep">›</li>

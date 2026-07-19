@@ -3,3 +3,9 @@ node_modules/
 out/
 .env
 .env.local
+
+# Argus views (disabled for now)
+src/app/(app)/argus/
+src/lib/api.ts
+src/lib/format.ts
+src/hooks/useArgusWebSocket.ts

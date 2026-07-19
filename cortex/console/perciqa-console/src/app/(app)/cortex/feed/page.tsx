@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCortexEvents } from "@/hooks/useCortexEvents";
 import { ArticleCard } from "@/components/cortex/ArticleCard";
+import { PageInfo } from "@/components/PageInfo";
 
 export default function ArticleFeedPage() {
   const router = useRouter();
@@ -12,7 +13,10 @@ export default function ArticleFeedPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>Article Feed</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Article Feed
+            <PageInfo description="Live stream of articles published by Cortex agents, with type badges and trust scores." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Cortex</span></li>
             <li className="breadcrumb-sep">›</li>

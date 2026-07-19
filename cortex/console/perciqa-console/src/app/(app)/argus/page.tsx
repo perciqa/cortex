@@ -9,6 +9,7 @@ import {
   IconArrowRight, IconCheck, IconAlertCircle, IconAlertTriangle,
   IconActivity, IconTrendingUp,
 } from "@tabler/icons-react";
+import { PageInfo } from "@/components/PageInfo";
 import { timeAgo } from "@/lib/format";
 import {
   getFinOpsSummary, getTimeseries, listTraces, listEvals,
@@ -194,7 +195,10 @@ export default function OverviewPage() {
       <div className="ov-hero">
         <div className="ov-hero-left">
           <div className="ov-greeting">{greet()}</div>
-          <h1 className="ov-title">Agent Observatory</h1>
+          <h1 className="ov-title" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Agent Observatory
+            <PageInfo description="Real-time overview of agent reliability — cost, pass rates, active agents, and live activity feed." />
+          </h1>
           <p className="ov-subtitle">
             {agentCount} agent{agentCount !== 1 ? "s" : ""} · {traces.length} recent traces
             {passRate != null && ` · ${(passRate * 100).toFixed(0)}% passing`}

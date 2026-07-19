@@ -6,6 +6,7 @@ import { notifications } from "@mantine/notifications";
 import {
   IconCoin, IconBolt, IconShieldCheck, IconUsers, IconTimeline,
 } from "@tabler/icons-react";
+import { PageInfo } from "@/components/PageInfo";
 import { listTraces, getTrace, type TraceSummary, type TraceDetail, type SpanRow } from "@/lib/api";
 import { fmtMs, fmtTokens, fmtCost, timeAgo } from "@/lib/format";
 import { useArgusWebSocket } from "@/hooks/useArgusWebSocket";
@@ -117,7 +118,10 @@ export default function TracesPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>Traces</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Traces
+            <PageInfo description="Live execution traces from AI agents — span timelines, token usage, cost, and status breakdowns." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Argus</span></li>
             <li className="breadcrumb-sep">›</li>

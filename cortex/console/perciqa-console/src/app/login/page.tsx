@@ -17,7 +17,7 @@ import { IconLock, IconAlertCircle } from "@tabler/icons-react";
 function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/argus";
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/cortex";
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

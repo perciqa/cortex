@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Badge, Card, Loader, Table, Text } from "@mantine/core";
 import { LineChart } from "@mantine/charts";
 import { notifications } from "@mantine/notifications";
+import { PageInfo } from "@/components/PageInfo";
 import { timeAgo } from "@/lib/format";
 import { listEvals, getEvalScores, type EvalSummary, type ScorePoint } from "@/lib/api";
 import { useArgusWebSocket } from "@/hooks/useArgusWebSocket";
@@ -94,7 +95,10 @@ export default function EvalsPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>Evals</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Evals
+            <PageInfo description="Automated LLM quality scoring — pass rates, score trends, verdict breakdowns, and judge model configuration." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Argus</span></li>
             <li className="breadcrumb-sep">›</li>

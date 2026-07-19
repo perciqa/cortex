@@ -19,25 +19,31 @@ import {
   IconShieldExclamation,
 } from "@tabler/icons-react";
 
+const ENABLE_ARGUS = process.env.NEXT_PUBLIC_ENABLE_ARGUS === "true";
+
 const NAV = [
-  {
-    section: "Argus",
-    items: [
-      { href: "/argus",              label: "Overview", icon: IconLayoutDashboard },
-      { href: "/argus/traces",       label: "Traces",   icon: IconTimeline },
-      { href: "/argus/finops",       label: "FinOps",   icon: IconCoins },
-      { href: "/argus/evals",        label: "Evals",    icon: IconChartBar },
-    ],
-  },
+  ...(ENABLE_ARGUS
+    ? [
+        {
+          section: "Argus",
+          items: [
+            { href: "/argus", label: "Overview", icon: IconLayoutDashboard },
+            { href: "/argus/traces", label: "Traces", icon: IconTimeline },
+            { href: "/argus/finops", label: "FinOps", icon: IconCoins },
+            { href: "/argus/evals", label: "Evals", icon: IconChartBar },
+          ],
+        },
+      ]
+    : []),
   {
     section: "Cortex",
     items: [
-      { href: "/cortex",             label: "Fabric Overview", icon: IconCpu },
-      { href: "/cortex/feed",        label: "Article Feed",    icon: IconNews },
-      { href: "/cortex/provenance",  label: "Provenance",      icon: IconGitFork },
-      { href: "/cortex/scope",       label: "Scope Filter",    icon: IconFilter },
-      { href: "/cortex/bench",       label: "Bench Panel",     icon: IconDeviceDesktopAnalytics },
-      { href: "/cortex/attack",      label: "Attack Matrix",   icon: IconShieldExclamation },
+      { href: "/cortex", label: "Fabric Overview", icon: IconCpu },
+      { href: "/cortex/feed", label: "Article Feed", icon: IconNews },
+      { href: "/cortex/provenance", label: "Provenance", icon: IconGitFork },
+      { href: "/cortex/scope", label: "Scope Filter", icon: IconFilter },
+      { href: "/cortex/bench", label: "Bench Panel", icon: IconDeviceDesktopAnalytics },
+      { href: "/cortex/attack", label: "Attack Matrix", icon: IconShieldExclamation },
     ],
   },
 ];
@@ -62,7 +68,10 @@ export function Sidebar() {
   }
 
   function isActive(href: string) {
-    return href === "/" ? pathname === "/" : pathname.startsWith(href);
+    if (href === "/") return pathname === "/";
+    const segments = href.split("/");
+    if (segments.length === 2) return pathname === href;
+    return pathname.startsWith(href);
   }
 
   return (

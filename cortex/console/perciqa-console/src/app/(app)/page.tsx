@@ -1,2 +1,2 @@
 import { redirect } from "next/navigation";
-export default function Root() { redirect("/argus"); }
+export default function Root() { redirect("/cortex"); }

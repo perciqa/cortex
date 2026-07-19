@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { PageInfo } from "@/components/PageInfo";
 import { TrustRing } from "@/components/cortex/TrustRing";
 import { SignatureStatus } from "@/components/cortex/SignatureStatus";
 import { useCortexEvents } from "@/hooks/useCortexEvents";
@@ -49,7 +50,10 @@ export default function ArticleDetailPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>{article.id.slice(0, 8)}</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            {article.id.slice(0, 8)}
+            <PageInfo description="Detailed view of a Cortex article — content, type badge, trust score, signatures, and payload." />
+          </h1>
           <ul className="breadcrumb">
             <li>
               <Link href="/cortex/feed" style={{ color: "var(--dark-grey)", textDecoration: "none" }}>

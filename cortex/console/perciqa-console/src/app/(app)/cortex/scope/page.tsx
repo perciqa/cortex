@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCortexEvents } from "@/hooks/useCortexEvents";
+import { PageInfo } from "@/components/PageInfo";
 
 const SCOPES = ["private", "partner", "public"] as const;
 type Scope = typeof SCOPES[number];
@@ -20,7 +21,10 @@ export default function ScopeFilterPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>Scope Filter</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Scope Filter
+            <PageInfo description="Filter articles by visibility scope — private, partner, or public — to control which data is visible." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Cortex</span></li>
             <li className="breadcrumb-sep">›</li>

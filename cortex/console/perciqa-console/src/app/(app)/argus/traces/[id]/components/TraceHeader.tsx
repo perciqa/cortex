@@ -1,5 +1,6 @@
 "use client";
 
+import { Tooltip } from "@mantine/core";
 import Link from "next/link";
 import {
   IconArrowLeft,
@@ -7,6 +8,7 @@ import {
   IconBolt,
   IconClock,
   IconBinaryTree2,
+  IconInfoCircle,
 } from "@tabler/icons-react";
 import type { TraceDetail } from "@/lib/api";
 import { fmtMs, fmtTokens, fmtCost } from "@/lib/format";
@@ -39,7 +41,12 @@ export function TraceHeader({ trace, evalResult }: TraceHeaderProps) {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>{trace.task ?? "Untitled trace"}</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            {trace.task ?? "Untitled trace"}
+            <Tooltip label="Full trace detail with span waterfall, eval results, and per-span cost/token breakdown." position="right" withArrow multiline maw={280}>
+              <IconInfoCircle size={18} style={{ cursor: "pointer", color: "var(--dark-grey)" }} />
+            </Tooltip>
+          </h1>
           <ul className="breadcrumb">
             <li>
               <Link

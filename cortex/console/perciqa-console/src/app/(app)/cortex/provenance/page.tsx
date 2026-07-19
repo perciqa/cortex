@@ -2,6 +2,7 @@
 
 import { useCortexEvents } from "@/hooks/useCortexEvents";
 import { ProvenanceGraph } from "@/components/cortex/ProvenanceGraph";
+import { PageInfo } from "@/components/PageInfo";
 
 export default function ProvenancePage() {
   const { articles, connected } = useCortexEvents();
@@ -10,7 +11,10 @@ export default function ProvenancePage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>Provenance Graph</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Provenance Graph
+            <PageInfo description="Interactive vis-network graph showing article citation chains and trust relationships." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Cortex</span></li>
             <li className="breadcrumb-sep">›</li>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCortexEvents } from "@/hooks/useCortexEvents";
+import { PageInfo } from "@/components/PageInfo";
 
 export default function FabricOverviewPage() {
   const { articles, connected } = useCortexEvents();
@@ -15,7 +16,10 @@ export default function FabricOverviewPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>Fabric Overview</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Fabric Overview
+            <PageInfo description="Live view of Cortex fabric tenants and event flow between nodes." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Cortex</span></li>
             <li className="breadcrumb-sep">›</li>

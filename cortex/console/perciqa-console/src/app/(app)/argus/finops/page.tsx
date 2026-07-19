@@ -6,6 +6,7 @@ import { AreaChart } from "@mantine/charts";
 import {
   IconBolt, IconLeaf,
 } from "@tabler/icons-react";
+import { PageInfo } from "@/components/PageInfo";
 import {
   getFinOpsSummary, getTimeseries, getBreakdown,
   type FinOpsSummary, type TimeseriesPoint, type BreakdownResponse,
@@ -59,7 +60,10 @@ export default function FinOpsPage() {
     <>
       <div className="page-head">
         <div className="page-head-left">
-          <h1>FinOps</h1>
+          <h1 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            FinOps
+            <PageInfo description="Cost tracking and savings analysis — daily spend, agent-level breakdowns, and local vs cloud cost comparison." />
+          </h1>
           <ul className="breadcrumb">
             <li><span style={{ color: "var(--dark-grey)" }}>Argus</span></li>
             <li className="breadcrumb-sep">›</li>
