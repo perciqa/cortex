@@ -17,6 +17,9 @@ htmlcov/
 # Node
 node_modules/
 
+# Docs
+docs/
+
 # Runtime data
 cortex-node/
 vectors/
