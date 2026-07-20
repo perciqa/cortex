@@ -75,6 +75,58 @@ class HNSWIndex:
         self._index.set_ef(self.ef_search)
 
 
+class NumpyIndex:
+    """Pure-NumPy brute-force cosine-similarity index. No C extensions.
+
+    Suitable for dev, demo, and CI where hnswlib/faiss are unavailable.
+    Uses O(n) linear scan — fine for datasets up to ~100K vectors.
+    """
+
+    def __init__(self, dim: int = 384, **kwargs):
+        self.dim = dim
+        self._vectors: dict[str, np.ndarray] = {}
+
+    def add(self, article_id: str, embedding: np.ndarray) -> None:
+        self._vectors[article_id] = np.asarray(embedding, dtype=np.float32).flatten()
+
+    def search(self, query_vec: np.ndarray, top_k: int) -> list[tuple[str, float]]:
+        q = np.asarray(query_vec, dtype=np.float32).flatten()
+        q_norm = np.linalg.norm(q)
+        if q_norm == 0 or not self._vectors:
+            return [(aid, 0.5) for aid in list(self._vectors.keys())[:top_k]]
+        scores = []
+        for aid, vec in self._vectors.items():
+            dot = np.dot(q, vec)
+            norm = np.linalg.norm(vec)
+            sim = dot / (q_norm * norm) if norm > 0 else 0.0
+            scores.append((aid, float(sim)))
+        scores.sort(key=lambda x: -x[1])
+        return scores[:top_k]
+
+    def size(self) -> int:
+        return len(self._vectors)
+
+    def save(self, path: Path) -> None:
+        p = Path(path)
+        p.mkdir(parents=True, exist_ok=True)
+        meta = {
+            aid: vec.tolist() for aid, vec in self._vectors.items()
+        }
+        (p / "vectors.json").write_text(
+            json.dumps(meta, sort_keys=True, separators=(",", ":"))
+        )
+
+    def load(self, path: Path) -> None:
+        p = Path(path)
+        vec_file = p / "vectors.json"
+        if vec_file.exists():
+            raw = json.loads(vec_file.read_text())
+            self._vectors = {
+                aid: np.asarray(v, dtype=np.float32)
+                for aid, v in raw.items()
+            }
+
+
 class FAISSGPUIndex:
     def __init__(self, dim: int = 384, M: int = 32, ef_construction: int = 200, ef_search: int = 64) -> None:
         try:

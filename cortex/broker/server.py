@@ -266,9 +266,10 @@ class BrokerServer:
                     return
                 if isinstance(pub_pem, bytes):
                     pub_pem = pub_pem.decode("utf-8")
-                if not verify(canonical, art.agent_signature, pub_pem):
+                sig_to_verify = art.org_signature if art.org_signature is not None else art.agent_signature
+                if not verify(canonical, sig_to_verify, pub_pem):
                     await ws.send(_error(src_org, "INVALID_SIGNATURE",
-                                         "agent signature verification failed"))
+                                         "signature verification failed"))
                     return
             except Exception as exc:
                 log.warning("publish verification failed: %s", exc)
@@ -281,7 +282,7 @@ class BrokerServer:
             return
         await ws.send(_ack(env))
         await self._broadcast_event(_event("article.published", {
-            "article_id": article.get("id"), "src_org": src_org, "topic": topic,
+            "article": article, "src_org": src_org, "topic": topic,
             "scope": scope,
         }))
 
@@ -418,8 +419,9 @@ class BrokerServer:
             return 0
         try:
             from datetime import datetime
-            dt = datetime.strptime(ts.replace("Z", "+00:00"),
-                                   "%Y-%m-%dT%H:%M:%S%z")
+            if ts.endswith("Z"):
+                ts = ts[:-1] + "+00:00"
+            dt = datetime.fromisoformat(ts)
             return int(dt.timestamp())
         except Exception:
             return 0

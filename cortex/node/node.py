@@ -24,7 +24,7 @@ from cortex.node.query import QueryResult, retrieve
 from cortex.node.receiver import receive_publish_envelope
 from cortex.node.store import ArticleStore
 from cortex.node.trust import TrustEngine
-from cortex.node.vector_index import FAISSGPUIndex, HNSWIndex
+from cortex.node.vector_index import FAISSGPUIndex, HNSWIndex, NumpyIndex
 
 log = logging.getLogger("cortex.node")
 
@@ -66,6 +66,8 @@ class CortexNode:
         backend = self.config.vector_index.backend
         if backend == "faiss-gpu":
             self.vector_index = FAISSGPUIndex(dim=384)
+        elif backend == "numpy":
+            self.vector_index = NumpyIndex(dim=384)
         else:
             self.vector_index = HNSWIndex(dim=384,
                                           M=self.config.vector_index.hnsw.M,

@@ -23,7 +23,7 @@ def load_config(path: Path | str) -> BrokerConfig:
     return BrokerConfig(
         host=section.get("host", "127.0.0.1"),
         port=int(section.get("port", 7432)),
-        registry_path=Path(section.get("registry", "./registry/org_registry.json")),
+        registry_path=Path(section.get("registry_path", section.get("registry", "./registry/org_registry.json"))),
         replay_window_sec=int(section.get("replay_window_sec", 600)),
         event_channel_max_clients=int(section.get("event_channel_max_clients", 16)),
         metrics_channel_max_clients=int(section.get("metrics_channel_max_clients", 16)),

@@ -1,7 +1,12 @@
 "use client";
 import { useEffect, useReducer } from "react";
 
-const url = process.env.NEXT_PUBLIC_CORTEX_WS_METRICS ?? "ws://localhost:8080/ws/metrics";
+function wsUrl(): string {
+  if (typeof window === "undefined") return "";
+  return process.env.NEXT_PUBLIC_CORTEX_WS_METRICS
+    ?? `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/ws/metrics`;
+}
+const url = wsUrl();
 
 export interface MetricsSample {
   node: string;

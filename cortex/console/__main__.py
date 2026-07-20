@@ -47,6 +47,8 @@ def build_app(broker_url: str, static_dir: Path, registry_path: Path):
 
     fanout_with_hooks = Fanout(on_event=on_event_sync)
 
+    if "channel=event" not in broker_url:
+        broker_url += ("?" if "?" not in broker_url else "&") + "channel=event"
     sub = BrokerSubscriber(uri=broker_url, fanout=fanout_with_hooks)
     app = create_app_with_broker(static_dir=static_dir, registry_path=registry_path,
                                  fanout=fanout_with_hooks, broker_url=broker_url,

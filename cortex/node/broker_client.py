@@ -56,6 +56,18 @@ class BrokerClient:
 
     async def connect(self) -> None:
         await self._connect_socket()
+        # Send subscribe as the first message to the broker
+        from cortex.core.envelope import EnvelopeType
+        import uuid
+        sub_env = {
+            "type": EnvelopeType.SUBSCRIBE.value,
+            "msg_id": str(uuid.uuid4()),
+            "src": self.org_did,
+            "dst": "broker",
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "payload": {"node_id": self.org_did, "topics": ["*"], "scopes": ["public"]},
+        }
+        await self._ws.send(json.dumps(sub_env, separators=(",", ":")))
         self._sender_task = asyncio.create_task(self._sender_loop())
         self._reader_task = asyncio.create_task(self._reader_loop())
 

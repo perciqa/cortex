@@ -44,7 +44,7 @@ node:
     agent: {keys['agent']}
 broker: {{url: {b_url}, registry: {reg}, replay_window_sec: 600}}
 embedder: {{model: BAAI/bge-small-en-v1.5, backend: cpu, batch_size: 4, fallback_on_oom: true}}
-vector_index: {{backend: hnswlib, metric: cosine, hnsw: {{M: 16, ef_construction: 100, ef_search: 32}}}}
+vector_index: {{backend: numpy, metric: cosine}}
 trust: {{default_org_reputation: 0.85, reputation_overrides: {{}}, half_life_days: 90, min_trust_default: 0.3}}
 query: {{default_top_k: 5, deadline_ms: 4000, min_trust: 0.0}}
 logging: {{level: WARNING, file: {p.parent / 'n.log'}}}
