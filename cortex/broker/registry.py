@@ -21,6 +21,10 @@ class OrgRegistry:
     def get(self, org_did: str) -> OrgRecord | None:
         return self._records.get(org_did)
 
+    def lookup(self, org_did: str) -> str | None:
+        rec = self.get(org_did)
+        return rec.pubkey if rec is not None else None
+
     def all_dids(self) -> list[str]:
         return list(self._records.keys())
 

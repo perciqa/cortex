@@ -45,7 +45,7 @@ def _write_config(tmp_path: Path, org_did: str, agent_did: str, broker_port: int
             agent: {tmp_path / org_did.split(':')[-1] / 'agent.pem'}
         broker: {{url: ws://127.0.0.1:{broker_port}, registry: {reg_path}, replay_window_sec: 600}}
         embedder: {{model: BAAI/bge-small-en-v1.5, backend: cpu, batch_size: 4, fallback_on_oom: true}}
-        vector_index: {{backend: hnswlib, metric: cosine, hnsw: {{M: 16, ef_construction: 100, ef_search: 32}}}}
+        vector_index: {{backend: numpy, metric: cosine}}
         trust: {{default_org_reputation: 0.85, reputation_overrides: {{}}, half_life_days: 90, min_trust_default: 0.3}}
         query: {{default_top_k: 5, deadline_ms: 4000, min_trust: 0.0}}
         logging: {{level: WARNING, file: {tmp_path / 'n.log'}}}

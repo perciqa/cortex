@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const CORTEX_TARGET = process.env.CORTEX_API_TARGET ?? "http://localhost:8080";
+
 const nextConfig: NextConfig = {
   devIndicators: false,
   async rewrites() {
@@ -10,7 +12,15 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/cortex-api/:path*",
-        destination: `${process.env.CORTEX_API_TARGET ?? "http://localhost:8080"}/:path*`,
+        destination: `${CORTEX_TARGET}/:path*`,
+      },
+      {
+        source: "/ws/events",
+        destination: `${CORTEX_TARGET}/ws/events`,
+      },
+      {
+        source: "/ws/metrics",
+        destination: `${CORTEX_TARGET}/ws/metrics`,
       },
     ];
   },

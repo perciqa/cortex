@@ -59,12 +59,8 @@ embedder:
   batch_size: 4
   fallback_on_oom: true
 vector_index:
-  backend: hnswlib
+  backend: numpy
   metric: cosine
-  hnsw:
-    M: 16
-    ef_construction: 100
-    ef_search: 32
 trust:
   default_org_reputation: 0.85
   half_life_days: 90

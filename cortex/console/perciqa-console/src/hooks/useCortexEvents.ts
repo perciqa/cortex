@@ -2,7 +2,12 @@
 import { useEffect, useReducer } from "react";
 import { consoleReducer, type ConsoleState } from "@/state/cortexStore";
 
-const url = process.env.NEXT_PUBLIC_CORTEX_WS_EVENTS ?? "ws://localhost:8080/ws/events";
+function wsUrl(): string {
+  if (typeof window === "undefined") return "";
+  return process.env.NEXT_PUBLIC_CORTEX_WS_EVENTS
+    ?? `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/ws/events`;
+}
+const url = wsUrl();
 
 export function useCortexEvents() {
   const [state, dispatch] = useReducer(consoleReducer, { articles: [], connected: false } as ConsoleState);
