@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import pytest
+
+pytest.importorskip("langchain_core")
+
 from cortex.sdk.agent import CortexAgent
 from cortex.sdk.langchain_adapter import CortexRetriever
 from cortex.sdk.llm import ScriptedReasoner
