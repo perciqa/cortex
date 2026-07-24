@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from cortex.console.fanout import Fanout
 from cortex.console.node_registry import load_tenants
+from cortex.console.ring_buffer import EventRingBuffer
 
 
 def create_app(static_dir: Path, registry_path: Path, broker_url: str | None = None) -> FastAPI:
@@ -24,6 +25,7 @@ def create_app_with_broker(
     broker_url: str | None,
     node_registry: NodeRegistry | None = None,
     attack_matrix: AttackMatrixTracker | None = None,
+    events_ring: EventRingBuffer | None = None,
 ) -> FastAPI:
     app = FastAPI(title="cortex-console")
     if node_registry is None:
@@ -32,10 +34,20 @@ def create_app_with_broker(
     if attack_matrix is None:
         from cortex.console.attack_matrix import AttackMatrixTracker
         attack_matrix = AttackMatrixTracker()
+    if events_ring is None:
+        events_ring = EventRingBuffer()
     state: dict[str, Any] = {"fanout": fanout, "registry_path": registry_path, "static_dir": static_dir, "nodes": node_registry}
 
     @app.get("/")
     async def root() -> HTMLResponse:
+        idx = static_dir / "index.html"
+        if idx.exists():
+            return HTMLResponse(idx.read_text())
+        return HTMLResponse("<html><head><title>Perciqa Cortex</title></head><body><h1>Perciqa Cortex</h1></body></html>")
+
+    @app.get("/vite")
+    @app.get("/vite/")
+    async def vite_root() -> HTMLResponse:
         idx = static_dir / "index.html"
         if idx.exists():
             return HTMLResponse(idx.read_text())
@@ -64,6 +76,8 @@ def create_app_with_broker(
     @app.websocket("/ws/events")
     async def ws_events(ws: WebSocket) -> None:
         await ws.accept()
+        for payload in events_ring.snapshot():
+            await ws.send_json({"type": "event", "payload": payload})
         q = fanout.add_event_client()
         try:
             while True:
@@ -91,8 +105,18 @@ def create_app_with_broker(
         finally:
             fanout.remove_metrics_client(q)
 
-    static_dir_static = static_dir / "static"
-    if static_dir_static.exists():
-        app.mount("/static", StaticFiles(directory=str(static_dir_static)), name="static")
+    static_dir_assets = static_dir / "assets"
+    if static_dir_assets.exists():
+        app.mount("/assets", StaticFiles(directory=str(static_dir_assets)), name="assets")
+        app.mount("/vite/assets", StaticFiles(directory=str(static_dir_assets)), name="vite-assets")
+
+    @app.get("/{path:path}")
+    async def spa_fallback(path: str) -> HTMLResponse:
+        if path.startswith("api/") or path.startswith("ws/") or path.startswith("vite/"):
+            return HTMLResponse("", status_code=404)
+        idx = static_dir / "index.html"
+        if idx.exists():
+            return HTMLResponse(idx.read_text())
+        return HTMLResponse("<html><head><title>Perciqa Cortex</title></head><body><h1>Perciqa Cortex</h1></body></html>")
 
     return app

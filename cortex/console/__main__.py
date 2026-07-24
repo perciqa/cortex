@@ -52,7 +52,8 @@ def build_app(broker_url: str, static_dir: Path, registry_path: Path):
     sub = BrokerSubscriber(uri=broker_url, fanout=fanout_with_hooks)
     app = create_app_with_broker(static_dir=static_dir, registry_path=registry_path,
                                  fanout=fanout_with_hooks, broker_url=broker_url,
-                                 node_registry=nodes, attack_matrix=attack)
+                                 node_registry=nodes, attack_matrix=attack,
+                                 events_ring=events_ring)
     app.state.subscriber = sub
     return app, Lifecycle(subscriber=sub)
 

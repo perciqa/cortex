@@ -16,16 +16,18 @@ export interface ArticleDetailArticle {
 
 export interface ArticleDetailProps {
   articleId: string;
+  article?: ArticleDetailArticle | null;
   fetchArticle: (id: string) => Promise<ArticleDetailArticle>;
 }
 
-export function ArticleDetail({ articleId, fetchArticle }: ArticleDetailProps) {
-  const [article, setArticle] = useState<ArticleDetailArticle | null>(null);
+export function ArticleDetail({ articleId, article: initialArticle, fetchArticle }: ArticleDetailProps) {
+  const [article, setArticle] = useState<ArticleDetailArticle | null>(initialArticle || null);
   useEffect(() => {
+    if (initialArticle) return;
     let alive = true;
     fetchArticle(articleId).then(a => { if (alive) setArticle(a); });
     return () => { alive = false; };
-  }, [articleId, fetchArticle]);
+  }, [articleId, fetchArticle, initialArticle]);
   if (!article) return <div className="text-slate-400">Loading\u2026</div>;
   return (
     <div className="space-y-4">
