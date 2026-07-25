@@ -56,7 +56,13 @@ function DetailPage({ articles }: { articles: any[] }) {
     <ArticleDetail
       articleId={id || ""}
       article={article}
-      fetchArticle={async (aid: string) => articles.find(a => a.id === aid) || { id: aid, type: "finding", content: aid, payload: {} }}
+      fetchArticle={async (aid: string) => {
+        const found = articles.find(a => a.id === aid);
+        if (found) return found;
+        // Wait briefly for WebSocket replay to deliver the article
+        await new Promise(r => setTimeout(r, 2000));
+        return articles.find(a => a.id === aid) || { id: aid, type: "finding", content: aid || "Loading...", payload: {} };
+      }}
     />
   );
 }

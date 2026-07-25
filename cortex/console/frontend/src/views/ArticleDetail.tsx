@@ -28,7 +28,11 @@ export function ArticleDetail({ articleId, article: initialArticle, fetchArticle
     fetchArticle(articleId).then(a => { if (alive) setArticle(a); });
     return () => { alive = false; };
   }, [articleId, fetchArticle, initialArticle]);
+  useEffect(() => {
+    if (initialArticle) setArticle(initialArticle);
+  }, [initialArticle]);
   if (!article) return <div className="text-slate-400">Loading\u2026</div>;
+  if (!article.content || article.content === article.id) return <div className="text-slate-400">Loading article data\u2026</div>;
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-4">
