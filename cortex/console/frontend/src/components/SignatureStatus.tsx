@@ -1,15 +1,10 @@
-import clsx from "clsx";
+import { Badge } from "@mantine/core";
 
-export interface SignatureStatusProps { sig?: string | null; label: string; }
-
-export function SignatureStatus({ sig, label }: SignatureStatusProps) {
-  const state = sig ? "valid" : "unsigned";
-  const icon = sig ? "\u2713" : "\u2022";
-  const color = sig ? "text-green-500" : "text-slate-400";
+export function SignatureStatus({ sig, label }: { sig?: string | null; label: string }) {
+  const ok = sig && sig.length > 0;
   return (
-    <span data-testid={label === "agent" ? "sig-agent" : "sig-org"}
-      className={clsx("inline-flex items-center gap-1 text-xs", color)}>
-      <span>{icon}</span><span>{label}</span>
-    </span>
+    <Badge color={ok ? "green" : "gray"} variant="light" size="sm">
+      {ok ? "\u2713" : "\u2022"} {label}
+    </Badge>
   );
 }

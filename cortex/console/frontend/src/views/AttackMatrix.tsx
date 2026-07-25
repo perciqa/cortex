@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Card, Title, Badge, Group, Stack, Text, Modal } from "@mantine/core";
 import clsx from "clsx";
 import { ATTACK_TECHNIQUES } from "../data/attackTechniques";
 
@@ -7,30 +8,36 @@ export interface AttackMatrixProps {
   articlesFor: (id: string) => { id: string; content: string }[];
 }
 
+const SEVERITY_COLORS: Record<string, string> = { critical: "red", high: "orange", medium: "yellow", low: "blue" };
+
 export function AttackMatrix({ counts, articlesFor }: AttackMatrixProps) {
   const [selected, setSelected] = useState<string | null>(null);
   return (
     <div>
-      <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}>
-        {ATTACK_TECHNIQUES.map(tid => {
-          const n = counts[tid] ?? 0;
-          const color = n >= 3 ? "bg-red-500" : n >= 1 ? "bg-orange-500" : "bg-slate-800";
-          return (
-            <button key={tid} data-testid="attack-cell" data-attack-id={tid}
-              onClick={() => setSelected(tid)}
-              className={clsx("h-6 rounded text-[8px] text-slate-100", color)}>
-              {tid.replace("T", "")}
-            </button>
-          );
-        })}
-      </div>
-      <div className="mt-4">
-        {selected && (
-          <ul className="space-y-1 text-sm text-slate-200">
-            {articlesFor(selected).map(a => <li key={a.id}>{a.content}</li>)}
-          </ul>
-        )}
-      </div>
+      <Title order={3} mb="md">Attack Matrix</Title>
+      <Card shadow="xs" withBorder radius="md" p="md">
+        <Stack gap="xs">
+          {Object.entries(counts).sort().map(([id, count]) => {
+            const tech = ATTACK_TECHNIQUES[id];
+            const color = SEVERITY_COLORS[tech?.severity || ""] || "gray";
+            return (
+              <Group key={id} gap="sm" justify="space-between" style={{ cursor: "pointer" }}
+                onClick={() => setSelected(id)}>
+                <Group gap="xs">
+                  <Badge color={color} variant="dot" size="sm" />
+                  <Text size="sm">{tech?.name || id}</Text>
+                </Group>
+                <Badge color={color}>{count}</Badge>
+              </Group>
+            );
+          })}
+        </Stack>
+      </Card>
+      <Modal opened={!!selected} onClose={() => setSelected(null)} title={selected ? ATTACK_TECHNIQUES[selected]?.name || selected : ""}>
+        {selected && articlesFor(selected).map(a => (
+          <Text key={a.id} size="sm" mb="xs">{a.content}</Text>
+        ))}
+      </Modal>
     </div>
   );
 }

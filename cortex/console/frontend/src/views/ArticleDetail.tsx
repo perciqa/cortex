@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Card, Badge, Text, Title, Group, Stack, Code } from "@mantine/core";
 import { TrustRing } from "../components/TrustRing";
 import { SignatureStatus } from "../components/SignatureStatus";
 
@@ -20,6 +21,11 @@ export interface ArticleDetailProps {
   fetchArticle: (id: string) => Promise<ArticleDetailArticle>;
 }
 
+const TYPE_COLORS: Record<string, string> = {
+  finding: "red", insight: "violet", warning: "orange",
+  precedent: "blue", procedure: "teal",
+};
+
 export function ArticleDetail({ articleId, article: initialArticle, fetchArticle }: ArticleDetailProps) {
   const [article, setArticle] = useState<ArticleDetailArticle | null>(initialArticle || null);
   useEffect(() => {
@@ -31,42 +37,39 @@ export function ArticleDetail({ articleId, article: initialArticle, fetchArticle
   useEffect(() => {
     if (initialArticle) setArticle(initialArticle);
   }, [initialArticle]);
-  if (!article) return <div className="text-slate-400">Loading\u2026</div>;
-  if (!article.content || article.content === article.id) return <div className="text-slate-400">Loading article data\u2026</div>;
+
+  if (!article) return <Text c="dimmed">Loading...</Text>;
+  if (!article.content || article.content === article.id) return <Text c="dimmed">Loading article data...</Text>;
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-start gap-4">
+    <Card shadow="xs" withBorder radius="md">
+      <Group gap="lg" align="flex-start" mb="md">
         <TrustRing pct={article.trust_score ?? 0} />
         <div>
-          <div className="text-xs uppercase text-slate-400">{article.type}</div>
-          <div className="text-lg text-slate-100">{article.content}</div>
-          <div className="mt-2"><SignatureStatus sig={article.agent_signature} label="agent" /></div>
-          <div>
-            {article.org_signature !== undefined
-              ? <SignatureStatus sig={article.org_signature} label="org" />
-              : <SignatureStatus sig={null} label="org" />}</div>
+          <Badge color={TYPE_COLORS[article.type] || "gray"} mb="xs">{article.type}</Badge>
+          <Title order={4}>{article.content}</Title>
+          <Group gap="xs" mt="sm">
+            <SignatureStatus sig={article.agent_signature} label="agent" />
+            <SignatureStatus sig={article.org_signature} label="org" />
+          </Group>
         </div>
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold text-slate-300">Payload</h3>
-        <pre className="text-xs bg-slate-900 p-3 rounded">{JSON.stringify(article.payload, null, 2)}</pre>
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold text-slate-300">Provenance tree</h3>
-        <ProvenanceTree roots={article.provenance_children ?? []} />
-      </div>
-    </div>
-  );
-}
-
-function ProvenanceTree({ roots }: { roots: { id: string; content: string }[] }) {
-  return (
-    <ul className="ml-4 border-l border-slate-700 pl-2 space-y-1">
-      {roots.map(r => (
-        <li key={r.id} className="text-sm text-slate-200">
-          <span className="text-slate-500">\u2514</span> {r.content}
-        </li>
-      ))}
-    </ul>
+      </Group>
+      <Stack gap="xs">
+        <div>
+          <Text fw={600} size="sm">Payload</Text>
+          <Code block>{JSON.stringify(article.payload, null, 2)}</Code>
+        </div>
+        {article.provenance_children && article.provenance_children.length > 0 && (
+          <div>
+            <Text fw={600} size="sm">Provenance tree</Text>
+            <Stack gap={4} ml="md">
+              {article.provenance_children.map(c => (
+                <Text key={c.id} size="sm" c="dimmed">{c.content}</Text>
+              ))}
+            </Stack>
+          </div>
+        )}
+      </Stack>
+    </Card>
   );
 }

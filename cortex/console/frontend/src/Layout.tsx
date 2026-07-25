@@ -1,5 +1,5 @@
-import clsx from "clsx";
-import { HEADER_GRADIENT } from "./styles/theme";
+import { AppShell, Group, NavLink, Title, Text } from "@mantine/core";
+import { IconLayoutDashboard, IconList, IconGraph, IconFilter, IconChartBar, IconShield } from "@tabler/icons-react";
 import { StatusPill } from "./components/StatusPill";
 
 export type ViewId = "overview" | "feed" | "detail" | "provenance" | "scope" | "bench" | "attack";
@@ -11,37 +11,46 @@ export interface LayoutProps {
   children: React.ReactNode;
 }
 
-const TABS: { id: ViewId; label: string }[] = [
-  { id: "overview", label: "Fabric Overview" },
-  { id: "feed", label: "Article Feed" },
-  { id: "provenance", label: "Provenance Graph" },
-  { id: "scope", label: "Scope Filter" },
-  { id: "bench", label: "Bench Panel" },
-  { id: "attack", label: "Attack Matrix" },
+const NAV_ITEMS: { id: ViewId; label: string; icon: React.ReactNode }[] = [
+  { id: "overview", label: "Fabric Overview", icon: <IconLayoutDashboard size={18} /> },
+  { id: "feed", label: "Article Feed", icon: <IconList size={18} /> },
+  { id: "provenance", label: "Provenance Graph", icon: <IconGraph size={18} /> },
+  { id: "scope", label: "Scope Filter", icon: <IconFilter size={18} /> },
+  { id: "bench", label: "Bench Panel", icon: <IconChartBar size={18} /> },
+  { id: "attack", label: "Attack Matrix", icon: <IconShield size={18} /> },
 ];
 
 export function Layout({ current, onNavigate, connected, children }: LayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className={clsx("flex items-center justify-between px-6 py-3", HEADER_GRADIENT)}>
-        <h1 className="text-xl font-bold text-white">Perciqa Cortex</h1>
-        <StatusPill connected={connected} />
-      </header>
-      <div className="flex flex-1">
-        <nav className="w-56 p-4 bg-slate-900 border-r border-slate-800 flex flex-col gap-1">
-          {TABS.map(t => (
-            <button key={t.id}
-              onClick={() => onNavigate(t.id)}
-              className={clsx(
-                "text-left px-3 py-2 rounded text-sm",
-                current === t.id ? "bg-slate-700 text-white" : "text-slate-300 hover:bg-slate-800"
-              )}>
-              {t.label}
-            </button>
-          ))}
-        </nav>
-        <main className="flex-1 p-6">{children}</main>
-      </div>
-    </div>
+    <AppShell
+      header={{ height: 56 }}
+      navbar={{ width: 240, breakpoint: 0 }}
+      padding="md"
+    >
+      <AppShell.Header>
+        <Group h="100%" px="md" justify="space-between">
+          <Group>
+            <Title order={4}>Perciqa Cortex</Title>
+          </Group>
+          <StatusPill connected={connected} />
+        </Group>
+      </AppShell.Header>
+      <AppShell.Navbar p="xs">
+        {NAV_ITEMS.map(item => (
+          <NavLink
+            key={item.id}
+            label={item.label}
+            leftSection={item.icon}
+            active={current === item.id}
+            onClick={() => onNavigate(item.id)}
+            variant="filled"
+            color="blue"
+          />
+        ))}
+      </AppShell.Navbar>
+      <AppShell.Main>
+        {children}
+      </AppShell.Main>
+    </AppShell>
   );
 }

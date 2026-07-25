@@ -1,25 +1,45 @@
-import clsx from "clsx";
-import { TYPE_TAG_COLORS } from "../styles/theme";
+import { Card, Group, Badge, Text, Button } from "@mantine/core";
 import { TrustRing } from "./TrustRing";
+import { SignatureStatus } from "./SignatureStatus";
 
 export interface Article {
   id: string;
-  type: keyof typeof TYPE_TAG_COLORS;
+  type: string;
   content: string;
+  payload?: Record<string, unknown>;
   trust_score?: number | null;
+  agent_signature?: string | null;
+  org_signature?: string | null;
+  cites?: string[];
 }
 
-export interface ArticleCardProps { article: Article; onSelect?: (id: string) => void; }
+const TYPE_COLORS: Record<string, string> = {
+  finding: "red",
+  insight: "violet",
+  warning: "orange",
+  precedent: "blue",
+  procedure: "teal",
+};
 
-export function ArticleCard({ article, onSelect }: ArticleCardProps) {
+export function ArticleCard({ article, onSelect }: { article: Article; onSelect?: (id: string) => void }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded p-4 flex items-start gap-3">
-      <TrustRing pct={article.trust_score ?? 0} />
-      <div className="flex-1">
-        <div className={clsx("text-xs uppercase", TYPE_TAG_COLORS[article.type])}>{article.type}</div>
-        <div className="text-slate-100">{article.content.slice(0, 240)}</div>
-      </div>
-      {onSelect && <button onClick={() => onSelect(article.id)} className="text-xs text-indigo-300 underline">detail</button>}
-    </div>
+    <Card shadow="xs" withBorder radius="md" p="sm">
+      <Group gap="sm" wrap="nowrap" align="flex-start">
+        <TrustRing pct={article.trust_score ?? 0} />
+        <div style={{ flex: 1 }}>
+          <Group gap="xs" mb={4}>
+            <Badge color={TYPE_COLORS[article.type] || "gray"} size="sm">{article.type}</Badge>
+            <SignatureStatus sig={article.agent_signature} label="agent" />
+            <SignatureStatus sig={article.org_signature} label="org" />
+          </Group>
+          <Text size="sm" lineClamp={2}>{article.content}</Text>
+        </div>
+        {onSelect && (
+          <Button variant="subtle" size="compact-sm" onClick={() => onSelect(article.id)}>
+            detail
+          </Button>
+        )}
+      </Group>
+    </Card>
   );
 }

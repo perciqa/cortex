@@ -1,34 +1,34 @@
+import { Card, Title } from "@mantine/core";
 import { useEffect, useRef } from "react";
 import { Network } from "vis-network";
 import { DataSet } from "vis-data";
 
-export interface GraphArticle {
-  id: string;
-  type: string;
-  content: string;
-  trust_score?: number | null;
-  cites?: string[];
-}
+export function ProvenanceGraph({ articles }: { articles: any[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-export interface ProvenanceGraphProps { articles: GraphArticle[]; }
-
-export function ProvenanceGraph({ articles }: ProvenanceGraphProps) {
-  const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (!ref.current) return;
+    if (!containerRef.current || articles.length === 0) return;
     const nodes = new DataSet(articles.map(a => ({
-      id: a.id,
-      label: a.content.slice(0, 24),
-      color: { background: colorFromTrust(a.trust_score ?? 0.5) },
+      id: a.id, label: a.content?.substring(0, 30) || a.id.substring(0, 10),
+      title: a.content, shape: "box",
+      color: { background: a.type === "insight" ? "#9775fa" : a.type === "warning" ? "#f76707" : "#e03131", border: "#1a1b1e" },
     })));
-    const edges = articles.flatMap(a => (a.cites ?? []).map(to => ({ from: a.id, to })));
-    new Network(ref.current, { nodes, edges: new DataSet(edges) }, { physics: { stabilization: true } });
+    const edges = new DataSet(
+      articles.filter(a => a.cites).flatMap(a => (a.cites || []).map((c: string) => ({ from: a.id, to: c, arrows: "to" })))
+    );
+    const network = new Network(containerRef.current, { nodes, edges }, {
+      physics: { solver: "forceAtlas2Based", forceAtlas2Based: { gravitationalConstant: -40 } },
+      edges: { arrows: { to: { enabled: true } }, color: { color: "#5c5f66" } },
+    });
+    return () => network.destroy();
   }, [articles]);
-  return <div ref={ref} className="w-full h-[600px] bg-slate-900 border border-slate-800 rounded" />;
-}
 
-function colorFromTrust(t: number): string {
-  if (t >= 0.7) return "#16a34a";
-  if (t >= 0.4) return "#eab308";
-  return "#dc2626";
+  return (
+    <div>
+      <Title order={3} mb="md">Provenance Graph</Title>
+      <Card shadow="xs" withBorder radius="md" p={0}>
+        <div ref={containerRef} style={{ height: 600 }} />
+      </Card>
+    </div>
+  );
 }

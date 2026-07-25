@@ -1,33 +1,39 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import type { MetricsSample } from "../hooks/useBrokerMetrics";
+import { Card, Title, Text, Group, Badge, Stack } from "@mantine/core";
 
-export interface BenchPanelProps { byNode: Record<string, MetricsSample[]>; }
-
-export function BenchPanel({ byNode }: BenchPanelProps) {
-  const flat = Object.values(byNode).flat();
-  const embedData = flat.map(s => ({ name: s.node, radeon: s.embeds_per_sec_radeon, cpu: s.embeds_per_sec_cpu }));
-  const queryData = flat.map(s => ({ name: s.node, radeon: s.queries_per_sec_radeon, cpu: s.queries_per_sec_cpu }));
+export function BenchPanel({ byNode }: { byNode: Record<string, any[]> }) {
+  const nodes = Object.keys(byNode);
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <Chart data={embedData} title="Embeds/sec (Radeon vs CPU)" />
-      <Chart data={queryData} title="Queries/sec (Radeon vs CPU)" />
-    </div>
-  );
-}
-
-function Chart({ data, title }: { data: { name: string; radeon: number; cpu: number }[]; title: string }) {
-  return (
-    <div className="bg-slate-900 border border-slate-800 rounded p-4">
-      <h3 className="text-sm font-semibold text-slate-300 mb-2">{title}</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data} layout="vertical">
-          <XAxis type="number" stroke="#94a3b8" />
-          <YAxis type="category" dataKey="name" stroke="#94a3b8" />
-          <Tooltip />
-          <Bar dataKey="radeon" fill="#f43f5e" />
-          <Bar dataKey="cpu" fill="#3b82f6" />
-        </BarChart>
-      </ResponsiveContainer>
+    <div>
+      <Title order={3} mb="md">Bench Panel</Title>
+      {nodes.length === 0 ? (
+        <Card shadow="xs" withBorder radius="md" p="xl">
+          <Text ta="center" c="dimmed">No metrics received yet. Metrics are sent every ~2s while nodes are active.</Text>
+        </Card>
+      ) : (
+        <Stack gap="md">
+          {nodes.map(node => {
+            const samples = byNode[node];
+            const latest = samples[samples.length - 1];
+            return (
+              <Card key={node} shadow="xs" withBorder radius="md">
+                <Group gap="sm" mb="sm">
+                  <Text fw={700}>{node}</Text>
+                  <Badge color="green" variant="dot" size="sm">live</Badge>
+                </Group>
+                {latest && (
+                  <Group gap="lg">
+                    <div><Text size="sm" c="dimmed">Embeds/s (GPU)</Text><Text>{latest.embeds_per_sec_radeon?.toFixed(1) || "—"}</Text></div>
+                    <div><Text size="sm" c="dimmed">Embeds/s (CPU)</Text><Text>{latest.embeds_per_sec_cpu?.toFixed(1) || "—"}</Text></div>
+                    <div><Text size="sm" c="dimmed">Queries/s (GPU)</Text><Text>{latest.queries_per_sec_radeon?.toFixed(1) || "—"}</Text></div>
+                    <div><Text size="sm" c="dimmed">GPU mem</Text><Text>{latest.gpu_mem_util_pct?.toFixed(0) || "—"}%</Text></div>
+                    <div><Text size="sm" c="dimmed">P95 latency</Text><Text>{latest.p95_query_latency_ms?.toFixed(0) || "—"}ms</Text></div>
+                  </Group>
+                )}
+              </Card>
+            );
+          })}
+        </Stack>
+      )}
     </div>
   );
 }
