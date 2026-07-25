@@ -13,6 +13,7 @@ class ArticleType(StrEnum):
     PRECEDENT = "precedent"
     PROCEDURE = "procedure"
     WARNING = "warning"
+    ACTIVITY = "activity"
 
 
 class Scope(StrEnum):

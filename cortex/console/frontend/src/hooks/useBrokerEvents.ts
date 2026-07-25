@@ -2,7 +2,7 @@ import { useEffect, useReducer } from "react";
 import { consoleReducer, ConsoleState } from "../state/store";
 
 export function useBrokerEvents(url: string) {
-  const [state, dispatch] = useReducer(consoleReducer, { articles: [], connected: false } as ConsoleState);
+  const [state, dispatch] = useReducer(consoleReducer, { articles: [], activities: [], connected: false } as ConsoleState);
   useEffect(() => {
     fetch("/api/attack-matrix")
       .then(r => r.json())

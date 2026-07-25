@@ -246,10 +246,11 @@ class BrokerServer:
     async def _handle_publish(self, ws: Any, env: dict, src_org: str, node_id: str) -> None:
         payload = env.get("payload") or {}
         article = payload.get("article") or {}
+        article = payload.get("article") or {}
         canonical_hex = payload.get("canonical", "")
         scope = article.get("scope", "private")
         topic = article.get("topic", "*")
-        if canonical_hex:
+        if canonical_hex and article.get("type") != "activity":
             try:
                 from cortex.core.article import MemoryArticle
                 art = MemoryArticle.from_dict(article)

@@ -1,8 +1,8 @@
 import { AppShell, Group, NavLink, Title, Text } from "@mantine/core";
-import { IconLayoutDashboard, IconList, IconGraph, IconFilter, IconChartBar, IconShield } from "@tabler/icons-react";
+import { IconLayoutDashboard, IconList, IconGraph, IconFilter, IconChartBar, IconShield, IconRobot } from "@tabler/icons-react";
 import { StatusPill } from "./components/StatusPill";
 
-export type ViewId = "overview" | "feed" | "detail" | "provenance" | "scope" | "bench" | "attack";
+export type ViewId = "overview" | "feed" | "detail" | "provenance" | "scope" | "bench" | "attack" | "activity";
 
 export interface LayoutProps {
   current: ViewId;
@@ -14,6 +14,7 @@ export interface LayoutProps {
 const NAV_ITEMS: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: "overview", label: "Fabric Overview", icon: <IconLayoutDashboard size={18} /> },
   { id: "feed", label: "Article Feed", icon: <IconList size={18} /> },
+  { id: "activity", label: "Agent Activity", icon: <IconRobot size={18} /> },
   { id: "provenance", label: "Provenance Graph", icon: <IconGraph size={18} /> },
   { id: "scope", label: "Scope Filter", icon: <IconFilter size={18} /> },
   { id: "bench", label: "Bench Panel", icon: <IconChartBar size={18} /> },

@@ -9,6 +9,7 @@ import { ProvenanceGraph } from "./views/ProvenanceGraph";
 import { ScopeFilter } from "./views/ScopeFilter";
 import { BenchPanel } from "./views/BenchPanel";
 import { AttackMatrix } from "./views/AttackMatrix";
+import { AgentActivity } from "./views/AgentActivity";
 
 function wsUrl(path: string): string {
   if (typeof window === "undefined") return "";
@@ -19,6 +20,7 @@ function wsUrl(path: string): string {
 const PATH_TO_VIEW: Record<string, ViewId> = {
   "/": "overview",
   "/feed": "feed",
+  "/activity": "activity",
   "/provenance": "provenance",
   "/scope": "scope",
   "/bench": "bench",
@@ -29,6 +31,7 @@ const VIEW_TO_PATH: Record<ViewId, string> = {
   overview: "/",
   feed: "/feed",
   detail: "/feed",
+  activity: "/activity",
   provenance: "/provenance",
   scope: "/scope",
   bench: "/bench",
@@ -77,6 +80,7 @@ export function App() {
   const handleNavigate = (view: ViewId) => navigate(VIEW_TO_PATH[view]);
 
   const articles = events.articles;
+  const activities = events.activities;
 
   return (
     <Layout current={currentView} onNavigate={handleNavigate} connected={events.connected}>
@@ -84,6 +88,7 @@ export function App() {
         <Route path="/" element={<HomePage articles={articles} events={eventsToOverview(articles)} />} />
         <Route path="/feed" element={<FeedPage articles={articles} onSelect={(id) => navigate(`/article/${id}`)} />} />
         <Route path="/article/:id" element={<DetailPage articles={articles} />} />
+        <Route path="/activity" element={<AgentActivity activities={activities} />} />
         <Route path="/provenance" element={<ProvenanceGraph articles={articles} />} />
         <Route path="/scope" element={<ScopeFilter articles={articles} />} />
         <Route path="/bench" element={<BenchPanel byNode={metrics.byNode} />} />

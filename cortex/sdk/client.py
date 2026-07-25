@@ -88,6 +88,26 @@ class CortexClient:
             content=content, payload=payload, scope=scope, type=ArticleType.PRECEDENT
         )
 
+    def emit_activity(
+        self,
+        step: str,
+        message: str,
+        agent_name: str = "",
+        metadata: dict | None = None,
+    ) -> str:
+        payload = {
+            "agent_id": self._node.org_did,
+            "agent_name": agent_name or self._node.org_did,
+            "activity_step": step,
+            "activity_message": message,
+        }
+        if metadata:
+            payload.update(metadata)
+        return self._publish_typed(
+            content=message, payload=payload, scope=Scope.PUBLIC,
+            type=ArticleType.ACTIVITY,
+        )
+
     def search(
         self,
         query_text: str,

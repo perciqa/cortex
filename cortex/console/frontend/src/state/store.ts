@@ -1,6 +1,6 @@
 export interface Article {
   id: string;
-  type: "finding" | "insight" | "warning" | "precedent" | "procedure";
+  type: "finding" | "insight" | "warning" | "precedent" | "procedure" | "activity";
   content: string;
   payload?: Record<string, unknown>;
   trust_score?: number | null;
@@ -17,6 +17,7 @@ export interface BrokerEvent {
 
 export interface ConsoleState {
   articles: Article[];
+  activities: Article[];
   connected: boolean;
 }
 
@@ -32,6 +33,10 @@ export function consoleReducer(state: ConsoleState, action: Action): ConsoleStat
     case "event":
       if (action.env.event === "article.published" && action.env.data.article) {
         const a = action.env.data.article;
+        if (a.type === "activity") {
+          if (state.activities.find(x => x.id === a.id)) return state;
+          return { ...state, activities: [a, ...state.activities].slice(0, 200) };
+        }
         if (state.articles.find(x => x.id === a.id)) return state;
         return { ...state, articles: [a, ...state.articles].slice(0, 1000) };
       }

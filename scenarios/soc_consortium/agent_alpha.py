@@ -8,7 +8,9 @@ from cortex.sdk.llm import ScriptedReasoner, vLLMClient
 
 
 def step_query(client, queries: str, min_trust: float = 0.0, top_k: int = 5) -> list[dict]:
+    client.emit_activity("querying", f"Searching fabric for: {queries}", agent_name="Agent Alpha")
     results = client.search(queries, scopes={"public"}, top_k=top_k, min_trust=min_trust)
+    client.emit_activity("querying", f"Retrieved {len(results)} findings from fabric", agent_name="Agent Alpha")
     return [
         {"article_id": r.article_id, "content_preview": r.article.content[:120],
          "trust": r.trust_score}
@@ -24,6 +26,7 @@ def step_derive(client, retrieved: list[dict],
         raise RuntimeError(f"Need at least 3 retrieved findings, got {len(article_ids)}")
 
     if reasoner == "vllm" and llm is not None:
+        client.emit_activity("reasoning", "Synthesizing insight via LLM...", agent_name="Agent Alpha")
         previews = "\n".join(
             f"- {r['article_id']}: {r['content_preview'][:200]}"
             for r in retrieved[:3]
@@ -36,6 +39,7 @@ def step_derive(client, retrieved: list[dict],
             f"Findings:\n{previews}"
         )
         body = llm.chat([{"role": "user", "content": prompt}])
+        client.emit_activity("reasoning", "LLM synthesis complete", agent_name="Agent Alpha")
     else:
         text = "Inferred coordinated APT29 activity leveraging T1059.001 across findings "
         text += ", ".join(article_ids) + ". Corroborated by source-hash provenance chain."
@@ -46,9 +50,11 @@ def step_derive(client, retrieved: list[dict],
                "source_article_ids": article_ids,
                "tactic": "Execution", "technique_id": "T1059.001"}
 
+    client.emit_activity("publishing", "Publishing insight to fabric...", agent_name="Agent Alpha")
     insight_id = client.publish_insight(
         content=body, payload=payload, scope="public", cites=article_ids,
     )
+    client.emit_activity("completed", f"Insight published: {insight_id}", agent_name="Agent Alpha")
     return {"insight_article_id": insight_id, "sources": article_ids, "body": body}
 
 

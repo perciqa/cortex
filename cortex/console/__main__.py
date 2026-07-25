@@ -55,7 +55,43 @@ def build_app(broker_url: str, static_dir: Path, registry_path: Path):
                                  node_registry=nodes, attack_matrix=attack,
                                  events_ring=events_ring)
     app.state.subscriber = sub
+    app.state._seed_fn = lambda: _seed_ring_buffer(events_ring, attack)
     return app, Lifecycle(subscriber=sub)
+
+
+def _seed_ring_buffer(events_ring: EventRingBuffer, attack: AttackMatrixTracker) -> None:
+    import sqlite3, json, glob
+    db_paths = glob.glob("/workspace/cortex/**/articles.sqlite", recursive=True)
+    db_paths += glob.glob("/tmp/*/cortex-node/articles.sqlite")
+    seen_ids: set[str] = set()
+    for db_path in db_paths:
+        try:
+            conn = sqlite3.connect(db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT id, type, content, scope, payload_json FROM articles ORDER BY rowid")
+            for row in cur.fetchall():
+                art_id, art_type, content, scope, payload_json = row
+                if art_id in seen_ids:
+                    continue
+                seen_ids.add(art_id)
+                payload = json.loads(payload_json) if payload_json else {}
+                env = {
+                    "event": "article.published",
+                    "data": {
+                        "article": {
+                            "id": art_id,
+                            "type": art_type,
+                            "content": content,
+                            "scope": scope,
+                            "payload": payload,
+                        }
+                    }
+                }
+                events_ring.append(env)
+                attack.on_event(env)
+            conn.close()
+        except Exception:
+            pass
 
 
 def main() -> None:
@@ -67,6 +103,7 @@ def main() -> None:
 
     @app.on_event("startup")
     async def _start():
+        app.state._seed_fn()
         app.state.subscriber.start()
 
     @app.on_event("shutdown")
