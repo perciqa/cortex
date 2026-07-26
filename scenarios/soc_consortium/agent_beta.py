@@ -1,9 +1,10 @@
 """SOC Beta agent: query → publish 2 corroborating findings → derive WARNING."""
 import argparse
 import json
+import os
 from pathlib import Path
 
-from cortex.sdk.llm import ScriptedReasoner
+from cortex.sdk.llm import ScriptedReasoner, vLLMClient
 
 CORROBORATING = [
     {"cve_id":"CVE-2023-40121",
@@ -56,20 +57,31 @@ def fetch_alpha_insight(client):
     raise RuntimeError("no Alpha INSIGHT in fabric yet")
 
 
-def emit_warning(client, insight_id: str, finding_ids: list[str]) -> str:
+def emit_warning(client, insight_id: str, finding_ids: list[str],
+                 reasoner: str = "scripted",
+                 llm: vLLMClient | None = None) -> str:
     from uuid import uuid4
 
     from cortex.core.article import ArticleType, MemoryArticle
     from cortex.sdk.provenance import ProvenanceHelpers
 
     sources = [insight_id, *finding_ids]
-    reasoner = ScriptedReasoner(
-        steps=[{"final": "WARNING: Lockbit ransomware T1486 activity detected."}]
-    )
-    body = reasoner.step({}, [])["final"]
+
+    if reasoner == "vllm" and llm is not None:
+        previews = "\n".join(f"- {s}" for s in sources)
+        prompt = (
+            "You are a SOC analyst reviewing threat intelligence. "
+            "A ransomware campaign (Lockbit) has been detected based on "
+            "the following article IDs. Synthesize a brief WARNING finding "
+            "highlighting the coordinated TTPs.\n\n"
+            f"Sources:\n{previews}"
+        )
+        body = llm.chat([{"role": "user", "content": prompt}])
+    else:
+        body = "WARNING: Lockbit ransomware T1486 activity detected."
+
     payload = {"attack_id": "T1486", "actor": "Lockbit", "severity": "critical",
                "source_article_ids": sources}
-
     article = MemoryArticle(
         id=str(uuid4()), type=ArticleType.WARNING, content=body,
         payload=payload, scope="public",
@@ -79,7 +91,7 @@ def emit_warning(client, insight_id: str, finding_ids: list[str]) -> str:
     return client.node.derive(article, sources)
 
 
-def run(client, node) -> dict:
+def run(client, node, reasoner: str = "scripted", llm: vLLMClient | None = None) -> dict:
     """Run agent beta: query → publish 2 findings → derive WARNING."""
     hits = client.search(
         "ransomware techniques Lockbit T1486",
@@ -87,7 +99,8 @@ def run(client, node) -> dict:
     )
     new_findings = publish_two_findings(client, node)
     insight_id = fetch_alpha_insight(client)
-    warning_id = emit_warning(client, insight_id, new_findings)
+    warning_id = emit_warning(client, insight_id, new_findings,
+                              reasoner=reasoner, llm=llm)
     return {
         "query_hits": [r.article_id for r in hits],
         "new_findings": new_findings,
@@ -100,7 +113,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--broker", required=True)
     ap.add_argument("--node", required=True)
-    ap.add_argument("--reasoner", choices=["scripted", "vllm"], default="scripted")
+    ap.add_argument("--reasoner", choices=["scripted", "vllm"], default="vllm")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -155,6 +168,13 @@ logging:
 """)
 
         from cortex.sdk.client import CortexClient
+
+        llm: vLLMClient | None = None
+        if args.reasoner == "vllm":
+            vllm_url = os.environ.get("VLLM_URL", "http://localhost:8000/v1")
+            api_key = os.environ.get("VLLM_API_KEY")
+            llm = vLLMClient(base_url=vllm_url, api_key=api_key)
+
         node = CortexNode(
             org_did="did:percq:org:soc-beta",
             agent_did="did:percq:agent:beta-bot-1",
@@ -163,7 +183,9 @@ logging:
         )
         await node.start()
         client = CortexClient(node)
-        result = run(client, node)
+        result = run(client, node, reasoner=args.reasoner, llm=llm)
+        if llm is not None:
+            llm.close()
         Path(args.out).write_text(json.dumps(result, indent=2))
         print("beta query hits:", result["query_hits"])
         print("beta new findings:", result["new_findings"])

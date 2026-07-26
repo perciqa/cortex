@@ -92,7 +92,7 @@ def main() -> int:
     ap.add_argument("--broker", required=True)
     ap.add_argument("--node", required=True)
     ap.add_argument("--queries", default="T1059.001 APT29 indicators")
-    ap.add_argument("--reasoner", choices=["scripted", "vllm"], default="scripted")
+    ap.add_argument("--reasoner", choices=["scripted", "vllm"], default="vllm")
     ap.add_argument("--vllm-url", default="http://localhost:8000/v1",
                     help="vLLM API endpoint (overridden by VLLM_URL env var)")
     ap.add_argument("--min-trust", type=float, default=0.0)
@@ -101,6 +101,8 @@ def main() -> int:
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     vllm_url = os.environ.get("VLLM_URL", args.vllm_url)
+    if args.reasoner == "vllm":
+        print(f"Using vLLM at {vllm_url} with model {os.environ.get('VLLM_MODEL', 'google/gemma-4-12B')}")
 
     import asyncio
 
