@@ -249,6 +249,8 @@ class BenchRunner:
             queries_per_sec_radeon=queries_radeon,
             queries_per_sec_cpu=queries_cpu,
             gpu_mem_util_pct=gpu["mem_util_pct"],
+            gpu_device_name=gpu.get("device_name", "unknown"),
+            gpu_sensor_backend=gpu.get("backend", "none"),
             p95_query_latency_ms=qp95_r,
             ts=datetime.now(UTC),
         )

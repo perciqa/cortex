@@ -55,4 +55,6 @@ def test_gpu_sensor_returns_zero_when_no_gpu(monkeypatch):
 
     monkeypatch.setattr("cortex.bench.gpu_sensor.torch_cuda", _FakeTorchCuda, raising=False)
     snap = sensor.snapshot()
-    assert snap == {"mem_util_pct": 0.0}
+    assert snap["mem_util_pct"] == 0.0
+    assert snap["device_name"] == "none"
+    assert snap["backend"] == "none"
