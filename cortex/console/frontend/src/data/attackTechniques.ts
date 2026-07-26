@@ -1,2 +1,8 @@
 import { loadAttackTechniques } from "./attackTechniquesLoader";
-export const ATTACK_TECHNIQUES: string[] = loadAttackTechniques();
+
+export interface TechniqueEntry {
+  name: string;
+  severity: string;
+}
+
+export const ATTACK_TECHNIQUES: Record<string, TechniqueEntry> = loadAttackTechniques();
