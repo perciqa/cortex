@@ -34,6 +34,9 @@ services:
     environment:
       - CORTEX_LOG_LEVEL=INFO
       - CORTEX_EMBED_BACKEND=${CORTEX_EMBED_BACKEND:-cpu}
+      - VLLM_MODEL=${VLLM_MODEL:-google/gemma-4-12B}
+      - VLLM_URL=http://vllm:8000/v1
+      - VLLM_API_KEY=${VLLM_API_KEY:-}
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/alpha.yaml"]
     healthcheck:
       test: ["CMD", "python", "-c", "import sys; sys.exit(0 if open('/app/config/.node-healthy').read().strip()=='healthy' else 1)"]
@@ -62,6 +65,9 @@ services:
     environment:
       - CORTEX_LOG_LEVEL=INFO
       - CORTEX_EMBED_BACKEND=${CORTEX_EMBED_BACKEND:-cpu}
+      - VLLM_MODEL=${VLLM_MODEL:-google/gemma-4-12B}
+      - VLLM_URL=http://vllm:8000/v1
+      - VLLM_API_KEY=${VLLM_API_KEY:-}
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/beta.yaml"]
     healthcheck:
       test: ["CMD", "python", "-c", "import sys; sys.exit(0 if open('/app/config/.node-healthy').read().strip()=='healthy' else 1)"]
@@ -69,6 +75,35 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: amd
+              count: 1
+              capabilities: [gpu]
+
+  vllm:
+    image: vllm/vllm-openai:latest
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - VLLM_MODEL=${VLLM_MODEL:-google/gemma-4-12B}
+      - HF_TOKEN=${HF_TOKEN:-}
+    command:
+      - "--model"
+      - "${VLLM_MODEL:-google/gemma-4-12B}"
+      - "--tensor-parallel-size"
+      - "1"
+      - "--gpu-memory-utilization"
+      - "0.90"
+      - "--dtype"
+      - "bfloat16"
+      - "--port"
+      - "8000"
+    ports:
+      - "8000:8000"
     deploy:
       resources:
         reservations:
