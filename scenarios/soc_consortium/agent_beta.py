@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 
-from cortex.sdk.llm import ScriptedReasoner, vLLMClient
+from cortex.sdk.llm import vLLMClient
 
 CORROBORATING = [
     {"cve_id":"CVE-2023-40121",
