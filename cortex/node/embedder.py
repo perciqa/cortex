@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 import re
 from collections.abc import Callable
 from typing import Literal
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 
 class Embedder:
@@ -42,6 +45,17 @@ class Embedder:
         from transformers import AutoModel, AutoTokenizer
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self._model = AutoModel.from_pretrained(self.model_name).to(self._device).eval()
+        hip_ver = getattr(torch.version, "hip", None)
+        device_name = ""
+        if desired == "gpu" and torch.cuda.is_available():
+            try:
+                device_name = torch.cuda.get_device_name(0)
+            except Exception:
+                device_name = "unknown"
+        log.info(
+            "Embedder device=%s model=%s hip_version=%s device_name=%s",
+            desired, self.model_name, hip_ver, device_name,
+        )
 
     def _check_gpu(self) -> bool:
         try:
