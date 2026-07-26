@@ -214,6 +214,14 @@ cortex/
 └── scenarios/     # F1 SOC consortium demo data and agent scripts
 ```
 
+## Hackathon Submission
+
+This repo is submitted to the AMD Radeon Hackathon 2026-07.
+
+- **ROCm GPU:** Embedding pipeline runs on Radeon via PyTorch ROCm (verified on MI300X)
+- **Bench:** Live GPU metrics via rocm-smi
+- **Inference:** vLLM serving Gemma 4 12B on ROCm
+
 ## License
 
 TBD.
