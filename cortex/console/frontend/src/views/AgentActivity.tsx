@@ -1,5 +1,5 @@
-import { Paper, Title, Text, Group, Badge, Stack, Box, Anchor, Divider } from "@mantine/core";
-import { IconSearch, IconBrain, IconUpload, IconCheck, IconAlertTriangle } from "@tabler/icons-react";
+import { Paper, Title, Text, Group, Badge, Stack, Box, Divider } from "@mantine/core";
+import { IconSearch, IconBrain, IconUpload, IconCheck, IconAlertTriangle, IconSparkles } from "@tabler/icons-react";
 import type { Article } from "../state/store";
 
 interface AgentActivityProps {
@@ -27,24 +27,40 @@ function ActivityEntry({ activity, onNavigate }: { activity: Article; onNavigate
   const message = (activity.payload?.activity_message as string) || activity.content;
   const findingIds = activity.payload?.finding_ids as string[] | undefined;
   const insightId = activity.payload?.insight_id as string | undefined;
+  const isReasoning = step === "reasoning";
 
   return (
-    <Paper p="sm" radius="md" withBorder style={{ borderLeft: `3px solid var(--mantine-color-${config.color}-6)` }}>
+    <Paper
+      p="sm"
+      radius="md"
+      withBorder
+      style={isReasoning ? {
+        borderLeft: "4px solid var(--mantine-color-violet-5)",
+        background: "linear-gradient(135deg, var(--mantine-color-violet-0) 0%, var(--mantine-color-grape-0) 100%)",
+      } : {
+        borderLeft: `3px solid var(--mantine-color-${config.color}-6)`,
+      }}
+    >
       <Group gap="sm" align="flex-start">
         <Badge
           color={config.color}
-          variant="light"
-          leftSection={config.icon}
+          variant={isReasoning ? "filled" : "light"}
+          leftSection={isReasoning ? <IconSparkles size={12} /> : config.icon}
           size="lg"
           tt="none"
         >
-          {config.label}
+          {isReasoning ? "LLM Reasoning" : config.label}
         </Badge>
         <Box style={{ flex: 1 }}>
           <Group gap="xs" mb={4}>
             <Text fw={600} size="sm">{agentName}</Text>
+            {isReasoning && (
+              <Badge size="xs" variant="outline" color="violet">
+                Gemma 4 12B · vLLM · ROCm
+              </Badge>
+            )}
           </Group>
-          <Text size="sm" c="dimmed">{message}</Text>
+          <Text size="sm" c={isReasoning ? "violet.8" : "dimmed"}>{message}</Text>
           {step === "completed" && findingIds && findingIds.length > 0 && (
             <Group gap="xs" mt={4}>
               <Text size="xs" c="dimmed">Published:</Text>

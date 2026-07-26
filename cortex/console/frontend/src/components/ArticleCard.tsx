@@ -39,6 +39,9 @@ export function ArticleCard({ article, onSelect }: { article: Article; onSelect?
   const technique = article.payload?.technique_id as string | undefined;
   const threatActor = article.payload?.threat_actor as string | undefined;
 
+  const isLlmDerived = (article.type === "insight" || article.type === "warning")
+    && article.cites != null && article.cites.length > 0;
+
   return (
     <Card shadow="xs" withBorder radius="md" p="sm">
       <Group gap="sm" wrap="nowrap" align="flex-start">
@@ -49,6 +52,9 @@ export function ArticleCard({ article, onSelect }: { article: Article; onSelect?
             {orgLabel && <Badge color={orgColor} variant="light" size="sm">{orgLabel}</Badge>}
             {technique && <Badge variant="outline" size="sm">{technique}</Badge>}
             {tactic && <Badge variant="dot" size="sm" c="dimmed">{tactic}</Badge>}
+            {isLlmDerived && (
+              <Badge color="violet" variant="light" size="sm">⚡ LLM-synthesized</Badge>
+            )}
             <SignatureStatus sig={article.agent_signature} label="agent" />
             <SignatureStatus sig={article.org_signature} label="org" />
           </Group>

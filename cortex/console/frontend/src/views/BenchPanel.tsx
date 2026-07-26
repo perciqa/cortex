@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Card, Title, Text, Group, Badge, Stack, SimpleGrid, Progress, RingProgress, Tooltip } from "@mantine/core";
-import { IconBrandAmd, IconCpu, IconRipple, IconDeviceDesktopAnalytics } from "@tabler/icons-react";
+import { Card, Title, Text, Group, Badge, Stack, SimpleGrid, Progress, RingProgress, Tooltip, ThemeIcon } from "@mantine/core";
+import { IconBrandAmd, IconCpu, IconRipple, IconDeviceDesktopAnalytics, IconBrain, IconPlugConnected, IconPlugConnectedX } from "@tabler/icons-react";
 import type { Article } from "../state/store";
 
 interface BenchPanelProps {
@@ -17,6 +17,13 @@ interface RocmInfo {
   hip_version: string | null;
   torch_version: string | null;
   rocm_active: boolean;
+}
+
+interface LlmInfo {
+  status: "online" | "offline";
+  model: string;
+  endpoint: string;
+  error?: string;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -75,6 +82,74 @@ function GpuStatusCard({ rocm }: { rocm: RocmInfo | null }) {
       </Group>
       <Progress value={vramPct} size="sm" color={vramColor} />
       <Text size="xs" c="dimmed" mt={4}>VRAM utilization</Text>
+    </Card>
+  );
+}
+
+function LlmStatusCard({ llm, reasoningCount }: { llm: LlmInfo | null; reasoningCount: number }) {
+  const online = llm?.status === "online";
+  // Shorten model name for display: "google/gemma-4-12B" → "Gemma 4 12B"
+  const displayName = llm
+    ? llm.model.split("/").pop()?.replace(/-/g, " ") ?? llm.model
+    : "—";
+
+  return (
+    <Card
+      shadow="xs"
+      withBorder
+      radius="md"
+      style={online ? { borderColor: "var(--mantine-color-violet-4)", borderWidth: 1.5 } : undefined}
+    >
+      <Group gap="sm" mb="md">
+        <ThemeIcon
+          size={36}
+          radius="md"
+          variant={online ? "gradient" : "light"}
+          gradient={online ? { from: "violet", to: "indigo", deg: 135 } : undefined}
+          color={online ? undefined : "gray"}
+        >
+          <IconBrain size={20} />
+        </ThemeIcon>
+        <div style={{ flex: 1 }}>
+          <Group gap="xs">
+            <Text fw={700} size="sm">{displayName}</Text>
+            {online
+              ? <Badge color="violet" variant="dot" size="sm" leftSection={<IconPlugConnected size={10} />}>vLLM · ROCm</Badge>
+              : <Badge color="gray" variant="light" size="sm" leftSection={<IconPlugConnectedX size={10} />}>offline</Badge>
+            }
+          </Group>
+          {llm && (
+            <Text size="xs" c="dimmed" mt={2} style={{ fontFamily: "monospace" }}>
+              {llm.endpoint}
+            </Text>
+          )}
+        </div>
+      </Group>
+
+      {online ? (
+        <Group gap="md">
+          <div>
+            <Text size="xs" c="dimmed">Reasoning steps</Text>
+            <Text fw={700} size="xl" c="violet">{reasoningCount}</Text>
+          </div>
+          <div style={{ flex: 1 }}>
+            <Text size="xs" c="dimmed" mb={4}>LLM pipeline</Text>
+            <Group gap={4} wrap="nowrap">
+              <Badge size="xs" variant="filled" color="violet">embed</Badge>
+              <Text size="xs" c="dimmed">→</Text>
+              <Badge size="xs" variant="filled" color="indigo">retrieve</Badge>
+              <Text size="xs" c="dimmed">→</Text>
+              <Badge size="xs" variant="filled" color="grape">generate</Badge>
+              <Text size="xs" c="dimmed">→</Text>
+              <Badge size="xs" variant="filled" color="teal">publish</Badge>
+            </Group>
+          </div>
+        </Group>
+      ) : (
+        <Text size="xs" c="dimmed">
+          {llm?.error ?? "vLLM pod not reachable. Start with COMPOSE_PROFILES=gpu."}
+        </Text>
+      )}
     </Card>
   );
 }
@@ -140,12 +215,24 @@ function NodeMetricsCard({ node, samples }: { node: string; samples: any[] }) {
 
 export function BenchPanel({ byNode, articles, activities, connected }: BenchPanelProps) {
   const [rocm, setRocm] = useState<RocmInfo | null>(null);
+  const [llm, setLlm] = useState<LlmInfo | null>(null);
 
   useEffect(() => {
     fetch("/api/rocm-info")
       .then(r => r.json())
       .then(setRocm)
       .catch(() => setRocm(null));
+
+    const pollLlm = () =>
+      fetch("/api/llm-info")
+        .then(r => r.json())
+        .then(setLlm)
+        .catch(() => setLlm(null));
+
+    pollLlm();
+    // Re-poll LLM status every 15 s so the card reflects pod restarts
+    const id = setInterval(pollLlm, 15_000);
+    return () => clearInterval(id);
   }, []);
 
   const nodes = Object.keys(byNode);
@@ -160,6 +247,11 @@ export function BenchPanel({ byNode, articles, activities, connected }: BenchPan
     byOrg[org] = (byOrg[org] || 0) + 1;
   }
 
+  // Count LLM reasoning steps seen in activity stream
+  const reasoningCount = activities.filter(
+    a => (a.payload?.activity_step as string) === "reasoning"
+  ).length;
+
   const total = allArticles.length;
 
   return (
@@ -168,29 +260,30 @@ export function BenchPanel({ byNode, articles, activities, connected }: BenchPan
 
       <SimpleGrid cols={2}>
         <GpuStatusCard rocm={rocm} />
-
-        <Card shadow="xs" withBorder radius="md">
-          <Group gap="sm" mb="sm">
-            <Badge color={connected ? "green" : "red"} variant="dot">
-              WebSocket {connected ? "connected" : "disconnected"}
-            </Badge>
-          </Group>
-          <SimpleGrid cols={3}>
-            <div>
-              <Text size="xs" c="dimmed">Total Articles</Text>
-              <Text fw={700} size="xl">{total}</Text>
-            </div>
-            <div>
-              <Text size="xs" c="dimmed">Findings</Text>
-              <Text fw={700} size="xl" c="red">{byType.finding || 0}</Text>
-            </div>
-            <div>
-              <Text size="xs" c="dimmed">Insights</Text>
-              <Text fw={700} size="xl" c="violet">{byType.insight || 0}</Text>
-            </div>
-          </SimpleGrid>
-        </Card>
+        <LlmStatusCard llm={llm} reasoningCount={reasoningCount} />
       </SimpleGrid>
+
+      <Card shadow="xs" withBorder radius="md">
+        <Group gap="sm" mb="sm">
+          <Badge color={connected ? "green" : "red"} variant="dot">
+            WebSocket {connected ? "connected" : "disconnected"}
+          </Badge>
+        </Group>
+        <SimpleGrid cols={3}>
+          <div>
+            <Text size="xs" c="dimmed">Total Articles</Text>
+            <Text fw={700} size="xl">{total}</Text>
+          </div>
+          <div>
+            <Text size="xs" c="dimmed">Findings</Text>
+            <Text fw={700} size="xl" c="red">{byType.finding || 0}</Text>
+          </div>
+          <div>
+            <Text size="xs" c="dimmed">LLM Insights</Text>
+            <Text fw={700} size="xl" c="violet">{byType.insight || 0}</Text>
+          </div>
+        </SimpleGrid>
+      </Card>
 
       <Card shadow="xs" withBorder radius="md">
         <Text fw={700} size="sm" mb="sm">By Organization</Text>
