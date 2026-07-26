@@ -104,6 +104,42 @@ def create_app_with_broker(
             "rocm_active": snap.get("backend") in ("rocm-smi", "torch") and snap.get("device_name", "none") not in ("none", "unknown"),
         })
 
+    @app.get("/api/llm-info")
+    async def llm_info() -> JSONResponse:
+        """Probe the vLLM inference pod and return model + health status.
+
+        The console uses this to display a live LLM status card showing which
+        model is running on the ROCm inference pod.  Falls back gracefully when
+        the vLLM service is not available (e.g. running without --profiles gpu).
+        """
+        import os
+        import httpx
+
+        vllm_url = os.environ.get("VLLM_URL", "http://localhost:8000/v1").rstrip("/")
+        model_name = os.environ.get("VLLM_MODEL", "google/gemma-4-12B")
+
+        try:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                r = await client.get(f"{vllm_url}/models")
+                r.raise_for_status()
+                data = r.json()
+                # OpenAI /v1/models returns {"data": [{"id": "<model>", ...}]}
+                served = [m["id"] for m in data.get("data", [])]
+                active_model = served[0] if served else model_name
+                return JSONResponse({
+                    "status": "online",
+                    "model": active_model,
+                    "endpoint": vllm_url,
+                    "served_models": served,
+                })
+        except Exception as exc:
+            return JSONResponse({
+                "status": "offline",
+                "model": model_name,
+                "endpoint": vllm_url,
+                "error": str(exc)[:120],
+            })
+
     @app.websocket("/ws/events")
     async def ws_events(ws: WebSocket) -> None:
         await ws.accept()

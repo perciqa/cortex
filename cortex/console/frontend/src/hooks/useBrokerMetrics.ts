@@ -8,6 +8,8 @@ export interface MetricsSample {
   queries_per_sec_cpu: number;
   gpu_mem_util_pct: number;
   p95_query_latency_ms: number;
+  gpu_device_name?: string;
+  gpu_sensor_backend?: string;
 }
 
 export interface MetricsState {
