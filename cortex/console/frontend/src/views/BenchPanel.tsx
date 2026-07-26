@@ -55,20 +55,23 @@ const ORG_LABELS: Record<string, string> = {
   "did:percq:org:soc-beta": "SOC Beta",
 };
 
+import { useCountUp } from "../hooks/useCountUp";
+
 function VramRing({ pct }: { pct: number }) {
+  const animatedValue = useCountUp(Math.round(pct));
   const color = pct > 80 ? "error.main" : pct > 50 ? "warning.main" : "success.main";
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
       <CircularProgress
         variant="determinate"
-        value={pct}
+        value={animatedValue}
         size={60}
         thickness={6}
-        sx={{ color, "& .MuiCircularProgress-track": { color: "#2a2a2e" } }}
+        sx={{ color, "& .MuiCircularProgress-track": { color: "rgba(255,255,255,.06)" } }}
       />
       <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Typography variant="caption" fontWeight={700} sx={{ color }}>
-          {pct.toFixed(0)}%
+          {Math.round(animatedValue)}%
         </Typography>
       </Box>
     </Box>
@@ -123,6 +126,8 @@ function GpuStatusCard({ rocm }: { rocm: RocmInfo | null }) {
 
 function LlmStatusCard({ llm, reasoningCount }: { llm: LlmInfo | null; reasoningCount: number }) {
   const online = llm?.status === "online";
+  const pipelineStages = ["embed", "retrieve", "generate", "publish"];
+  const activeStage = reasoningCount > 0 ? Math.min(Math.floor(reasoningCount / 3) % 4, 3) : -1;
   const displayName = llm
     ? llm.model.split("/").pop()?.replace(/-/g, " ") ?? llm.model
     : "—";
@@ -171,13 +176,28 @@ function LlmStatusCard({ llm, reasoningCount }: { llm: LlmInfo | null; reasoning
             <Box sx={{ flex: 1 }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>LLM pipeline</Typography>
               <Stack direction="row" spacing={0.5} sx={{ flexWrap: "nowrap" }} alignItems="center">
-                <Chip label="embed" size="small" color="secondary" />
-                <Typography variant="caption" color="text.secondary">→</Typography>
-                <Chip label="retrieve" size="small" color="primary" />
-                <Typography variant="caption" color="text.secondary">→</Typography>
-                <Chip label="generate" size="small" color="secondary" />
-                <Typography variant="caption" color="text.secondary">→</Typography>
-                <Chip label="publish" size="small" color="success" />
+                {pipelineStages.map((stage, i) => (
+                  <Box key={stage} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    {i > 0 && (
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Box sx={{ width: 12, height: 1, bgcolor: i <= activeStage ? "#8b5cf6" : "rgba(255,255,255,.1)", transition: "background 0.3s ease" }} />
+                        {activeStage >= i && (
+                          <Box sx={{ width: 3, height: 3, borderRadius: "50%", bgcolor: "#8b5cf6", ml: -0.5 }} />
+                        )}
+                      </Box>
+                    )}
+                    <Chip
+                      label={stage}
+                      size="small"
+                      color={i === activeStage ? "secondary" : "default"}
+                      variant={i === activeStage ? "filled" : "outlined"}
+                      sx={{
+                        transition: "all 0.3s ease",
+                        ...(i === activeStage ? { boxShadow: "0 0 8px rgba(139,92,246,.4)" } : {}),
+                      }}
+                    />
+                  </Box>
+                ))}
               </Stack>
             </Box>
           </Stack>
@@ -255,23 +275,28 @@ function NodeMetricsCard({ node, samples }: { node: string; samples: any[] }) {
 export function BenchPanel({ byNode, articles, activities, connected }: BenchPanelProps) {
   const [rocm, setRocm] = useState<RocmInfo | null>(null);
   const [llm, setLlm] = useState<LlmInfo | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   useEffect(() => {
-    fetch("/api/rocm-info")
-      .then(r => r.json())
-      .then(setRocm)
-      .catch(() => setRocm(null));
+    const fetchRocm = () =>
+      fetch("/api/rocm-info")
+        .then(r => r.json())
+        .then(data => { setRocm(data); setLastUpdated(new Date()); })
+        .catch(() => setRocm(null));
+    fetchRocm();
 
     const pollLlm = () =>
       fetch("/api/llm-info")
         .then(r => r.json())
-        .then(setLlm)
+        .then(data => { setLlm(data); setLastUpdated(new Date()); })
         .catch(() => setLlm(null));
 
     pollLlm();
     const id = setInterval(pollLlm, 15_000);
     return () => clearInterval(id);
   }, []);
+
+  const timeSinceUpdate = Math.floor((Date.now() - lastUpdated.getTime()) / 1000);
 
   const nodes = Object.keys(byNode);
   const allArticles = [...articles, ...activities];
@@ -292,10 +317,15 @@ export function BenchPanel({ byNode, articles, activities, connected }: BenchPan
   const total = allArticles.length;
 
   return (
-    <Stack spacing={3}>
-      <Typography variant="h4" sx={{ fontWeight: 700 }}>
-        Bench Panel
-      </Typography>
+      <Stack spacing={3}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Typography variant="h1" sx={{ fontSize: "1.5rem" }}>
+          Bench Panel
+        </Typography>
+        <Typography variant="caption" sx={{ color: "#5d6678", fontFamily: '"IBM Plex Mono", monospace' }}>
+          updated {timeSinceUpdate}s ago
+        </Typography>
+      </Box>
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>

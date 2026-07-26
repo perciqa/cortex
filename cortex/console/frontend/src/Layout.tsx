@@ -39,7 +39,7 @@ const DRAWER_WIDTH = 240;
 
 export function Layout({ current, onNavigate, connected, children }: LayoutProps) {
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box className="app-container" sx={{ display: "flex" }}>
       <Drawer
         variant="permanent"
         sx={{
@@ -52,9 +52,17 @@ export function Layout({ current, onNavigate, connected, children }: LayoutProps
           },
         }}
       >
-        <AppBar position="static" elevation={0} sx={{ bgcolor: "#1a1a1e" }}>
+        <AppBar position="static" elevation={0}>
           <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                flexGrow: 1,
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontWeight: 600,
+                letterSpacing: "-0.02em",
+              }}
+            >
               Perciqa Cortex
             </Typography>
             <StatusPill connected={connected} />
