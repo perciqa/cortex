@@ -68,9 +68,9 @@ def _seed_ring_buffer(events_ring: EventRingBuffer, attack: AttackMatrixTracker)
         try:
             conn = sqlite3.connect(db_path)
             cur = conn.cursor()
-            cur.execute("SELECT id, type, content, scope, payload_json FROM articles ORDER BY rowid")
+            cur.execute("SELECT id, type, content, scope, payload_json, producer_org FROM articles ORDER BY rowid")
             for row in cur.fetchall():
-                art_id, art_type, content, scope, payload_json = row
+                art_id, art_type, content, scope, payload_json, producer_org = row
                 if art_id in seen_ids:
                     continue
                 seen_ids.add(art_id)
@@ -84,7 +84,8 @@ def _seed_ring_buffer(events_ring: EventRingBuffer, attack: AttackMatrixTracker)
                             "content": content,
                             "scope": scope,
                             "payload": payload,
-                        }
+                        },
+                        "src_org": producer_org or "",
                     }
                 }
                 events_ring.append(env)

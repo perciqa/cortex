@@ -52,13 +52,14 @@ function FeedPage({ articles, onSelect }: { articles: any[]; onSelect: (id: stri
   return <ArticleFeed articles={articles} onSelect={onSelect} />;
 }
 
-function DetailPage({ articles }: { articles: any[] }) {
+function DetailPage({ articles, onNavigate }: { articles: any[]; onNavigate: (path: string) => void }) {
   const { id } = useParams();
   const article = articles.find(a => a.id === id) || null;
   return (
     <ArticleDetail
       articleId={id || ""}
       article={article}
+      onNavigate={onNavigate}
       fetchArticle={async (aid: string) => {
         const found = articles.find(a => a.id === aid);
         if (found) return found;
@@ -87,11 +88,11 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage articles={articles} events={eventsToOverview(articles)} />} />
         <Route path="/feed" element={<FeedPage articles={articles} onSelect={(id) => navigate(`/article/${id}`)} />} />
-        <Route path="/article/:id" element={<DetailPage articles={articles} />} />
-        <Route path="/activity" element={<AgentActivity activities={activities} />} />
+        <Route path="/article/:id" element={<DetailPage articles={articles} onNavigate={(p) => navigate(p)} />} />
+        <Route path="/activity" element={<AgentActivity activities={activities} onNavigate={(p) => navigate(p)} />} />
         <Route path="/provenance" element={<ProvenanceGraph articles={articles} />} />
         <Route path="/scope" element={<ScopeFilter articles={articles} />} />
-        <Route path="/bench" element={<BenchPanel byNode={metrics.byNode} />} />
+        <Route path="/bench" element={<BenchPanel byNode={metrics.byNode} articles={articles} activities={activities} connected={events.connected} />} />
         <Route path="/attack" element={
           <AttackMatrix
             counts={buildCounts(articles)}
@@ -106,7 +107,7 @@ export function App() {
 function eventsToOverview(articles: any[]) {
   return articles.map(a => ({
     event: "article.published",
-    data: { article: a, route: { from: "soc-alpha", to: "soc-beta" } },
+    data: { article: a, src_org: a.src_org || "" },
   }));
 }
 

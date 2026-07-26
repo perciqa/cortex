@@ -8,6 +8,7 @@ export interface Article {
   cites?: string[];
   agent_signature?: string;
   org_signature?: string | null;
+  src_org?: string;
 }
 
 export interface BrokerEvent {
@@ -32,7 +33,7 @@ export function consoleReducer(state: ConsoleState, action: Action): ConsoleStat
     case "disconnected": return { ...state, connected: false };
     case "event":
       if (action.env.event === "article.published" && action.env.data.article) {
-        const a = action.env.data.article;
+        const a = { ...action.env.data.article, src_org: action.env.data.src_org || "" };
         if (a.type === "activity") {
           if (state.activities.find(x => x.id === a.id)) return state;
           return { ...state, activities: [a, ...state.activities].slice(0, 200) };
