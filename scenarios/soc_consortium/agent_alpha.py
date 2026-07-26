@@ -10,7 +10,9 @@ from cortex.sdk.llm import ScriptedReasoner, vLLMClient
 def step_query(client, queries: str, min_trust: float = 0.0, top_k: int = 5) -> list[dict]:
     client.emit_activity("querying", f"Searching fabric for: {queries}", agent_name="Agent Alpha")
     results = client.search(queries, scopes={"public"}, top_k=top_k, min_trust=min_trust)
-    client.emit_activity("querying", f"Retrieved {len(results)} findings from fabric", agent_name="Agent Alpha")
+    client.emit_activity(
+        "querying", f"Retrieved {len(results)} findings from fabric", agent_name="Agent Alpha"
+    )
     return [
         {"article_id": r.article_id, "content_preview": r.article.content[:120],
          "trust": r.trust_score}
@@ -26,7 +28,9 @@ def step_derive(client, retrieved: list[dict],
         raise RuntimeError(f"Need at least 3 retrieved findings, got {len(article_ids)}")
 
     if reasoner == "vllm" and llm is not None:
-        client.emit_activity("reasoning", "Synthesizing insight via LLM...", agent_name="Agent Alpha")
+        client.emit_activity(
+            "reasoning", "Synthesizing insight via LLM...", agent_name="Agent Alpha"
+        )
         previews = "\n".join(
             f"- {r['article_id']}: {r['content_preview'][:200]}"
             for r in retrieved[:3]
@@ -102,7 +106,8 @@ def main() -> int:
     args = ap.parse_args()
     vllm_url = os.environ.get("VLLM_URL", args.vllm_url)
     if args.reasoner == "vllm":
-        print(f"Using vLLM at {vllm_url} with model {os.environ.get('VLLM_MODEL', 'google/gemma-4-12B')}")
+        model = os.environ.get("VLLM_MODEL", "google/gemma-4-12B")
+        print(f"Using vLLM at {vllm_url} with model {model}")
 
     import asyncio
 
@@ -131,7 +136,7 @@ broker:
   replay_window_sec: 600
 embedder:
   model: BAAI/bge-small-en-v1.5
-  backend: cpu
+  backend: auto
   batch_size: 4
   fallback_on_oom: true
 vector_index:

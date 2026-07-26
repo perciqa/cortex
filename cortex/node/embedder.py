@@ -45,16 +45,17 @@ class Embedder:
         from transformers import AutoModel, AutoTokenizer
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self._model = AutoModel.from_pretrained(self.model_name).to(self._device).eval()
+        # Log device + ROCm/HIP version so startup confirms GPU is active
         hip_ver = getattr(torch.version, "hip", None)
         device_name = ""
-        if desired == "gpu" and torch.cuda.is_available():
+        if self._device == "cuda" and torch.cuda.is_available():
             try:
                 device_name = torch.cuda.get_device_name(0)
             except Exception:
                 device_name = "unknown"
         log.info(
-            "Embedder device=%s model=%s hip_version=%s device_name=%s",
-            desired, self.model_name, hip_ver, device_name,
+            "embedder ready: device=%s model=%s hip=%s device_name=%s fallback_cpu=%s",
+            self._device, self.model_name, hip_ver, device_name, self.fallback_to_cpu,
         )
 
     def _check_gpu(self) -> bool:

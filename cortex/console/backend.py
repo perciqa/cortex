@@ -73,6 +73,37 @@ def create_app_with_broker(
     async def attack_matrix_articles(attack_id: str) -> JSONResponse:
         return JSONResponse({"attack_id": attack_id, "articles": attack_matrix.articles_for(attack_id)})
 
+    @app.get("/api/rocm-info")
+    async def rocm_info() -> JSONResponse:
+        """Return live GPU device info from the running process.
+
+        Used by the console bench panel to display a real-time confirmation
+        that ROCm is active.  Falls back gracefully when running on CPU-only hosts.
+        """
+        from cortex.bench.gpu_sensor import GpuSensor
+
+        sensor = GpuSensor()
+        snap = sensor.snapshot()
+
+        # Add HIP version from torch if available
+        hip_version: str | None = None
+        torch_version: str | None = None
+        try:
+            import torch
+            hip_version = getattr(torch.version, "hip", None)
+            torch_version = torch.__version__
+        except Exception:
+            pass
+
+        return JSONResponse({
+            "mem_util_pct": snap["mem_util_pct"],
+            "device_name": snap.get("device_name", "unknown"),
+            "sensor_backend": snap.get("backend", "none"),
+            "hip_version": hip_version,
+            "torch_version": torch_version,
+            "rocm_active": snap.get("backend") in ("rocm-smi", "torch") and snap.get("device_name", "none") not in ("none", "unknown"),
+        })
+
     @app.websocket("/ws/events")
     async def ws_events(ws: WebSocket) -> None:
         await ws.accept()

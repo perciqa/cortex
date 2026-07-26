@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 
-from cortex.sdk.llm import ScriptedReasoner, vLLMClient
+from cortex.sdk.llm import vLLMClient
 
 CORROBORATING = [
     {"cve_id":"CVE-2023-40121",
@@ -144,7 +144,7 @@ broker:
   replay_window_sec: 600
 embedder:
   model: BAAI/bge-small-en-v1.5
-  backend: cpu
+  backend: auto
   batch_size: 4
   fallback_on_oom: true
 vector_index:
