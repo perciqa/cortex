@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, Badge, Text, Title, Group, Stack, Code, Anchor } from "@mantine/core";
+import { IconShield } from "@tabler/icons-react";
 import { TrustRing } from "../components/TrustRing";
 import { SignatureStatus } from "../components/SignatureStatus";
 
@@ -69,6 +70,12 @@ export function ArticleDetail({ articleId, article: initialArticle, fetchArticle
           <Group gap="xs" mt="sm">
             <SignatureStatus sig={article.agent_signature} label="agent" />
             <SignatureStatus sig={article.org_signature} label="org" />
+            {article.payload?.computation_ref && (
+              <Badge color="teal" variant="light"
+                leftSection={<IconShield size={14} />}>
+                ZK-Verified
+              </Badge>
+            )}
           </Group>
         </div>
       </Group>
