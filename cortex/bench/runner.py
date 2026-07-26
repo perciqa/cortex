@@ -30,7 +30,8 @@ def _default_broker_client(url: str) -> BrokerClient:
     return BrokerClient(url)
 
 
-def _make_bench_node(node_id: str, embed_backend: str, tmp_root: Path) -> CortexNode:
+def _make_bench_node(node_id: str, embed_backend: str, tmp_root: Path,
+                     broker_url: str = "ws://localhost:7432") -> CortexNode:
     keys_dir = tmp_root / node_id
     keys_dir.mkdir(parents=True, exist_ok=True)
     from cortex.node.keys import ensure_keys
@@ -49,7 +50,7 @@ node:
     org: {keys['org']}
     agent: {keys['agent']}
 broker:
-  url: ws://localhost:7432
+  url: {broker_url}
   registry: {reg}
   replay_window_sec: 600
 embedder:
@@ -78,15 +79,17 @@ logging:
         org_did=node_id,
         agent_did="did:percq:agent:bench",
         key_paths=keys,
-        broker_url="ws://localhost:7432",
+        broker_url=broker_url,
         config_path=cfg,
         embedder_backend_override=embed_backend,
     )
 
 
 def _default_probe_factory(node_id: str):
+    import os
     import tempfile
     tmp_root = Path(tempfile.mkdtemp(prefix="cortex-bench-"))
+    broker_url = os.environ.get("CORTEX_BROKER_URL", "ws://localhost:7432")
     text_pool = [
         "APT29 leveraged encoded PowerShell T1059.001",
         "Lateral movement via WMI T1021.006",
@@ -100,8 +103,8 @@ def _default_probe_factory(node_id: str):
 
     embed_radeon = EmbedProbe(text_pool, batch_size=BENCH_EMBED_BATCH, mode="radeon")
     embed_cpu = EmbedProbe(text_pool, batch_size=BENCH_EMBED_BATCH, mode="cpu")
-    node_radeon = _make_bench_node(node_id, "gpu", tmp_root)
-    node_cpu = _make_bench_node(node_id, "cpu", tmp_root)
+    node_radeon = _make_bench_node(node_id, "gpu", tmp_root, broker_url)
+    node_cpu = _make_bench_node(node_id, "cpu", tmp_root, broker_url)
     _seed_synthetic_store(node_radeon, text_pool)
     _seed_synthetic_store(node_cpu, text_pool)
     query_radeon = QueryProbe(node_radeon, query_pool, top_k=5, count=BENCH_QUERY_COUNT)

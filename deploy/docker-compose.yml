@@ -90,3 +90,25 @@ services:
     environment:
       - CORTEX_LOG_LEVEL=INFO
     command: ["python", "-m", "cortex.console", "--broker", "ws://broker:7432", "--port", "8080", "--host", "0.0.0.0", "--static", "/app/cortex/console/frontend/dist"]
+
+  bench:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - CORTEX_LOG_LEVEL=INFO
+      - CORTEX_BROKER_URL=ws://broker:7432
+      - CORTEX_EMBED_BACKEND=${CORTEX_EMBED_BACKEND:-auto}
+    command: ["python", "-m", "cortex.bench", "--node-id", "bench-node-1", "--broker", "ws://broker:7432"]
+    ports:
+      - "9464:9464"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: amd
+              count: 1
+              capabilities: [gpu]
