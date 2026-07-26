@@ -1,5 +1,14 @@
-import { Paper, Title, Text, Group, Badge, Stack, Box, Divider } from "@mantine/core";
-import { IconSearch, IconBrain, IconUpload, IconCheck, IconAlertTriangle, IconSparkles } from "@tabler/icons-react";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
+import Search from "@mui/icons-material/Search";
+import Psychology from "@mui/icons-material/Psychology";
+import Publish from "@mui/icons-material/Publish";
+import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
+import WarningAmber from "@mui/icons-material/WarningAmber";
+import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import type { Article } from "../state/store";
 
 interface AgentActivityProps {
@@ -7,12 +16,12 @@ interface AgentActivityProps {
   onNavigate?: (path: string) => void;
 }
 
-const STEP_CONFIG: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
-  querying: { color: "blue", icon: <IconSearch size={14} />, label: "Querying" },
-  reasoning: { color: "violet", icon: <IconBrain size={14} />, label: "Reasoning" },
-  publishing: { color: "teal", icon: <IconUpload size={14} />, label: "Publishing" },
-  completed: { color: "green", icon: <IconCheck size={14} />, label: "Completed" },
-  error: { color: "red", icon: <IconAlertTriangle size={14} />, label: "Error" },
+const STEP_CONFIG: Record<string, { color: string; icon: React.ReactElement; label: string }> = {
+  querying: { color: "primary", icon: <Search />, label: "Querying" },
+  reasoning: { color: "secondary", icon: <Psychology />, label: "Reasoning" },
+  publishing: { color: "success", icon: <Publish />, label: "Publishing" },
+  completed: { color: "success", icon: <CheckCircleOutline />, label: "Completed" },
+  error: { color: "error", icon: <WarningAmber />, label: "Error" },
 };
 
 const ORG_LABELS: Record<string, string> = {
@@ -31,57 +40,53 @@ function ActivityEntry({ activity, onNavigate }: { activity: Article; onNavigate
 
   return (
     <Paper
-      p="sm"
-      radius="md"
-      withBorder
-      style={isReasoning ? {
-        borderLeft: "4px solid var(--mantine-color-violet-5)",
-        background: "linear-gradient(135deg, var(--mantine-color-violet-0) 0%, var(--mantine-color-grape-0) 100%)",
-      } : {
-        borderLeft: `3px solid var(--mantine-color-${config.color}-6)`,
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        borderLeft: isReasoning ? "4px solid" : "3px solid",
+        borderLeftColor: isReasoning ? "secondary.main" : `${config.color}.main`,
+        background: isReasoning
+          ? "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(168,85,247,0.05) 100%)"
+          : undefined,
       }}
     >
-      <Group gap="sm" align="flex-start">
-        <Badge
-          color={config.color}
-          variant={isReasoning ? "filled" : "light"}
-          leftSection={isReasoning ? <IconSparkles size={12} /> : config.icon}
-          size="lg"
-          tt="none"
-        >
-          {isReasoning ? "LLM Reasoning" : config.label}
-        </Badge>
-        <Box style={{ flex: 1 }}>
-          <Group gap="xs" mb={4}>
-            <Text fw={600} size="sm">{agentName}</Text>
+      <Stack direction="row" spacing={1.5} alignItems="flex-start">
+        <Chip
+          label={isReasoning ? "LLM Reasoning" : config.label}
+          color={config.color as any}
+          variant={isReasoning ? "filled" : "outlined"}
+          icon={isReasoning ? <AutoAwesome /> : config.icon}
+          size="small"
+          sx={{ textTransform: "none", flexShrink: 0 }}
+        />
+        <Box sx={{ flex: 1 }}>
+          <Stack direction="row" spacing={0.5} sx={{ mb: 0.5, alignItems: "center" }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{agentName}</Typography>
             {isReasoning && (
-              <Badge size="xs" variant="outline" color="violet">
-                Gemma 4 12B · vLLM · ROCm
-              </Badge>
+              <Chip label="Gemma 4 12B · vLLM · ROCm" variant="outlined" color="secondary" size="small"
+                sx={{ textTransform: "none" }} />
             )}
-          </Group>
-          <Text size="sm" c={isReasoning ? "violet.8" : "dimmed"}>{message}</Text>
+          </Stack>
+          <Typography variant="body2" sx={{ color: isReasoning ? "secondary.main" : "text.secondary" }}>
+            {message}
+          </Typography>
           {step === "completed" && findingIds && findingIds.length > 0 && (
-            <Group gap="xs" mt={4}>
-              <Text size="xs" c="dimmed">Published:</Text>
+            <Stack direction="row" spacing={0.5} sx={{ mt: 0.5, flexWrap: "wrap", alignItems: "center" }}>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>Published:</Typography>
               {findingIds.slice(0, 3).map(fid => (
-                <Badge key={fid} size="xs" variant="outline" color="red"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => onNavigate?.(`/article/${fid}`)}>
-                  {fid.slice(0, 8)}…
-                </Badge>
+                <Chip key={fid} label={`${fid.slice(0, 8)}…`} variant="outlined" color="error" size="small"
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => onNavigate?.(`/article/${fid}`)} />
               ))}
               {insightId && (
-                <Badge size="xs" variant="outline" color="violet"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => onNavigate?.(`/article/${insightId}`)}>
-                  insight {insightId.slice(0, 8)}…
-                </Badge>
+                <Chip label={`insight ${insightId.slice(0, 8)}…`} variant="outlined" color="secondary" size="small"
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => onNavigate?.(`/article/${insightId}`)} />
               )}
-            </Group>
+            </Stack>
           )}
         </Box>
-      </Group>
+      </Stack>
     </Paper>
   );
 }
@@ -95,20 +100,20 @@ export function AgentActivity({ activities, onNavigate }: AgentActivityProps) {
   }
 
   return (
-    <Stack gap="md">
-      <Title order={4}>Agent Activity</Title>
+    <Stack spacing={2}>
+      <Typography variant="h6">Agent Activity</Typography>
       {activities.length === 0 ? (
-        <Paper p="xl" withBorder ta="center">
-          <Text c="dimmed">No agent activity yet. Run an agent to see real-time steps.</Text>
+        <Paper variant="outlined" sx={{ p: 3, textAlign: "center" }}>
+          <Typography sx={{ color: "text.secondary" }}>No agent activity yet. Run an agent to see real-time steps.</Typography>
         </Paper>
       ) : (
         Object.entries(grouped).map(([agent, items]) => (
-          <Paper key={agent} p="md" withBorder radius="md">
-            <Group gap="xs" mb="sm">
-              <Text fw={700}>{agent}</Text>
-              <Badge size="sm" variant="light">{items.length} events</Badge>
-            </Group>
-            <Stack gap="xs">
+          <Paper key={agent} variant="outlined" sx={{ p: 2 }}>
+            <Stack direction="row" spacing={1} sx={{ mb: 1.5, alignItems: "center" }}>
+              <Typography sx={{ fontWeight: 700 }}>{agent}</Typography>
+              <Chip label={`${items.length} events`} variant="outlined" size="small" />
+            </Stack>
+            <Stack spacing={1}>
               {items.map(a => (
                 <ActivityEntry key={a.id} activity={a} onNavigate={onNavigate} />
               ))}

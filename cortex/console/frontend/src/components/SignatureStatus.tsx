@@ -1,10 +1,16 @@
-import { Badge } from "@mantine/core";
+import Chip from "@mui/material/Chip";
 
 export function SignatureStatus({ sig, label }: { sig?: string | null; label: string }) {
-  const ok = sig && sig.length > 0;
+  const ok = Boolean(sig && sig.length > 0);
   return (
-    <Badge color={ok ? "green" : "gray"} variant="light" size="sm">
-      {ok ? "\u2713" : "\u2022"} {label}
-    </Badge>
+    <Chip
+      label={`${ok ? "✓" : "•"} ${label}`}
+      size="small"
+      sx={{
+        color: ok ? "#14b8a6" : "#6b7280",
+        bgcolor: ok ? "rgba(20,184,166,0.1)" : "rgba(107,114,128,0.1)",
+        fontWeight: 500, fontSize: "0.75rem", height: 24,
+      }}
+    />
   );
 }

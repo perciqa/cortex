@@ -1,5 +1,19 @@
-import { AppShell, Group, NavLink, Title, Text } from "@mantine/core";
-import { IconLayoutDashboard, IconList, IconGraph, IconFilter, IconChartBar, IconShield, IconRobot } from "@tabler/icons-react";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Dashboard from "@mui/icons-material/Dashboard";
+import Article from "@mui/icons-material/Article";
+import SmartToy from "@mui/icons-material/SmartToy";
+import Hub from "@mui/icons-material/Hub";
+import FilterAlt from "@mui/icons-material/FilterAlt";
+import Speed from "@mui/icons-material/Speed";
+import Shield from "@mui/icons-material/Shield";
 import { StatusPill } from "./components/StatusPill";
 
 export type ViewId = "overview" | "feed" | "detail" | "provenance" | "scope" | "bench" | "attack" | "activity";
@@ -12,46 +26,56 @@ export interface LayoutProps {
 }
 
 const NAV_ITEMS: { id: ViewId; label: string; icon: React.ReactNode }[] = [
-  { id: "overview", label: "Fabric Overview", icon: <IconLayoutDashboard size={18} /> },
-  { id: "feed", label: "Article Feed", icon: <IconList size={18} /> },
-  { id: "activity", label: "Agent Activity", icon: <IconRobot size={18} /> },
-  { id: "provenance", label: "Provenance Graph", icon: <IconGraph size={18} /> },
-  { id: "scope", label: "Scope Filter", icon: <IconFilter size={18} /> },
-  { id: "bench", label: "Bench Panel", icon: <IconChartBar size={18} /> },
-  { id: "attack", label: "Attack Matrix", icon: <IconShield size={18} /> },
+  { id: "overview", label: "Fabric Overview", icon: <Dashboard /> },
+  { id: "feed", label: "Article Feed", icon: <Article /> },
+  { id: "activity", label: "Agent Activity", icon: <SmartToy /> },
+  { id: "provenance", label: "Provenance Graph", icon: <Hub /> },
+  { id: "scope", label: "Scope Filter", icon: <FilterAlt /> },
+  { id: "bench", label: "Bench Panel", icon: <Speed /> },
+  { id: "attack", label: "Attack Matrix", icon: <Shield /> },
 ];
+
+const DRAWER_WIDTH = 240;
 
 export function Layout({ current, onNavigate, connected, children }: LayoutProps) {
   return (
-    <AppShell
-      header={{ height: 56 }}
-      navbar={{ width: 240, breakpoint: 0 }}
-      padding="md"
-    >
-      <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group>
-            <Title order={4}>Perciqa Cortex</Title>
-          </Group>
-          <StatusPill connected={connected} />
-        </Group>
-      </AppShell.Header>
-      <AppShell.Navbar p="xs">
-        {NAV_ITEMS.map(item => (
-          <NavLink
-            key={item.id}
-            label={item.label}
-            leftSection={item.icon}
-            active={current === item.id}
-            onClick={() => onNavigate(item.id)}
-            variant="filled"
-            color="blue"
-          />
-        ))}
-      </AppShell.Navbar>
-      <AppShell.Main>
+    <Box sx={{ display: "flex" }}>
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: DRAWER_WIDTH,
+            boxSizing: "border-box",
+            position: "relative",
+          },
+        }}
+      >
+        <AppBar position="static" elevation={0} sx={{ bgcolor: "#1a1a1e" }}>
+          <Toolbar>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              Perciqa Cortex
+            </Typography>
+            <StatusPill connected={connected} />
+          </Toolbar>
+        </AppBar>
+        <List>
+          {NAV_ITEMS.map((item) => (
+            <ListItemButton
+              key={item.id}
+              selected={current === item.id}
+              onClick={() => onNavigate(item.id)}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} />
+            </ListItemButton>
+          ))}
+        </List>
+      </Drawer>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, minHeight: "100vh" }}>
         {children}
-      </AppShell.Main>
-    </AppShell>
+      </Box>
+    </Box>
   );
 }

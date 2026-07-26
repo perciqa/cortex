@@ -1,6 +1,21 @@
 import { useState, useEffect } from "react";
-import { Card, Title, Text, Group, Badge, Stack, SimpleGrid, Progress, RingProgress, Tooltip, ThemeIcon } from "@mantine/core";
-import { IconBrandAmd, IconCpu, IconRipple, IconDeviceDesktopAnalytics, IconBrain, IconPlugConnected, IconPlugConnectedX } from "@tabler/icons-react";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
+import Grid from "@mui/material/Grid2";
+import LinearProgress from "@mui/material/LinearProgress";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import Cancel from "@mui/icons-material/Cancel";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import DesktopWindows from "@mui/icons-material/DesktopWindows";
+import DeveloperBoard from "@mui/icons-material/DeveloperBoard";
+import Memory from "@mui/icons-material/Memory";
+import Psychology from "@mui/icons-material/Psychology";
+import Sensors from "@mui/icons-material/Sensors";
 import type { Article } from "../state/store";
 
 interface BenchPanelProps {
@@ -27,12 +42,12 @@ interface LlmInfo {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  finding: "red",
-  insight: "violet",
-  warning: "orange",
-  precedent: "blue",
-  procedure: "teal",
-  activity: "gray",
+  finding: "error",
+  insight: "secondary",
+  warning: "warning",
+  precedent: "info",
+  procedure: "success",
+  activity: "default",
 };
 
 const ORG_LABELS: Record<string, string> = {
@@ -40,116 +55,138 @@ const ORG_LABELS: Record<string, string> = {
   "did:percq:org:soc-beta": "SOC Beta",
 };
 
+function VramRing({ pct }: { pct: number }) {
+  const color = pct > 80 ? "error.main" : pct > 50 ? "warning.main" : "success.main";
+  return (
+    <Box sx={{ position: "relative", display: "inline-flex" }}>
+      <CircularProgress
+        variant="determinate"
+        value={pct}
+        size={60}
+        thickness={6}
+        sx={{ color, "& .MuiCircularProgress-track": { color: "#2a2a2e" } }}
+      />
+      <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Typography variant="caption" fontWeight={700} sx={{ color }}>
+          {pct.toFixed(0)}%
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
 function GpuStatusCard({ rocm }: { rocm: RocmInfo | null }) {
   if (!rocm || !rocm.rocm_active) {
     return (
-      <Card shadow="xs" withBorder radius="md">
-        <Group gap="sm" mb="sm">
-          <IconDeviceDesktopAnalytics size={20} />
-          <Text fw={700}>GPU Status</Text>
-        </Group>
-        <Badge color="gray" variant="light" size="lg">No GPU detected</Badge>
-        <Text size="sm" c="dimmed" mt="xs">Running on CPU fallback</Text>
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <CardContent>
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+            <DesktopWindows sx={{ fontSize: 20 }} />
+            <Typography fontWeight={700}>GPU Status</Typography>
+          </Stack>
+          <Chip label="No GPU detected" variant="outlined" size="small" />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Running on CPU fallback
+          </Typography>
+        </CardContent>
       </Card>
     );
   }
 
   const vramPct = Math.min(rocm.mem_util_pct, 100);
-  const vramColor = vramPct > 80 ? "red" : vramPct > 50 ? "yellow" : "teal";
+  const vramColor = vramPct > 80 ? "error" : vramPct > 50 ? "warning" : "success";
 
   return (
-    <Card shadow="xs" withBorder radius="md">
-      <Group gap="sm" mb="md">
-        <IconBrandAmd size={24} color="var(--mantine-color-red-6)" />
-        <div style={{ flex: 1 }}>
-          <Group gap="xs">
-            <Text fw={700} size="sm">{rocm.device_name}</Text>
-            <Badge color="green" variant="dot" size="sm">{rocm.sensor_backend}</Badge>
-          </Group>
-          <Group gap="xs" mt={2}>
-            <Text size="xs" c="dimmed">HIP {rocm.hip_version || "—"}</Text>
-            <Text size="xs" c="dimmed">·</Text>
-            <Text size="xs" c="dimmed">torch {rocm.torch_version || "—"}</Text>
-          </Group>
-        </div>
-        <RingProgress
-          size={60}
-          thickness={6}
-          roundCaps
-          sections={[{ value: vramPct, color: vramColor }]}
-          label={<Text size="xs" fw={700} ta="center">{vramPct.toFixed(0)}%</Text>}
-        />
-      </Group>
-      <Progress value={vramPct} size="sm" color={vramColor} />
-      <Text size="xs" c="dimmed" mt={4}>VRAM utilization</Text>
+    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+      <CardContent>
+        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+          <DeveloperBoard sx={{ color: "error.main", fontSize: 24 }} />
+          <Box sx={{ flex: 1 }}>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <Typography variant="body2" fontWeight={700}>{rocm.device_name}</Typography>
+              <Chip label={rocm.sensor_backend} size="small" color="success" variant="outlined" />
+            </Stack>
+            <Stack direction="row" spacing={0.5} sx={{ mt: 0.25 }}>
+              <Typography variant="caption" color="text.secondary">HIP {rocm.hip_version || "—"}</Typography>
+              <Typography variant="caption" color="text.secondary">·</Typography>
+              <Typography variant="caption" color="text.secondary">torch {rocm.torch_version || "—"}</Typography>
+            </Stack>
+          </Box>
+          <VramRing pct={vramPct} />
+        </Stack>
+        <LinearProgress variant="determinate" value={vramPct} color={vramColor} />
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>VRAM utilization</Typography>
+      </CardContent>
     </Card>
   );
 }
 
 function LlmStatusCard({ llm, reasoningCount }: { llm: LlmInfo | null; reasoningCount: number }) {
   const online = llm?.status === "online";
-  // Shorten model name for display: "google/gemma-4-12B" → "Gemma 4 12B"
   const displayName = llm
     ? llm.model.split("/").pop()?.replace(/-/g, " ") ?? llm.model
     : "—";
 
   return (
     <Card
-      shadow="xs"
-      withBorder
-      radius="md"
-      style={online ? { borderColor: "var(--mantine-color-violet-4)", borderWidth: 1.5 } : undefined}
+      variant="outlined"
+      sx={{
+        borderRadius: 2,
+        ...(online ? { borderColor: "secondary.main", borderWidth: 1.5 } : {}),
+      }}
     >
-      <Group gap="sm" mb="md">
-        <ThemeIcon
-          size={36}
-          radius="md"
-          variant={online ? "gradient" : "light"}
-          gradient={online ? { from: "violet", to: "indigo", deg: 135 } : undefined}
-          color={online ? undefined : "gray"}
-        >
-          <IconBrain size={20} />
-        </ThemeIcon>
-        <div style={{ flex: 1 }}>
-          <Group gap="xs">
-            <Text fw={700} size="sm">{displayName}</Text>
-            {online
-              ? <Badge color="violet" variant="dot" size="sm" leftSection={<IconPlugConnected size={10} />}>vLLM · ROCm</Badge>
-              : <Badge color="gray" variant="light" size="sm" leftSection={<IconPlugConnectedX size={10} />}>offline</Badge>
+      <CardContent>
+        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+          <Box
+            sx={
+              online
+                ? { width: 36, height: 36, borderRadius: 1.5, background: "linear-gradient(135deg, #7c3aed, #4f46e5)", display: "flex", alignItems: "center", justifyContent: "center" }
+                : { width: 36, height: 36, borderRadius: 1.5, bgcolor: "grey.500", display: "flex", alignItems: "center", justifyContent: "center" }
             }
-          </Group>
-          {llm && (
-            <Text size="xs" c="dimmed" mt={2} style={{ fontFamily: "monospace" }}>
-              {llm.endpoint}
-            </Text>
-          )}
-        </div>
-      </Group>
+          >
+            <Psychology sx={{ fontSize: 20, color: "#fff" }} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <Typography variant="body2" fontWeight={700}>{displayName}</Typography>
+              {online
+                ? <Chip icon={<CheckCircle sx={{ fontSize: 14 }} />} label="vLLM · ROCm" size="small" color="secondary" variant="outlined" />
+                : <Chip icon={<Cancel sx={{ fontSize: 14 }} />} label="offline" size="small" variant="outlined" />
+              }
+            </Stack>
+            {llm && (
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, fontFamily: "monospace" }}>
+                {llm.endpoint}
+              </Typography>
+            )}
+          </Box>
+        </Stack>
 
-      {online ? (
-        <Group gap="md">
-          <div>
-            <Text size="xs" c="dimmed">Reasoning steps</Text>
-            <Text fw={700} size="xl" c="violet">{reasoningCount}</Text>
-          </div>
-          <div style={{ flex: 1 }}>
-            <Text size="xs" c="dimmed" mb={4}>LLM pipeline</Text>
-            <Group gap={4} wrap="nowrap">
-              <Badge size="xs" variant="filled" color="violet">embed</Badge>
-              <Text size="xs" c="dimmed">→</Text>
-              <Badge size="xs" variant="filled" color="indigo">retrieve</Badge>
-              <Text size="xs" c="dimmed">→</Text>
-              <Badge size="xs" variant="filled" color="grape">generate</Badge>
-              <Text size="xs" c="dimmed">→</Text>
-              <Badge size="xs" variant="filled" color="teal">publish</Badge>
-            </Group>
-          </div>
-        </Group>
-      ) : (
-        <Text size="xs" c="dimmed">
-          {llm?.error ?? "vLLM pod not reachable. Start with COMPOSE_PROFILES=gpu."}
-        </Text>
-      )}
+        {online ? (
+          <Stack direction="row" spacing={3}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">Reasoning steps</Typography>
+              <Typography variant="h5" fontWeight={700} color="secondary.main">{reasoningCount}</Typography>
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>LLM pipeline</Typography>
+              <Stack direction="row" spacing={0.5} sx={{ flexWrap: "nowrap" }} alignItems="center">
+                <Chip label="embed" size="small" color="secondary" />
+                <Typography variant="caption" color="text.secondary">→</Typography>
+                <Chip label="retrieve" size="small" color="primary" />
+                <Typography variant="caption" color="text.secondary">→</Typography>
+                <Chip label="generate" size="small" color="secondary" />
+                <Typography variant="caption" color="text.secondary">→</Typography>
+                <Chip label="publish" size="small" color="success" />
+              </Stack>
+            </Box>
+          </Stack>
+        ) : (
+          <Typography variant="caption" color="text.secondary">
+            {llm?.error ?? "vLLM pod not reachable. Start with COMPOSE_PROFILES=gpu."}
+          </Typography>
+        )}
+      </CardContent>
     </Card>
   );
 }
@@ -169,46 +206,48 @@ function NodeMetricsCard({ node, samples }: { node: string; samples: any[] }) {
   const cpuPct = (cpuEmb / maxRate) * 100;
 
   return (
-    <Card shadow="xs" withBorder radius="md">
-      <Group gap="sm" mb="sm">
-        <Badge color="green" variant="dot" size="lg">{node}</Badge>
-        {deviceName && sensorBackend && (
-          <Tooltip label={`${deviceName} · ${sensorBackend}`}>
-            <IconBrandAmd size={16} color="var(--mantine-color-red-6)" />
-          </Tooltip>
-        )}
-      </Group>
+    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+      <CardContent>
+        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+          <Chip label={node} color="success" variant="outlined" />
+          {deviceName && sensorBackend && (
+            <Tooltip title={`${deviceName} · ${sensorBackend}`}>
+              <DeveloperBoard sx={{ fontSize: 16, color: "error.main" }} />
+            </Tooltip>
+          )}
+        </Stack>
 
-      <Stack gap="xs">
-        <div>
-          <Group justify="space-between" mb={2}>
-            <Group gap={4}>
-              <IconBrandAmd size={14} color="var(--mantine-color-red-6)" />
-              <Text size="xs">Radeon</Text>
-            </Group>
-            <Text size="xs" fw={600}>{radeon.toFixed(1)} embeds/s</Text>
-          </Group>
-          <Progress value={radeonPct} size="md" color="red" />
-        </div>
+        <Stack spacing={1}>
+          <Box>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.25 }}>
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <DeveloperBoard sx={{ fontSize: 14, color: "error.main" }} />
+                <Typography variant="caption">Radeon</Typography>
+              </Stack>
+              <Typography variant="caption" fontWeight={600}>{radeon.toFixed(1)} embeds/s</Typography>
+            </Stack>
+            <LinearProgress variant="determinate" value={radeonPct} color="error" />
+          </Box>
 
-        <div>
-          <Group justify="space-between" mb={2}>
-            <Group gap={4}>
-              <IconCpu size={14} />
-              <Text size="xs">CPU</Text>
-            </Group>
-            <Text size="xs" fw={600}>{cpuEmb.toFixed(1)} embeds/s</Text>
-          </Group>
-          <Progress value={cpuPct} size="md" color="blue" />
-        </div>
+          <Box>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.25 }}>
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <Memory sx={{ fontSize: 14 }} />
+                <Typography variant="caption">CPU</Typography>
+              </Stack>
+              <Typography variant="caption" fontWeight={600}>{cpuEmb.toFixed(1)} embeds/s</Typography>
+            </Stack>
+            <LinearProgress variant="determinate" value={cpuPct} color="info" />
+          </Box>
 
-        <Group gap="xs" mt="xs">
-          <IconRipple size={14} />
-          <Text size="xs" c="dimmed">p95 latency: {p95.toFixed(1)} ms</Text>
-          <Text size="xs" c="dimmed">·</Text>
-          <Text size="xs" c="dimmed">GPU mem: {gpuMem.toFixed(0)}%</Text>
-        </Group>
-      </Stack>
+          <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 1 }}>
+            <Sensors sx={{ fontSize: 14 }} />
+            <Typography variant="caption" color="text.secondary">p95 latency: {p95.toFixed(1)} ms</Typography>
+            <Typography variant="caption" color="text.secondary">·</Typography>
+            <Typography variant="caption" color="text.secondary">GPU mem: {gpuMem.toFixed(0)}%</Typography>
+          </Stack>
+        </Stack>
+      </CardContent>
     </Card>
   );
 }
@@ -230,7 +269,6 @@ export function BenchPanel({ byNode, articles, activities, connected }: BenchPan
         .catch(() => setLlm(null));
 
     pollLlm();
-    // Re-poll LLM status every 15 s so the card reflects pod restarts
     const id = setInterval(pollLlm, 15_000);
     return () => clearInterval(id);
   }, []);
@@ -247,7 +285,6 @@ export function BenchPanel({ byNode, articles, activities, connected }: BenchPan
     byOrg[org] = (byOrg[org] || 0) + 1;
   }
 
-  // Count LLM reasoning steps seen in activity stream
   const reasoningCount = activities.filter(
     a => (a.payload?.activity_step as string) === "reasoning"
   ).length;
@@ -255,69 +292,89 @@ export function BenchPanel({ byNode, articles, activities, connected }: BenchPan
   const total = allArticles.length;
 
   return (
-    <Stack gap="md">
-      <Title order={3}>Bench Panel</Title>
+    <Stack spacing={3}>
+      <Typography variant="h4" sx={{ fontWeight: 700 }}>
+        Bench Panel
+      </Typography>
 
-      <SimpleGrid cols={2}>
-        <GpuStatusCard rocm={rocm} />
-        <LlmStatusCard llm={llm} reasoningCount={reasoningCount} />
-      </SimpleGrid>
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <GpuStatusCard rocm={rocm} />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <LlmStatusCard llm={llm} reasoningCount={reasoningCount} />
+        </Grid>
+      </Grid>
 
-      <Card shadow="xs" withBorder radius="md">
-        <Group gap="sm" mb="sm">
-          <Badge color={connected ? "green" : "red"} variant="dot">
-            WebSocket {connected ? "connected" : "disconnected"}
-          </Badge>
-        </Group>
-        <SimpleGrid cols={3}>
-          <div>
-            <Text size="xs" c="dimmed">Total Articles</Text>
-            <Text fw={700} size="xl">{total}</Text>
-          </div>
-          <div>
-            <Text size="xs" c="dimmed">Findings</Text>
-            <Text fw={700} size="xl" c="red">{byType.finding || 0}</Text>
-          </div>
-          <div>
-            <Text size="xs" c="dimmed">LLM Insights</Text>
-            <Text fw={700} size="xl" c="violet">{byType.insight || 0}</Text>
-          </div>
-        </SimpleGrid>
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <CardContent>
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+            <Chip
+              label={`WebSocket ${connected ? "connected" : "disconnected"}`}
+              color={connected ? "success" : "error"}
+              variant="outlined"
+            />
+          </Stack>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Typography variant="caption" color="text.secondary">Total Articles</Typography>
+              <Typography variant="h5" fontWeight={700}>{total}</Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Typography variant="caption" color="text.secondary">Findings</Typography>
+              <Typography variant="h5" fontWeight={700} color="error.main">{byType.finding || 0}</Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Typography variant="caption" color="text.secondary">LLM Insights</Typography>
+              <Typography variant="h5" fontWeight={700} color="secondary.main">{byType.insight || 0}</Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
       </Card>
 
-      <Card shadow="xs" withBorder radius="md">
-        <Text fw={700} size="sm" mb="sm">By Organization</Text>
-        <Stack gap="xs">
-          {Object.entries(byOrg).map(([org, count]) => {
-            const label = ORG_LABELS[org] || org;
-            const pct = total > 0 ? (count / total) * 100 : 0;
-            return (
-              <div key={org}>
-                <Group justify="space-between" mb={2}>
-                  <Text size="sm">{label}</Text>
-                  <Text size="sm" c="dimmed">{count} ({pct.toFixed(0)}%)</Text>
-                </Group>
-                <Progress value={pct} size="sm" color={org.includes("alpha") ? "blue" : "orange"} />
-              </div>
-            );
-          })}
-        </Stack>
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <CardContent>
+          <Typography fontWeight={700} variant="body2" sx={{ mb: 1.5 }}>By Organization</Typography>
+          <Stack spacing={1}>
+            {Object.entries(byOrg).map(([org, count]) => {
+              const label = ORG_LABELS[org] || org;
+              const pct = total > 0 ? (count / total) * 100 : 0;
+              return (
+                <Box key={org}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.25 }}>
+                    <Typography variant="body2">{label}</Typography>
+                    <Typography variant="body2" color="text.secondary">{count} ({pct.toFixed(0)}%)</Typography>
+                  </Stack>
+                  <LinearProgress
+                    variant="determinate"
+                    value={pct}
+                    color={org.includes("alpha") ? "primary" : "warning"}
+                  />
+                </Box>
+              );
+            })}
+          </Stack>
+        </CardContent>
       </Card>
 
-      <Card shadow="xs" withBorder radius="md">
-        <Text fw={700} size="sm" mb="sm">By Article Type</Text>
-        <Group gap="xs" wrap="wrap">
-          {Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([type, count]) => (
-            <Badge key={type} color={TYPE_COLORS[type] || "gray"} variant="light" size="lg">
-              {type}: {count}
-            </Badge>
-          ))}
-        </Group>
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <CardContent>
+          <Typography fontWeight={700} variant="body2" sx={{ mb: 1.5 }}>By Article Type</Typography>
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+            {Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([type, count]) => (
+              <Chip
+                key={type}
+                label={`${type}: ${count}`}
+                color={(TYPE_COLORS[type] as any) || "default"}
+              />
+            ))}
+          </Stack>
+        </CardContent>
       </Card>
 
       {nodes.length > 0 && (
-        <Stack gap="sm">
-          <Text fw={700} size="sm">Node Performance</Text>
+        <Stack spacing={1.5}>
+          <Typography fontWeight={700} variant="body2">Node Performance</Typography>
           {nodes.map(node => (
             <NodeMetricsCard key={node} node={node} samples={byNode[node]} />
           ))}

@@ -1,6 +1,14 @@
 import { useState } from "react";
-import { Card, Title, Badge, Group, Stack, Text, Modal } from "@mantine/core";
-import clsx from "clsx";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { ATTACK_TECHNIQUES } from "../data/attackTechniques";
 
 export interface AttackMatrixProps {
@@ -8,36 +16,50 @@ export interface AttackMatrixProps {
   articlesFor: (id: string) => { id: string; content: string }[];
 }
 
-const SEVERITY_COLORS: Record<string, string> = { critical: "red", high: "orange", medium: "yellow", low: "blue" };
+const SEVERITY_COLORS: Record<string, string> = { critical: "error", high: "warning", medium: "warning", low: "info" };
 
 export function AttackMatrix({ counts, articlesFor }: AttackMatrixProps) {
   const [selected, setSelected] = useState<string | null>(null);
   return (
-    <div>
-      <Title order={3} mb="md">Attack Matrix</Title>
-      <Card shadow="xs" withBorder radius="md" p="md">
-        <Stack gap="xs">
-          {Object.entries(counts).sort().map(([id, count]) => {
-            const tech = ATTACK_TECHNIQUES[id];
-            const color = SEVERITY_COLORS[tech?.severity || ""] || "gray";
-            return (
-              <Group key={id} gap="sm" justify="space-between" style={{ cursor: "pointer" }}
-                onClick={() => setSelected(id)}>
-                <Group gap="xs">
-                  <Badge color={color} variant="dot" size="sm" />
-                  <Text size="sm">{tech?.name || id}</Text>
-                </Group>
-                <Badge color={color}>{count}</Badge>
-              </Group>
-            );
-          })}
-        </Stack>
+    <Box>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+        Attack Matrix
+      </Typography>
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <CardContent>
+          <Stack spacing={1}>
+            {Object.entries(counts).sort().map(([id, count]) => {
+              const tech = ATTACK_TECHNIQUES[id];
+              const color = SEVERITY_COLORS[tech?.severity || ""] || "default";
+              return (
+                <Stack
+                  key={id}
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  spacing={1.5}
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => setSelected(id)}
+                >
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: `${color}.main` }} />
+                    <Typography variant="body2">{tech?.name || id}</Typography>
+                  </Stack>
+                  <Chip label={count} color={color as any} size="small" />
+                </Stack>
+              );
+            })}
+          </Stack>
+        </CardContent>
       </Card>
-      <Modal opened={!!selected} onClose={() => setSelected(null)} title={selected ? ATTACK_TECHNIQUES[selected]?.name || selected : ""}>
-        {selected && articlesFor(selected).map(a => (
-          <Text key={a.id} size="sm" mb="xs">{a.content}</Text>
-        ))}
-      </Modal>
-    </div>
+      <Dialog open={!!selected} onClose={() => setSelected(null)}>
+        <DialogTitle>{selected ? ATTACK_TECHNIQUES[selected]?.name || selected : ""}</DialogTitle>
+        <DialogContent>
+          {selected && articlesFor(selected).map(a => (
+            <DialogContentText key={a.id} sx={{ mb: 1 }}>{a.content}</DialogContentText>
+          ))}
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
 }

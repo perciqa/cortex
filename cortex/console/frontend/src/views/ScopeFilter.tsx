@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Card, Title, Badge, Group, Stack, Text } from "@mantine/core";
-import clsx from "clsx";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 const TYPE_COLORS: Record<string, string> = {
-  finding: "red", insight: "violet", warning: "orange",
-  precedent: "blue", procedure: "teal",
+  finding: "error", insight: "secondary", warning: "warning",
+  precedent: "info", procedure: "success",
 };
 
 export function ScopeFilter({ articles }: { articles: any[] }) {
@@ -14,24 +17,33 @@ export function ScopeFilter({ articles }: { articles: any[] }) {
 
   return (
     <div>
-      <Title order={3} mb="md">Scope Filter</Title>
-      <Group gap="xs" mb="md">
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Scope Filter</Typography>
+      <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
         {types.map(t => (
-          <Badge key={t} color={t === "all" ? "gray" : TYPE_COLORS[t] || "gray"}
-            variant={typeFilter === t ? "filled" : "outline"}
-            style={{ cursor: "pointer" }} onClick={() => setTypeFilter(t)}>
-            {t}
-          </Badge>
+          <Chip key={t} label={t}
+            color={t === "all" ? "default" : (TYPE_COLORS[t] as any) || "default"}
+            variant={typeFilter === t ? "filled" : "outlined"}
+            onClick={() => setTypeFilter(t)}
+            sx={{ cursor: "pointer" }} />
         ))}
-      </Group>
-      <Stack gap="sm">
+      </Stack>
+      <Stack spacing={1.5}>
         {filtered.map(a => (
-          <Card key={a.id} shadow="xs" withBorder radius="md" p="sm">
-            <Group gap="sm">
-              <Badge color={TYPE_COLORS[a.type] || "gray"} size="sm">{a.type}</Badge>
-              <Text size="sm" style={{ flex: 1 }} lineClamp={1}>{a.content}</Text>
-              <Text size="xs" c="dimmed">trust: {(a.trust_score ?? 0).toFixed(2)}</Text>
-            </Group>
+          <Card key={a.id} variant="outlined">
+            <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Chip label={a.type} color={(TYPE_COLORS[a.type] as any) || "default"} size="small" />
+                <Typography variant="body2" sx={{
+                  flex: 1,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}>{a.content}</Typography>
+                <Typography variant="caption" sx={{ color: "text.secondary", flexShrink: 0 }}>
+                  trust: {(a.trust_score ?? 0).toFixed(2)}
+                </Typography>
+              </Stack>
+            </CardContent>
           </Card>
         ))}
       </Stack>
