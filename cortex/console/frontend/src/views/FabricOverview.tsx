@@ -7,6 +7,7 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from "@mui/material/Tooltip";
+import { Info } from "../components/Info";
 
 const ORG_MAP: Record<string, string> = {
   "did:percq:org:soc-alpha": "soc-alpha",
@@ -27,18 +28,18 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Num({ value, color }: { value: number; color?: string }) {
+function Ticker({ value, color }: { value: number; color?: string }) {
   return (
     <Typography
       component="span"
       sx={{
-        fontFamily: '"Space Grotesk", sans-serif',
-        fontWeight: 700,
-        fontSize: "1.75rem",
+        fontFamily: '"IBM Plex Mono", monospace',
+        fontWeight: 600,
+        fontSize: "1.05rem",
         lineHeight: 1,
-        fontVariantNumeric: "tabular-nums",
+        fontFeatureSettings: '"tnum"',
         color: color || "#eef2f8",
-        letterSpacing: "-0.02em",
+        letterSpacing: "-0.01em",
       }}
     >
       {value}
@@ -51,7 +52,7 @@ function Delta({ v }: { v: number }) {
   return (
     <Typography
       component="span"
-      sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6875rem", color: up ? "#ff5d73" : "#3ddc97", ml: 0.5 }}
+      sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.625rem", fontWeight: 600, color: up ? "#ff5d73" : "#3ddc97", px: 0.5, py: 0.25, borderRadius: 0.5, bgcolor: up ? "rgba(255,93,115,.14)" : "rgba(61,220,151,.14)" }}
     >
       {up ? "▲" : "▼"} {Math.abs(v)}
     </Typography>
@@ -126,7 +127,7 @@ export function FabricOverview({
     <Box
       sx={{
         display: "grid",
-        gap: "14px",
+        gap: "12px",
         gridTemplateColumns: "repeat(12, 1fr)",
         gridAutoRows: "auto",
       }}
@@ -151,13 +152,18 @@ export function FabricOverview({
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5 }}>
-                <Num value={findings.length} color="#ff5d73" />
-                <Eyebrow>findings</Eyebrow>
+                <Ticker value={findings.length} color="#ff5d73" />
+                <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontWeight: 500, fontSize: "0.59375rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8a94a8", ml: 0.5 }}>
+                  findings
+                </Typography>
                 <Delta v={findings.length > 0 ? Math.floor(Math.random() * 5) - 2 : 0} />
               </Box>
+              <Typography sx={{ color: "#8a94a8", fontSize: "0.625rem" }}>/</Typography>
               <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5 }}>
-                <Num value={insights.length} color="#9b7bff" />
-                <Eyebrow>insights</Eyebrow>
+                <Ticker value={insights.length} color="#9b7bff" />
+                <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontWeight: 500, fontSize: "0.59375rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8a94a8", ml: 0.5 }}>
+                  insights
+                </Typography>
               </Box>
               {topInsight && (
                 <>
@@ -185,11 +191,11 @@ export function FabricOverview({
         </CardContent>
       </Card>
 
-      {/* ── Focal (protagonist — threat posture) ── */}
+      {/* ── Focal (threat posture — protagonist) ── */}
       <Card sx={{ gridColumn: { xs: "span 12", md: "span 7" }, borderRadius: "var(--r-md, 10px)" }}>
-        <CardContent>
-          <Eyebrow>Threat posture · 24h</Eyebrow>
-          <Box sx={{ display: "flex", gap: 0.5, mb: 2, height: 64, alignItems: "flex-end" }}>
+        <CardContent sx={{ p: "16px 18px !important", "&:last-child": { pb: "16px !important" } }}>
+          <Eyebrow>Threat posture · 24h <Info k="severity" /></Eyebrow>
+          <Box sx={{ display: "flex", gap: 0.5, mb: 2, height: 60, alignItems: "flex-end" }}>
             {Array.from({ length: 24 }, (_, i) => {
               const h = Math.max(2, Math.floor(Math.random() * 50) + 4 * (i > 17 ? 1 : i > 10 ? 0.5 : 0));
               const isHigh = h > 35;
@@ -208,57 +214,109 @@ export function FabricOverview({
             })}
           </Box>
           {topInsight && (
-            <Box
-              onClick={() => onNavigate(`/article/${topInsight.id}`)}
-              sx={{ cursor: "pointer", "&:hover": { opacity: 0.8 } }}
-            >
-              <Typography variant="caption" sx={{ color: "#9b7bff", fontFamily: '"IBM Plex Mono", monospace', mb: 0.25 }}>
-                highest-trust insight
-              </Typography>
-              <Typography variant="body2" sx={{ color: "#eef2f8", lineHeight: 1.4 }}>
-                {topInsight.content}
-              </Typography>
-              <Typography variant="caption" sx={{ color: "#9b7bff", mt: 0.5, display: "inline-block" }}>
-                open provenance ↗
-              </Typography>
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+              <Box onClick={() => onNavigate(`/article/${topInsight.id}`)} sx={{ cursor: "pointer", "&:hover": { opacity: 0.8 } }}>
+                <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.59375rem", color: "#9b7bff", mb: 0.25, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                  highest-trust insight
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#eef2f8", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" }}>
+                  {topInsight.content}
+                </Typography>
+                <Typography variant="caption" sx={{ color: "#9b7bff", mt: 0.5, display: "inline-block" }}>
+                  read ↗
+                </Typography>
+              </Box>
+              <Box>
+                <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.59375rem", color: "#8a94a8", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                  driving this
+                </Typography>
+                {topTechniques.slice(0, 3).map(([id, count]) => (
+                  <Box key={id} sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.3 }}>
+                    <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.625rem", color: "#8a94a8", width: 56, flexShrink: 0 }}>
+                      {id}
+                    </Typography>
+                    <Box sx={{ flex: 1, height: 3, borderRadius: 1.5, bgcolor: "rgba(150,170,200,.08)", overflow: "hidden" }}>
+                      <Box sx={{ width: `${(count / maxAttackCount) * 100}%`, height: "100%", bgcolor: count / maxAttackCount > 0.7 ? "#ff5d73" : "#f5a524", borderRadius: 1.5 }} />
+                    </Box>
+                    <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.625rem", color: "#c2cbda", width: 20, textAlign: "right" }}>
+                      {count}
+                    </Typography>
+                  </Box>
+                ))}
+                {topInsight.payload?.threat_actor && (
+                  <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.625rem", color: "#c2cbda", mt: 0.5 }}>
+                    Actor: {topInsight.payload.threat_actor as string}
+                  </Typography>
+                )}
+              </Box>
             </Box>
           )}
         </CardContent>
       </Card>
 
-      {/* ── Compute (mini Bench Panel) ── */}
+      {/* ── Compute (instrument cluster) ── */}
       <Card sx={{ gridColumn: { xs: "span 12", md: "span 5" }, borderRadius: "var(--r-md, 10px)" }}>
-        <CardContent>
-          <Eyebrow>Compute</Eyebrow>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Box sx={{ position: "relative", display: "inline-flex" }}>
-              <CircularProgress
-                variant="determinate"
-                value={gpuPct}
-                size={48}
-                thickness={4}
-                sx={{ color: gpuPct > 80 ? "#ff5d73" : gpuPct > 50 ? "#f5a524" : "#3ddc97", "& .MuiCircularProgress-track": { color: "rgba(150,170,200,.08)" } }}
-              />
-              <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: gpuPct > 80 ? "#ff5d73" : gpuPct > 50 ? "#f5a524" : "#3ddc97", fontFamily: '"IBM Plex Mono", monospace' }}>
-                  {gpuPct.toFixed(0)}%
-                </Typography>
+        <CardContent sx={{ p: "16px 18px !important", "&:last-child": { pb: "16px !important" } }}>
+          <Eyebrow>Compute <Info k="agent" /></Eyebrow>
+          <Box sx={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 2, alignItems: "start" }}>
+            <Box sx={{ textAlign: "center" }}>
+              <Box sx={{ position: "relative", display: "inline-flex", mb: 0.5 }}>
+                <CircularProgress
+                  variant="determinate"
+                  value={gpuPct}
+                  size={64}
+                  thickness={5}
+                  sx={{ color: gpuPct > 80 ? "#ff5d73" : gpuPct > 50 ? "#f5a524" : "#3ddc97", "& .MuiCircularProgress-track": { color: "rgba(150,170,200,.08)" } }}
+                />
+                <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Typography sx={{ fontWeight: 700, color: gpuPct > 80 ? "#ff5d73" : gpuPct > 50 ? "#f5a524" : "#3ddc97", fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.8rem" }}>
+                    {gpuPct.toFixed(0)}%
+                  </Typography>
+                </Box>
               </Box>
+              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.59375rem", color: "#8a94a8" }}>vram</Typography>
             </Box>
             <Box>
-              <Typography variant="body2" sx={{ color: "#eef2f8", fontWeight: 500, fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.8125rem" }}>
-                {latestSample?.gpu_device_name || "GPU"} · {reasoningCount} reasoning
+              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", color: "#eef2f8", fontWeight: 500 }}>
+                {latestSample?.gpu_device_name || "GPU"} · {latestSample?.gpu_sensor_backend || "—"}
               </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 1 }}>
-                {["embed", "retrieve", "generate", "publish"].map((s, i) => (
-                  <Box key={s} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    {i > 0 && <Box sx={{ width: 8, height: 1, bgcolor: i <= 2 ? "#9b7bff" : "rgba(150,170,200,.15)" }} />}
-                    <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: i === 2 ? "#9b7bff" : "rgba(150,170,200,.15)", boxShadow: i === 2 ? "0 0 6px rgba(155,123,255,.5)" : "none" }} />
-                    <Typography variant="caption" sx={{ color: i === 2 ? "#9b7bff" : "#8a94a8", fontFamily: '"IBM Plex Mono", monospace' }}>
-                      {s}
-                    </Typography>
-                  </Box>
-                ))}
+              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.625rem", color: "#8a94a8", mb: 1 }}>
+                {latestSample?.hip_version ? `HIP ${latestSample.hip_version}` : ""} · torch {latestSample?.torch_version || "—"}
+              </Typography>
+              <Box sx={{ display: "flex", gap: 0.75, alignItems: "center", mb: 1 }}>
+                {["embed", "retrieve", "generate", "publish"].map((s, i) => {
+                  const state = i < 2 ? "done" : i === 2 ? "live" : "";
+                  return (
+                    <Box key={s} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      {i > 0 && <Box sx={{ width: 10, height: 1, bgcolor: state === "done" || state === "live" ? "#9b7bff" : "rgba(150,170,200,.15)" }} />}
+                      <Box sx={{
+                        width: 7, height: 7, borderRadius: "50%",
+                        bgcolor: state === "done" ? "#3ddc97" : state === "live" ? "#9b7bff" : "rgba(150,170,200,.15)",
+                        boxShadow: state === "live" ? "0 0 0 3px rgba(155,123,255,.25)" : "none",
+                        transition: "all var(--t, 0.26s) var(--ease, cubic-bezier(.22,.61,.36,1))",
+                      }} />
+                      <Typography variant="caption" sx={{ color: state ? "#c2cbda" : "#8a94a8", fontFamily: '"IBM Plex Mono", monospace' }}>
+                        {s}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+              <Box sx={{ display: "flex", gap: 2, mt: 0.5 }}>
+                <Box>
+                  <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.59375rem", color: "#8a94a8", textTransform: "uppercase", letterSpacing: "0.12em" }}>latency</Typography>
+                  <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "1.3rem", fontWeight: 600, color: "#eef2f8", fontFeatureSettings: '"tnum"' }}>
+                    {latestSample?.p95_query_latency_ms?.toFixed(0) || "—"}
+                    <Typography component="span" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.59375rem", color: "#8a94a8", ml: 0.25 }}>ms</Typography>
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.59375rem", color: "#8a94a8", textTransform: "uppercase", letterSpacing: "0.12em" }}>throughput</Typography>
+                  <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "1.3rem", fontWeight: 600, color: "#eef2f8", fontFeatureSettings: '"tnum"' }}>
+                    {(latestSample?.embeds_per_sec_radeon || 0).toFixed(0)}
+                    <Typography component="span" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.59375rem", color: "#8a94a8", ml: 0.25 }}>e/s</Typography>
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -335,12 +393,15 @@ export function FabricOverview({
           {feed.map((a) => (
             <Box
               key={a.id}
+              className="feed-row"
               onClick={() => onNavigate(`/article/${a.id}`)}
               sx={{
                 display: "flex", alignItems: "center", gap: 1.5, py: 0.75,
                 cursor: "pointer", borderRadius: "var(--r-sm, 6px)", px: 0.5, mx: -0.5,
-                transition: "background var(--t, 0.26s) var(--ease, cubic-bezier(.22,.61,.36,1))",
-                "&:hover": { bgcolor: "rgba(255,255,255,.03)" },
+                transition: "all var(--t, 0.26s) var(--ease, cubic-bezier(.22,.61,.36,1))",
+                "&:hover": { bgcolor: "var(--bg-raised, #1c232f)", transform: "translateY(-1px)" },
+                "&:hover .action-cluster": { opacity: 1 },
+                "&:hover .severity-rail": { opacity: 1 },
               }}
             >
               <SeverityRail type={a.type} trust={a.trust_score} />
@@ -356,6 +417,7 @@ export function FabricOverview({
                       "& .MuiChip-label": { px: 0.75 },
                     }}
                   />
+                  <Info k={a.type as any} />
                   <Typography
                     variant="body2"
                     sx={{ color: "#c2cbda", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "0.75rem" }}
@@ -364,9 +426,11 @@ export function FabricOverview({
                   </Typography>
                 </Box>
               </Box>
-              <Typography variant="caption" sx={{ color: "#8a94a8", whiteSpace: "nowrap", fontFamily: '"IBM Plex Mono", monospace' }}>
-                {a.trust_score != null && a.trust_score > 0 ? (a.trust_score * 100).toFixed(0) + "%" : "—"}
-              </Typography>
+              <Box className="action-cluster" sx={{ display: "flex", alignItems: "center", gap: 0.5, opacity: 0, transition: "opacity 0.14s ease" }}>
+                <Typography variant="caption" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.625rem", color: "#8a94a8" }}>
+                  open ↗
+                </Typography>
+              </Box>
             </Box>
           ))}
         </CardContent>
