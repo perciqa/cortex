@@ -27,6 +27,8 @@ interface BenchPanelProps {
 
 interface RocmInfo {
   mem_util_pct: number;
+  vram_total_mb?: number;
+  vram_used_mb?: number;
   device_name: string;
   sensor_backend: string;
   hip_version: string | null;

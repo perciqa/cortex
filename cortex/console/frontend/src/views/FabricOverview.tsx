@@ -320,7 +320,7 @@ export function FabricOverview({
                   <Box sx={{ width: gpuOff ? "0%" : `${gpuPct}%`, height: "100%", bgcolor: "#f5a524", borderRadius: 2, transition: "width 0.6s cubic-bezier(.16,1,.3,1)" }} />
                 </Box>
                 <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.59375rem", color: "#8a94a8", mt: 0.5, textAlign: "center", background: "none !important" }}>
-                  vram {gpuOff ? "\u00b7 no signal" : `${(latestSample?.gpu_mem_util_total_mb || 0).toFixed(0)} MiB`}
+                  vram {gpuOff ? "\u00b7 no signal" : latestSample?.vram_total_mb ? `${latestSample.vram_total_mb.toFixed(0)} MiB` : ""}
                 </Typography>
               </Box>
             </Box>

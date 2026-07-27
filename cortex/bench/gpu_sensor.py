@@ -48,10 +48,11 @@ class _TorchCudaShim:
 torch_cuda = _TorchCudaShim()
 
 
-def _rocm_smi_mem_util() -> float | None:
-    """Query rocm-smi for GPU 0 VRAM utilisation (used / total).
+def _rocm_smi_mem_info() -> dict | None:
+    """Query rocm-smi for GPU 0 VRAM info.
 
-    Returns a float in [0, 100] or None if rocm-smi is unavailable.
+    Returns a dict with ``mem_util_pct`` and ``vram_total_mb``/``vram_used_mb``
+    or None if rocm-smi is unavailable.
     """
     try:
         raw = subprocess.check_output(
@@ -66,14 +67,17 @@ def _rocm_smi_mem_util() -> float | None:
         for _key, vals in data.items():
             if not isinstance(vals, dict):
                 continue
-            # Try shape A
             total_b = vals.get("VRAM Total Memory (B)") or vals.get("vram_total")
             used_b = vals.get("VRAM Total Used Memory (B)") or vals.get("vram_used")
             if total_b is not None and used_b is not None:
                 total = float(total_b)
                 used = float(used_b)
                 if total > 0:
-                    return max(0.0, min(100.0, 100.0 * used / total))
+                    return {
+                        "mem_util_pct": max(0.0, min(100.0, 100.0 * used / total)),
+                        "vram_total_mb": round(total / 1_048_576, 1),
+                        "vram_used_mb": round(used / 1_048_576, 1),
+                    }
     except FileNotFoundError:
         pass  # rocm-smi not installed — expected on non-Radeon hosts
     except Exception as exc:
@@ -116,10 +120,12 @@ class GpuSensor:
 
     def snapshot(self) -> dict:
         # --- Primary: rocm-smi (present on Radeon pod) ---
-        rocm_util = _rocm_smi_mem_util()
-        if rocm_util is not None:
+        rocm_info = _rocm_smi_mem_info()
+        if rocm_info is not None:
             return {
-                "mem_util_pct": rocm_util,
+                "mem_util_pct": rocm_info["mem_util_pct"],
+                "vram_total_mb": rocm_info["vram_total_mb"],
+                "vram_used_mb": rocm_info["vram_used_mb"],
                 "device_name": _rocm_smi_device_name() or torch_cuda.device_name(),
                 "backend": "rocm-smi",
             }

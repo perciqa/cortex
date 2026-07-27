@@ -97,6 +97,8 @@ def create_app_with_broker(
 
         return JSONResponse({
             "mem_util_pct": snap["mem_util_pct"],
+            "vram_total_mb": snap.get("vram_total_mb"),
+            "vram_used_mb": snap.get("vram_used_mb"),
             "device_name": snap.get("device_name", "unknown"),
             "sensor_backend": snap.get("backend", "none"),
             "hip_version": hip_version,

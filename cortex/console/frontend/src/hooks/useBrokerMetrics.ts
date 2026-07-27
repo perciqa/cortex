@@ -2,17 +2,18 @@ import { useEffect, useReducer, useRef } from "react";
 
 export interface MetricsSample {
   node: string;
-  embeds_per_sec_radeon: number;
-  embeds_per_sec_cpu: number;
-  queries_per_sec_radeon: number;
-  queries_per_sec_cpu: number;
+  embeds_per_sec_radeon?: number;
+  embeds_per_sec_cpu?: number;
+  queries_per_sec_radeon?: number;
+  queries_per_sec_cpu?: number;
   gpu_mem_util_pct: number;
-  p95_query_latency_ms: number;
+  p95_query_latency_ms?: number;
   gpu_device_name?: string;
   gpu_sensor_backend?: string;
   hip_version?: string;
   torch_version?: string;
-  gpu_mem_util_total_mb?: number;
+  vram_total_mb?: number;
+  vram_used_mb?: number;
 }
 
 export interface MetricsState {
@@ -63,30 +64,20 @@ export function useBrokerMetrics(url: string): MetricsState {
     const poll = async () => {
       if (hasSamples.current) return;
       try {
-        const [rocmRes, llmRes] = await Promise.allSettled([
-          fetch("/api/rocm-info").then(r => r.json()),
-          fetch("/api/llm-info").then(r => r.json()),
-        ]);
+        const rocmRes = await fetch("/api/rocm-info").then(r => r.json());
 
         if (cancelled) return;
 
-        const rocm = rocmRes.status === "fulfilled" ? rocmRes.value : null;
-        const llm = llmRes.status === "fulfilled" ? llmRes.value : null;
-
-        if (rocm) {
+        if (rocmRes && rocmRes.mem_util_pct != null) {
           const sample: MetricsSample = {
             node: "soc-alpha",
-            embeds_per_sec_radeon: 0,
-            embeds_per_sec_cpu: 0,
-            queries_per_sec_radeon: 0,
-            queries_per_sec_cpu: 0,
-            gpu_mem_util_pct: rocm.mem_util_pct || 0,
-            p95_query_latency_ms: 0,
-            gpu_device_name: rocm.device_name,
-            gpu_sensor_backend: rocm.sensor_backend,
-            hip_version: rocm.hip_version,
-            torch_version: rocm.torch_version,
-            gpu_mem_util_total_mb: 0,
+            gpu_mem_util_pct: rocmRes.mem_util_pct,
+            gpu_device_name: rocmRes.device_name,
+            gpu_sensor_backend: rocmRes.sensor_backend,
+            hip_version: rocmRes.hip_version,
+            torch_version: rocmRes.torch_version,
+            vram_total_mb: rocmRes.vram_total_mb,
+            vram_used_mb: rocmRes.vram_used_mb,
           };
           dispatch({ type: "sample", sample });
           hasSamples.current = true;
