@@ -11,6 +11,7 @@ export function Info({ k }: { k: GlossaryKey }) {
   const [pos, setPos] = useState({ top: 0, left: 0, ax: 12, flip: false, measured: false });
   const g = GLOSSARY[k];
   const id = useId();
+  if (!g) return null;
 
   useLayoutEffect(() => {
     if (!open || !btn.current || !pop.current) return;

@@ -141,6 +141,8 @@ export function ArticleDetail({ articleId, article: initialArticle, fetchArticle
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const readPct = useScrollProgress(scrollRef);
+  const content = article?.content || "";
+  const indicators = useMemo(() => extractIndicators(content), [content]);
 
   if (!article) return <Typography sx={{ color: "#8a94a8", p: 4 }}>Loading...</Typography>;
   if (!article.content || article.content === article.id) return <Typography sx={{ color: "#8a94a8", p: 4 }}>Loading article data...</Typography>;
@@ -149,7 +151,6 @@ export function ArticleDetail({ articleId, article: initialArticle, fetchArticle
   const isUnranked = article.trust_score === null || article.trust_score === undefined || article.trust_score === 0;
   const trustVal = article.trust_score ?? 0;
   const trustColor = trustVal > 0.7 ? "#3ddc97" : trustVal > 0.4 ? "#f5a524" : "#ff5d73";
-  const indicators = useMemo(() => extractIndicators(article.content), [article.content]);
   const sourceIds = (article.payload as Record<string, unknown>)?.source_article_ids as string[] | undefined;
   const rawPayload = JSON.stringify(article.payload, null, 2);
 
