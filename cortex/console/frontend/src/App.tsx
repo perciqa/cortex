@@ -17,15 +17,16 @@ function wsUrl(path: string): string {
   return `${proto}//${location.host}${path}`;
 }
 
-const PATH_TO_VIEW: Record<string, ViewId> = {
-  "/": "overview",
-  "/feed": "feed",
-  "/activity": "activity",
-  "/provenance": "provenance",
-  "/scope": "scope",
-  "/bench": "bench",
-  "/attack": "attack",
-};
+function activeKey(path: string): ViewId {
+  if (path === "/") return "overview";
+  if (path.startsWith("/feed") || path.startsWith("/article")) return "feed";
+  if (path.startsWith("/activity")) return "activity";
+  if (path.startsWith("/provenance")) return "provenance";
+  if (path.startsWith("/scope")) return "scope";
+  if (path.startsWith("/bench")) return "bench";
+  if (path.startsWith("/attack")) return "attack";
+  return "overview";
+}
 
 const VIEW_TO_PATH: Record<ViewId, string> = {
   overview: "/",
@@ -79,8 +80,7 @@ function DetailPage({ articles, onNavigate }: { articles: any[]; onNavigate: (pa
 
 export function App() {
   const navigate = useNavigate();
-  const location = window.location.pathname;
-  const currentView = PATH_TO_VIEW[location] || "overview";
+  const currentView = activeKey(window.location.pathname);
   const events = useBrokerEvents(wsUrl("/ws/events"));
   const metrics = useBrokerMetrics(wsUrl("/ws/metrics"));
 
