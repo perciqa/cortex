@@ -38,12 +38,18 @@ const VIEW_TO_PATH: Record<ViewId, string> = {
   attack: "/attack",
 };
 
-function HomePage({ articles, events }: { articles: any[]; events: any[] }) {
-  const navigate = useNavigate();
+function HomePage({ articles, activities, byNode, connected, attackCounts, onNavigate }: {
+  articles: any[]; activities: any[]; byNode: Record<string, any[]>; connected: boolean;
+  attackCounts: Record<string, number>; onNavigate: (path: string) => void;
+}) {
   return (
     <FabricOverview
-      tenants={[{ slug: "soc-alpha" }, { slug: "soc-beta" }]}
-      events={events}
+      articles={articles}
+      activities={activities}
+      byNode={byNode}
+      connected={connected}
+      attackCounts={attackCounts}
+      onNavigate={onNavigate}
     />
   );
 }
@@ -86,7 +92,7 @@ export function App() {
   return (
     <Layout current={currentView} onNavigate={handleNavigate} connected={events.connected}>
       <Routes>
-        <Route path="/" element={<HomePage articles={articles} events={eventsToOverview(articles)} />} />
+        <Route path="/" element={<HomePage articles={articles} activities={activities} byNode={metrics.byNode} connected={events.connected} attackCounts={buildCounts(articles)} onNavigate={(p) => navigate(p)} />} />
         <Route path="/feed" element={<FeedPage articles={articles} onSelect={(id) => navigate(`/article/${id}`)} />} />
         <Route path="/article/:id" element={<DetailPage articles={articles} onNavigate={(p) => navigate(p)} />} />
         <Route path="/activity" element={<AgentActivity activities={activities} onNavigate={(p) => navigate(p)} />} />
@@ -102,13 +108,6 @@ export function App() {
       </Routes>
     </Layout>
   );
-}
-
-function eventsToOverview(articles: any[]) {
-  return articles.map(a => ({
-    event: "article.published",
-    data: { article: a, src_org: a.src_org || "" },
-  }));
 }
 
 function buildCounts(articles: any[]) {

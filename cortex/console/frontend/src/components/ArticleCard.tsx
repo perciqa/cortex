@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
+import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import { TrustRing } from "./TrustRing";
 import { SignatureStatus } from "./SignatureStatus";
 
@@ -60,10 +61,10 @@ export function ArticleCard({ article, onSelect }: { article: Article; onSelect?
               {technique && <Chip label={technique} size="small" variant="outlined" />}
               {tactic && <Chip label={tactic} size="small" variant="outlined" sx={{ opacity: 0.7 }} />}
               {isLlmDerived && (
-                <Chip label="⚡ LLM-synthesized" size="small" color="secondary" variant="outlined" />
+                <Chip icon={<AutoAwesome sx={{ fontSize: 12 }} />} label="LLM-synthesized" size="small" color="secondary" variant="outlined" />
               )}
-              <SignatureStatus sig={article.agent_signature} label="agent" />
-              <SignatureStatus sig={article.org_signature} label="org" />
+              {article.agent_signature && <SignatureStatus sig={article.agent_signature} label="agent" />}
+              {article.org_signature && <SignatureStatus sig={article.org_signature} label="org" />}
             </Stack>
             {threatActor && (
               <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.25 }}>

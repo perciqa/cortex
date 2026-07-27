@@ -17,12 +17,13 @@ import "./index.css";
 const theme = createTheme({
   palette: {
     mode: "dark",
-    primary: { main: "#6366f1" },
-    secondary: { main: "#8b5cf6" },
-    success: { main: "#14b8a6" },
-    error: { main: "#f43f5e" },
-    warning: { main: "#f59e0b" },
-    background: { default: "#12151b", paper: "#1b2029" },
+    primary: { main: "#34d6c8" },
+    secondary: { main: "#9b7bff" },
+    success: { main: "#3ddc97" },
+    error: { main: "#ff5d73" },
+    warning: { main: "#f5a524" },
+    background: { default: "#0e1218", paper: "#161c26" },
+    divider: "rgba(150,170,200,.08)",
   },
   typography: {
     fontFamily: '"IBM Plex Sans", -apple-system, sans-serif',
@@ -67,28 +68,31 @@ const theme = createTheme({
       fontSize: "0.75rem",
       fontVariantNumeric: "tabular-nums",
     },
-    body1: { fontWeight: 400, fontSize: "0.9375rem", lineHeight: 1.5 },
-    body2: { fontWeight: 400, fontSize: "0.8125rem", lineHeight: 1.5 },
+    body1: { fontWeight: 400, fontSize: "0.9375rem", lineHeight: 1.5, color: "#c2cbda" },
+    body2: { fontWeight: 400, fontSize: "0.8125rem", lineHeight: 1.5, color: "#c2cbda" },
     caption: {
       fontFamily: '"IBM Plex Mono", monospace',
       fontSize: "0.6875rem",
       fontVariantNumeric: "tabular-nums",
+      color: "#8a94a8",
     },
     overline: {
-      fontFamily: '"IBM Plex Sans", sans-serif',
-      fontWeight: 600,
-      fontSize: "0.6875rem",
-      letterSpacing: "0.12em",
+      fontFamily: '"IBM Plex Mono", monospace',
+      fontWeight: 500,
+      fontSize: "0.65625rem",
+      letterSpacing: "0.18em",
       textTransform: "uppercase",
+      color: "#8a94a8",
     },
   },
-  shape: { borderRadius: 12 },
+  shape: { borderRadius: 10 },
   components: {
     MuiCard: {
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          transition: "box-shadow 0.2s ease, transform 0.2s ease",
+          borderRadius: "var(--r-md, 10px)",
+          transition: "box-shadow var(--t, 0.26s) var(--ease, cubic-bezier(.22,.61,.36,1)), transform var(--t, 0.26s) var(--ease, cubic-bezier(.22,.61,.36,1))",
           "&:hover": {
             boxShadow: "0 1px 0 rgba(255,255,255,.04), 0 8px 24px -8px rgba(0,0,0,.7)",
             transform: "translateY(-2px)",
@@ -103,8 +107,8 @@ const theme = createTheme({
     },
     MuiChip: {
       styleOverrides: {
-        root: { borderRadius: 16 },
-        label: { fontWeight: 500 },
+        root: { borderRadius: 999 },
+        label: { fontWeight: 500, fontSize: "0.6875rem" },
       },
     },
     MuiInputBase: {
@@ -114,29 +118,29 @@ const theme = createTheme({
     },
     MuiDrawer: {
       styleOverrides: {
-        paper: { background: "#161a22", borderRight: "1px solid rgba(255,255,255,.06)" },
+        paper: { background: "var(--bg-rail, #11161e)", borderRight: "1px solid var(--line, rgba(150,170,200,.08))" },
       },
     },
     MuiAppBar: {
       styleOverrides: {
-        root: { background: "#161a22 !important", backgroundImage: "none !important" },
+        root: { background: "var(--bg-rail, #11161e) !important", backgroundImage: "none !important" },
       },
     },
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: "var(--r-sm, 6px)",
           margin: "2px 8px",
           "&.Mui-selected": {
-            background: "rgba(99,102,241,.15)",
-            "&:hover": { background: "rgba(99,102,241,.2)" },
+            background: "rgba(52,214,200,.12)",
+            "&:hover": { background: "rgba(52,214,200,.18)" },
           },
         },
       },
     },
     MuiListItemIcon: {
       styleOverrides: {
-        root: { minWidth: 36, color: "#9aa4b6" },
+        root: { minWidth: 36, color: "#8a94a8" },
       },
     },
     MuiPaper: {
@@ -146,17 +150,17 @@ const theme = createTheme({
     },
     MuiTableCell: {
       styleOverrides: {
-        root: { borderBottom: "1px solid rgba(255,255,255,.06)" },
+        root: { borderBottom: "1px solid rgba(150,170,200,.08)" },
       },
     },
     MuiLinearProgress: {
       styleOverrides: {
-        root: { borderRadius: 4, background: "rgba(255,255,255,.06)" },
+        root: { borderRadius: 4, background: "rgba(150,170,200,.08)" },
       },
     },
     MuiCircularProgress: {
       styleOverrides: {
-        root: { "& .MuiCircularProgress-track": { color: "rgba(255,255,255,.06)" } },
+        root: { "& .MuiCircularProgress-track": { color: "rgba(150,170,200,.08)" } },
       },
     },
   },
@@ -177,11 +181,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             pointerEvents: "none",
             zIndex: 0,
             backgroundImage:
-              "linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-            maskImage: "radial-gradient(120% 90% at 50% 0%, #000 30%, transparent 100%)",
-            WebkitMaskImage:
-              "radial-gradient(120% 90% at 50% 0%, #000 30%, transparent 100%)",
+              "linear-gradient(rgba(150,170,200,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(150,170,200,.06) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+            WebkitMask: "radial-gradient(130% 100% at 50% -10%, #000 25%, transparent 78%)",
+            mask: "radial-gradient(130% 100% at 50% -10%, #000 25%, transparent 78%)",
+            opacity: 0.6,
           },
           "&::after": {
             content: '""',
@@ -190,8 +194,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             pointerEvents: "none",
             zIndex: 0,
             background:
-              "radial-gradient(80% 60% at 50% 120%, hsl(var(--threat-hue, 190) 80% 50% / 0.08), transparent 70%)",
-            transition: "background 1.2s ease",
+              "radial-gradient(70% 50% at 88% 112%, hsl(var(--threat-h, 176) 70% 45% / 0.10), transparent 70%), radial-gradient(50% 40% at 6% -8%, hsl(220 60% 50% / 0.06), transparent 70%)",
+            transition: "background 1.4s cubic-bezier(.22,.61,.36,1)",
           },
           "& > *": { position: "relative", zIndex: 1 },
         },

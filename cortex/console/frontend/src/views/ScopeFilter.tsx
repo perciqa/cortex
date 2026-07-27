@@ -42,7 +42,7 @@ function TrustMeter({ value }: { value: number | null | undefined }) {
           width: 60,
           height: 4,
           borderRadius: 2,
-          bgcolor: "rgba(255,255,255,.06)",
+          bgcolor: "rgba(150,170,200,.16)",
           overflow: "hidden",
           cursor: "pointer",
           position: "relative",
@@ -50,12 +50,12 @@ function TrustMeter({ value }: { value: number | null | undefined }) {
       >
         <Box
           sx={{
-            width: `${pct}%`,
+            width: isUnranked ? "100%" : `${pct}%`,
             height: "100%",
-            bgcolor: color,
+            bgcolor: isUnranked ? "transparent" : color,
             borderRadius: 2,
-            opacity: isUnranked ? 0.3 : 1,
-            border: isUnranked ? "1px dashed rgba(255,255,255,.2)" : "none",
+            opacity: isUnranked ? 0.5 : 1,
+            border: isUnranked ? "1px dashed rgba(150,170,200,.4)" : "none",
             transition: "width 0.4s ease",
           }}
         />
