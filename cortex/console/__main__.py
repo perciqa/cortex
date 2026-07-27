@@ -27,11 +27,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 @dataclass
 class Lifecycle:
-    subscriber: BrokerSubscriber | None
+    subscribers: list[BrokerSubscriber]
     async def stop(self):
-        if self.subscriber is None:
-            return
-        await self.subscriber.stop()
+        for sub in self.subscribers:
+            await sub.stop()
+
+
+def _channel_url(broker_url: str, channel: str) -> str:
+    sep = "?" if "?" not in broker_url else "&"
+    return f"{broker_url}{sep}channel={channel}"
 
 
 def build_app(broker_url: str, static_dir: Path, registry_path: Path):
@@ -47,16 +51,17 @@ def build_app(broker_url: str, static_dir: Path, registry_path: Path):
 
     fanout_with_hooks = Fanout(on_event=on_event_sync)
 
-    if "channel=event" not in broker_url:
-        broker_url += ("?" if "?" not in broker_url else "&") + "channel=event"
-    sub = BrokerSubscriber(uri=broker_url, fanout=fanout_with_hooks)
+    event_url = _channel_url(broker_url, "event")
+    metrics_url = _channel_url(broker_url, "metrics")
+    event_sub = BrokerSubscriber(uri=event_url, fanout=fanout_with_hooks)
+    metrics_sub = BrokerSubscriber(uri=metrics_url, fanout=fanout_with_hooks)
     app = create_app_with_broker(static_dir=static_dir, registry_path=registry_path,
-                                 fanout=fanout_with_hooks, broker_url=broker_url,
+                                 fanout=fanout_with_hooks, broker_url=event_url,
                                  node_registry=nodes, attack_matrix=attack,
                                  events_ring=events_ring)
-    app.state.subscriber = sub
+    app.state.subscribers = [event_sub, metrics_sub]
     app.state._seed_fn = lambda: _seed_ring_buffer(events_ring, attack)
-    return app, Lifecycle(subscriber=sub)
+    return app, Lifecycle(subscribers=[event_sub, metrics_sub])
 
 
 def _seed_ring_buffer(events_ring: EventRingBuffer, attack: AttackMatrixTracker) -> None:
@@ -105,11 +110,13 @@ def main() -> None:
     @app.on_event("startup")
     async def _start():
         app.state._seed_fn()
-        app.state.subscriber.start()
+        for sub in app.state.subscribers:
+            sub.start()
 
     @app.on_event("shutdown")
     async def _stop():
-        await app.state.subscriber.stop()
+        for sub in app.state.subscribers:
+            await sub.stop()
 
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 
