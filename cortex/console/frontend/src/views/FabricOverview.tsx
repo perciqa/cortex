@@ -266,7 +266,7 @@ export function FabricOverview({
       {/* ── Focal ── */}
       <Card sx={{ gridColumn: { xs: "span 12", md: "span 7" }, borderRadius: "var(--r-md, 10px)" }}>
         <CardContent sx={{ p: "16px 18px !important", "&:last-child": { pb: "16px !important" } }}>
-          <Eyebrow>Threat posture \u00b7 24h <Info k="severity" /></Eyebrow>
+          <Eyebrow>Threat posture · 24h <Info k="severity" /></Eyebrow>
           <Box sx={{ display: "flex", gap: 0.5, mb: 2, height: 60, alignItems: "flex-end" }}>
             {Array.from({ length: 24 }, (_, i) => {
               const h = Math.max(2, Math.floor(Math.random() * 50) + 4 * (i > 17 ? 1 : i > 10 ? 0.5 : 0));
@@ -373,7 +373,7 @@ export function FabricOverview({
               </Box>
               {gpuOff && (
                 <Typography sx={{ fontFamily: '"IBM Plex Sans", sans-serif', fontSize: "0.6875rem", color: "#8a94a8", fontStyle: "italic", mt: 1, background: "none !important" }}>
-                  pipeline idle \u00b7 awaiting a reasoning pass
+                  pipeline idle · awaiting a reasoning pass
                 </Typography>
               )}
               <Box sx={{ display: "flex", gap: "22px", mt: 1.5 }}>
@@ -415,7 +415,7 @@ export function FabricOverview({
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
             <Eyebrow>Agents</Eyebrow>
             <Typography variant="caption" sx={{ fontFamily: '"IBM Plex Mono", monospace', color: "#8a94a8" }}>
-              {Object.keys(agentSummary).length} agents \u00b7 {activities.length} events \u00b7 {reasoningCount} reasoning
+              {Object.keys(agentSummary).length} agents · {activities.length} events · {reasoningCount} reasoning
             </Typography>
           </Box>
           {Object.entries(agentSummary).slice(0, 4).map(([name, info]) => {

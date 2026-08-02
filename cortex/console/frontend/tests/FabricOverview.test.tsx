@@ -25,6 +25,15 @@ function renderOverview(activities: ReturnType<typeof activity>[]) {
 }
 
 describe("FabricOverview agents summary", () => {
+  it("renders the separator as a middle dot, not a literal escape", () => {
+    const { container } = renderOverview([
+      activity("a1", "SOC Alpha", "completed"),
+    ]);
+    const summary = container.textContent || "";
+    expect(summary).toContain("\u00b7");
+    expect(summary).not.toContain("\\u00b7");
+  });
+
   it("shows the newest activity step per agent, not the oldest", () => {
     // The reducer stores activities newest-first: index 0 is the newest.
     const activities = [
