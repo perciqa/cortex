@@ -124,17 +124,36 @@ export function FabricOverview({
 
   const agentSummary = useMemo(() => {
     const agents: Record<string, { total: number; lastStep: string }> = {};
+    // Activities are newest-first (the reducer prepends), so the first
+    // occurrence of an agent is its latest step.
     for (const a of activities) {
       const name = (a.payload?.agent_name as string) || "Unknown";
-      if (!agents[name]) agents[name] = { total: 0, lastStep: "idle" };
+      if (!agents[name]) {
+        agents[name] = { total: 0, lastStep: (a.payload?.activity_step as string) || "idle" };
+      }
       agents[name].total++;
-      const step = a.payload?.activity_step as string;
-      if (step) agents[name].lastStep = step;
     }
     return agents;
   }, [activities]);
 
-  const reasoningCount = activities.filter(a => (a.payload?.activity_step as string) === "reasoning").length;
+  const reasoningCount = useMemo(() => {
+    // A cycle emits two consecutive "reasoning" activities (synthesize +
+    // complete); collapse them per agent so the count reflects reasoning
+    // passes, not activity rows.
+    const byAgent: Record<string, string[]> = {};
+    for (const a of activities) {
+      const name = (a.payload?.agent_name as string) || "Unknown";
+      if (!byAgent[name]) byAgent[name] = [];
+      byAgent[name].push((a.payload?.activity_step as string) || "");
+    }
+    let count = 0;
+    for (const steps of Object.values(byAgent)) {
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i] === "reasoning" && steps[i - 1] !== "reasoning") count++;
+      }
+    }
+    return count;
+  }, [activities]);
   const totalArticles = articles.length;
   const byOrgTotal = Object.values(byOrg).reduce((a, b) => a + b, 0);
   const totalByType = Object.values(byType).reduce((a, b) => a + b, 0);
