@@ -143,11 +143,15 @@ pip install -e ".[dev,gpu]"       # Requires ROCm/CUDA PyTorch
 pytest -q tests/
 ```
 
-### Running the Demo
+### Running the Fabric
 
 ```bash
-# End-to-end F1 SOC consortium demo (two tenants, broker, agents)
-python scenarios/soc_consortium/demo_run.py
+# Start the broker (WebSocket + health endpoint on 7432)
+python -m cortex.broker --config deploy/config/broker.yaml
+
+# Start a node per tenant (separate terminals; see deploy/config/ for templates)
+python -m cortex.cli start --config deploy/config/alpha.yaml
+python -m cortex.cli start --config deploy/config/beta.yaml
 
 # Start the Console UI (separate terminal)
 python -m cortex.console --broker ws://localhost:7432 --port 8080
@@ -156,13 +160,13 @@ python -m cortex.console --broker ws://localhost:7432 --port 8080
 
 ### Environment Configuration
 
-See `scenarios/soc_consortium/configs/` for YAML configuration templates:
+`deploy/config/` contains YAML templates for the broker, nodes, and registry:
 
 | File | Purpose |
 |---|---|
 | `broker.yaml` | Broker WebSocket port, registry path, replay window |
-| `node-alpha.yaml` | SOC Alpha node config (org DID, keys, embedder, vector index) |
-| `node-beta.yaml` | SOC Beta node config |
+| `node-alpha.yaml` | Tenant node config (org DID, keys, embedder, vector index) |
+| `node-beta.yaml` | Second tenant node config |
 | `org_registry.json` | Org public keys for signature verification |
 
 Key environment overrides:
@@ -176,20 +180,19 @@ Key environment overrides:
 | `VLLM_API_KEY` | API key for the LLM endpoint (if required) |
 | `VLLM_MODEL` | Model name override (default: `google/gemma-4-12B`) |
 
-When `VLLM_URL` or `VLLM_API_KEY` is set, the demo automatically routes agent reasoning through the live LLM instead of using scripted responses.
+When `VLLM_URL` or `VLLM_API_KEY` is set, agent reasoning routes through the live LLM instead of using scripted responses.
 
 ### Running with Live LLM Reasoning
 
 ```bash
-# Using the Gemma 4 12B inference pod (via SSH tunnel):
-ssh -i ~/.ssh/rocm_pod -p 31047 -fNL 8000:localhost:8000 root@36.150.116.206
-VLLM_URL=http://localhost:8000/v1 python scenarios/soc_consortium/demo_run.py
+# Using a locally-served OpenAI-compatible endpoint (e.g. vLLM on localhost:8000):
+VLLM_URL=http://localhost:8000/v1 python -m cortex.cli start --config deploy/config/alpha.yaml
 
 # Or with a hosted API (Groq, Together AI, etc.):
 VLLM_URL=https://api.groq.com/openai/v1 \
   VLLM_API_KEY=gsk_... \
   VLLM_MODEL=llama-3.1-8b-instant \
-  python scenarios/soc_consortium/demo_run.py
+  python -m cortex.cli start --config deploy/config/alpha.yaml
 ```
 
 ### Running Tests
@@ -210,8 +213,7 @@ cortex/
 ├── broker/        # Federated pub/sub WebSocket server with ACL
 ├── sdk/           # Agent-facing client + LangChain/LlamaIndex adapters
 ├── bench/         # GPU vs CPU benchmark harness
-├── console/       # FastAPI backend + React SPA web UI
-└── scenarios/     # F1 SOC consortium demo data and agent scripts
+└── console/       # FastAPI backend + React SPA web UI
 ```
 
 ## Hackathon Submission
