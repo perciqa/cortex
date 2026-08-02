@@ -17,15 +17,16 @@ function wsUrl(path: string): string {
   return `${proto}//${location.host}${path}`;
 }
 
-const PATH_TO_VIEW: Record<string, ViewId> = {
-  "/": "overview",
-  "/feed": "feed",
-  "/activity": "activity",
-  "/provenance": "provenance",
-  "/scope": "scope",
-  "/bench": "bench",
-  "/attack": "attack",
-};
+function activeKey(path: string): ViewId {
+  if (path === "/") return "overview";
+  if (path.startsWith("/feed") || path.startsWith("/article")) return "feed";
+  if (path.startsWith("/activity")) return "activity";
+  if (path.startsWith("/provenance")) return "provenance";
+  if (path.startsWith("/scope")) return "scope";
+  if (path.startsWith("/bench")) return "bench";
+  if (path.startsWith("/attack")) return "attack";
+  return "overview";
+}
 
 const VIEW_TO_PATH: Record<ViewId, string> = {
   overview: "/",
@@ -38,12 +39,18 @@ const VIEW_TO_PATH: Record<ViewId, string> = {
   attack: "/attack",
 };
 
-function HomePage({ articles, events }: { articles: any[]; events: any[] }) {
-  const navigate = useNavigate();
+function HomePage({ articles, activities, byNode, connected, attackCounts, onNavigate }: {
+  articles: any[]; activities: any[]; byNode: Record<string, any[]>; connected: boolean;
+  attackCounts: Record<string, number>; onNavigate: (path: string) => void;
+}) {
   return (
     <FabricOverview
-      tenants={[{ slug: "soc-alpha" }, { slug: "soc-beta" }]}
-      events={events}
+      articles={articles}
+      activities={activities}
+      byNode={byNode}
+      connected={connected}
+      attackCounts={attackCounts}
+      onNavigate={onNavigate}
     />
   );
 }
@@ -73,8 +80,7 @@ function DetailPage({ articles, onNavigate }: { articles: any[]; onNavigate: (pa
 
 export function App() {
   const navigate = useNavigate();
-  const location = window.location.pathname;
-  const currentView = PATH_TO_VIEW[location] || "overview";
+  const currentView = activeKey(window.location.pathname);
   const events = useBrokerEvents(wsUrl("/ws/events"));
   const metrics = useBrokerMetrics(wsUrl("/ws/metrics"));
 
@@ -86,7 +92,7 @@ export function App() {
   return (
     <Layout current={currentView} onNavigate={handleNavigate} connected={events.connected}>
       <Routes>
-        <Route path="/" element={<HomePage articles={articles} events={eventsToOverview(articles)} />} />
+        <Route path="/" element={<HomePage articles={articles} activities={activities} byNode={metrics.byNode} connected={events.connected} attackCounts={buildCounts(articles)} onNavigate={(p) => navigate(p)} />} />
         <Route path="/feed" element={<FeedPage articles={articles} onSelect={(id) => navigate(`/article/${id}`)} />} />
         <Route path="/article/:id" element={<DetailPage articles={articles} onNavigate={(p) => navigate(p)} />} />
         <Route path="/activity" element={<AgentActivity activities={activities} onNavigate={(p) => navigate(p)} />} />
@@ -102,13 +108,6 @@ export function App() {
       </Routes>
     </Layout>
   );
-}
-
-function eventsToOverview(articles: any[]) {
-  return articles.map(a => ({
-    event: "article.published",
-    data: { article: a, src_org: a.src_org || "" },
-  }));
 }
 
 function buildCounts(articles: any[]) {

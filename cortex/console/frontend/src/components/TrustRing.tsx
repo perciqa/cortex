@@ -1,13 +1,25 @@
-import { RingProgress, Text } from "@mantine/core";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import { useCountUp } from "../hooks/useCountUp";
 
 export function TrustRing({ pct }: { pct: number }) {
-  const color = pct > 0.7 ? "green" : pct > 0.4 ? "yellow" : "red";
+  const animatedValue = useCountUp(Math.round(pct * 100));
+  const color = pct > 0.7 ? "#14b8a6" : pct > 0.4 ? "#f59e0b" : "#f43f5e";
   return (
-    <RingProgress
-      size={48}
-      thickness={4}
-      sections={[{ value: Math.round(pct * 100), color }]}
-      label={<Text c={color} ta="center" size="xs">{Math.round(pct * 100)}</Text>}
-    />
+    <Box sx={{ position: "relative", display: "inline-flex" }}>
+      <CircularProgress
+        variant="determinate"
+        value={animatedValue}
+        size={48}
+        thickness={4}
+        sx={{ color, "& .MuiCircularProgress-track": { color: "rgba(255,255,255,.06)" } }}
+      />
+      <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Typography variant="caption" sx={{ fontWeight: 700, color, fontSize: "0.75rem" }}>
+          {Math.round(animatedValue)}
+        </Typography>
+      </Box>
+    </Box>
   );
 }

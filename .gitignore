@@ -49,3 +49,6 @@ dist/
 !cortex/console/frontend/dist/
 build/
 *.whl
+
+# OpenCode session artifacts
+.omo/
