@@ -55,8 +55,8 @@ function HomePage({ articles, activities, byNode, connected, attackCounts, onNav
   );
 }
 
-function FeedPage({ articles, onSelect }: { articles: any[]; onSelect: (id: string) => void }) {
-  return <ArticleFeed articles={articles} onSelect={onSelect} />;
+function FeedPage({ articles, onSelect, connected }: { articles: any[]; onSelect: (id: string) => void; connected: boolean }) {
+  return <ArticleFeed articles={articles} onSelect={onSelect} connected={connected} />;
 }
 
 function DetailPage({ articles, onNavigate }: { articles: any[]; onNavigate: (path: string) => void }) {
@@ -93,7 +93,7 @@ export function App() {
     <Layout current={currentView} onNavigate={handleNavigate} connected={events.connected}>
       <Routes>
         <Route path="/" element={<HomePage articles={articles} activities={activities} byNode={metrics.byNode} connected={events.connected} attackCounts={buildCounts(articles)} onNavigate={(p) => navigate(p)} />} />
-        <Route path="/feed" element={<FeedPage articles={articles} onSelect={(id) => navigate(`/article/${id}`)} />} />
+        <Route path="/feed" element={<FeedPage articles={articles} onSelect={(id) => navigate(`/article/${id}`)} connected={events.connected} />} />
         <Route path="/article/:id" element={<DetailPage articles={articles} onNavigate={(p) => navigate(p)} />} />
         <Route path="/activity" element={<AgentActivity activities={activities} onNavigate={(p) => navigate(p)} />} />
         <Route path="/provenance" element={<ProvenanceGraph articles={articles} />} />
