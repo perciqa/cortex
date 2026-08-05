@@ -55,7 +55,7 @@ def article_canonical_bytes(article) -> bytes:
         "schema_version": article.schema_version,
         "type": article.type.value,
         "content": article.content,
-        "payload": article.payload,
+        "payload": dict(article.payload),
         "provenance": {
             "producer_agent": p.producer_agent,
             "producer_org": p.producer_org,

@@ -51,7 +51,7 @@ def test_publish_insight_includes_cites(fake_node: MagicMock):
     assert art_id == "art-id-1"
     article = fake_node.publish.call_args.args[0]
     assert article.type == ArticleType.INSIGHT
-    assert article.cites == ["art-source-1", "art-source-2"]
+    assert article.cites == ("art-source-1", "art-source-2")
 
 
 def test_publish_warning_procedure_precedent_dispatch_correct_type(fake_node: MagicMock):

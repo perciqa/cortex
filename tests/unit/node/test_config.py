@@ -62,8 +62,18 @@ def test_env_override_embed_backend_cpu(tmp_path: Path, monkeypatch) -> None:
           key_paths: {org: ./o.pem, agent: ./a.pem}
         broker: {url: wss://b.local:7432, registry: ./r.json, replay_window_sec: 600}
         embedder: {model: bge-small-en-v1.5, backend: auto, batch_size: 16, fallback_on_oom: true}
-        vector_index: {backend: faiss-gpu, metric: cosine, hnsw: {M: 32, ef_construction: 200, ef_search: 64}}
-        trust: {default_org_reputation: 0.5, reputation_overrides: {}, half_life_days: 90, min_trust_default: 0.3}
+        vector_index:
+          backend: faiss-gpu
+          metric: cosine
+          hnsw:
+            M: 32
+            ef_construction: 200
+            ef_search: 64
+        trust:
+          default_org_reputation: 0.5
+          reputation_overrides: {}
+          half_life_days: 90
+          min_trust_default: 0.3
         query: {default_top_k: 5, deadline_ms: 400, min_trust: 0.3}
         logging: {level: INFO, file: ./logs/node.log}
     """)

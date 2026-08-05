@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import datetime as _dt
 import json
 import logging
@@ -165,7 +166,9 @@ class CortexNode:
         except Exception as exc:
             log.warning("inbound publish rejected: %s", exc)
             if self.store:
-                self.store.event_log_append("inbound.publish.rejected", article.id, {"error": str(exc)})
+                self.store.event_log_append(
+                    "inbound.publish.rejected", article.id, {"error": str(exc)},
+                )
             return
         if self.embedder is not None and self.vector_index is not None:
             try:
@@ -177,7 +180,9 @@ class CortexNode:
                 self.store.set_state(article.id, "indexed")
             except Exception as exc:
                 log.warning("inbound publish embed/index failed: %s", exc)
-                self.store.event_log_append("inbound.publish.index_failed", article.id, {"error": str(exc)})
+                self.store.event_log_append(
+                    "inbound.publish.index_failed", article.id, {"error": str(exc)},
+                )
                 return
         if self.trust is not None:
             now = _dt.datetime.now(_dt.UTC)
@@ -197,12 +202,12 @@ class CortexNode:
             if not self.embedder._check_gpu() and not self.embedder.fallback_to_cpu:
                 self.embedder.fallback_to_cpu = True
                 self.embedder._device = "cpu"
-                try:
+                with contextlib.suppress(Exception):
                     self.embedder._model = self.embedder._model.to("cpu")
-                except Exception:
-                    pass
                 self._on_embed_failed("healthcheck:no_gpu")
-                self.store.event_log_append("node.embed.fallback_cpu", None, {"reason": "healthcheck"})
+                self.store.event_log_append(
+                    "node.embed.fallback_cpu", None, {"reason": "healthcheck"},
+                )
 
     def publish(self, article: MemoryArticle) -> str:
         assert self.store and self.embedder and self.vector_index and self.trust and self.provenance
@@ -217,9 +222,13 @@ class CortexNode:
         art_id = compute_article_id(canonical)
         article = replace(article, id=art_id, agent_signature=agent_sig, org_signature=org_sig)
         embedding = self.embedder.embed_one(article.content)
-        article = replace(article, embedding=embedding.tolist(), embedding_model=self.config.embedder.model)
+        article = replace(article, embedding=embedding.tolist(),
+                          embedding_model=self.config.embedder.model)
         now = _dt.datetime.now(_dt.UTC)
-        trust_score = self.trust.trust_for(article, now, _StoreAdapter(self.store), graph_version=self.provenance.graph_version)
+        trust_score = self.trust.trust_for(
+            article, now, _StoreAdapter(self.store),
+            graph_version=self.provenance.graph_version,
+        )
         trust_expires = now + _dt.timedelta(days=self.config.trust.half_life_days)
         article = replace(article, trust_score=trust_score, trust_expiration=trust_expires)
         transition(article, ArticleState.DRAFTED, ArticleState.SIGNED)
@@ -318,12 +327,16 @@ class CortexNode:
                 "top_k": top_k, "min_trust": min_trust, "deadline_ms": deadline_ms,
             },
         }
+        loop = getattr(self.broker, "_loop", None)
+        if loop is None or loop.is_closed():
+            return []
+        timeout = (deadline_ms / 1000.0) + 2.0
         try:
-            loop = asyncio.get_running_loop()
-            fut = asyncio.run_coroutine_threadsafe(
-                self.broker.query_fanout(env), loop
-            )
-            result = fut.result(timeout=(deadline_ms / 1000.0) + 2.0)
+            fut = asyncio.run_coroutine_threadsafe(self.broker.query_fanout(env), loop)
+        except RuntimeError:
+            return []
+        try:
+            result = fut.result(timeout=timeout)
         except Exception:
             return []
         if isinstance(result, dict):
@@ -380,27 +393,27 @@ def _row_to_article(row: Any) -> MemoryArticle | None:
         created = _dt.datetime.fromisoformat(row["created_at"])
     except Exception:
         created = _dt.datetime.now(_dt.UTC)
-    get_col = lambda k, d=None: row[k] if k in row and row[k] is not None else d
+    def _get_col(row: Any, key: str, default: Any = None) -> Any:
+        return row[key] if key in row and row[key] is not None else default
+
     prov = Provenance(
-        producer_agent=get_col("producer_agent", ""),
-        producer_org=get_col("producer_org", ""),
+        producer_agent=_get_col(row, "producer_agent", ""),
+        producer_org=_get_col(row, "producer_org", ""),
         computation_ref=None, source_data_hash=None,
-        source_data_schema=None, run_id=get_col("run_id", ""),
+        source_data_schema=None, run_id=_get_col(row, "run_id", ""),
         timestamp=created,
     )
-    payload = json.loads(get_col("payload_json", "{}"))
-    cites = json.loads(get_col("cites_json", "[]"))
+    payload = json.loads(_get_col(row, "payload_json", "{}"))
+    cites = json.loads(_get_col(row, "cites_json", "[]"))
     trust_exp = None
-    if get_col("trust_expires"):
-        try:
-            trust_exp = _dt.datetime.fromisoformat(get_col("trust_expires"))
-        except Exception:
-            pass
+    if _get_col(row, "trust_expires"):
+        with contextlib.suppress(Exception):
+            trust_exp = _dt.datetime.fromisoformat(_get_col(row, "trust_expires"))
     return MemoryArticle(
         id=row["id"], type=row["type"], content=row["content"],
         payload=payload, embedding=None, embedding_model=None,
-        provenance=prov, scope=row["scope"], topic=get_col("topic", "*"),
-        agent_signature=get_col("agent_sig") or b"",
-        org_signature=get_col("org_sig"),
+        provenance=prov, scope=row["scope"], topic=_get_col(row, "topic", "*"),
+        agent_signature=_get_col(row, "agent_sig") or b"",
+        org_signature=_get_col(row, "org_sig"),
         cites=cites, trust_score=row["trust_score"], trust_expiration=trust_exp,
     )

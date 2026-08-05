@@ -12,8 +12,8 @@ def load_keys(org_path: Path, agent_path: Path) -> tuple[str, str]:
         if not Path(p).exists():
             raise FileNotFoundError(f"key file missing: {p}")
         mode = stat.S_IMODE(os.stat(p).st_mode)
-        if mode & 0o044:
-            raise PermissionError(f"key file is world-readable: {p} (mode {oct(mode)})")
+        if mode & 0o077:
+            raise PermissionError(f"key file has unsafe permissions: {p} (mode {oct(mode)})")
     org_pem = Path(org_path).read_text(encoding="utf-8")
     agent_pem = Path(agent_path).read_text(encoding="utf-8")
     load_private_pem(org_path)

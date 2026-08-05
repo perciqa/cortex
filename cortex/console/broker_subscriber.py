@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 
@@ -14,7 +15,8 @@ log = logging.getLogger(__name__)
 class BrokerSubscriber:
     """Persistent WS client to the broker. Reconnects with exponential backoff."""
 
-    def __init__(self, uri: str, fanout: Fanout, min_backoff: float = 1.0, max_backoff: float = 30.0) -> None:
+    def __init__(self, uri: str, fanout: Fanout, min_backoff: float = 1.0,
+                 max_backoff: float = 30.0) -> None:
         self._uri = uri
         self._fanout = fanout
         self._min_backoff = min_backoff
@@ -43,20 +45,16 @@ class BrokerSubscriber:
                 if self._stop.is_set():
                     break
                 log.warning("broker disconnected; retrying in %.1fs", backoff)
-                try:
+                with contextlib.suppress(TimeoutError):
                     await asyncio.wait_for(self._stop.wait(), timeout=backoff)
-                except TimeoutError:
-                    pass
                 backoff = min(self._max_backoff, backoff * 2)
 
     async def stop(self) -> None:
         self._stop.set()
         if self._task:
             self._task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._task
-            except asyncio.CancelledError:
-                pass
 
     def start(self) -> asyncio.Task:
         self._task = asyncio.create_task(self.run())

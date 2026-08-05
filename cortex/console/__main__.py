@@ -12,7 +12,7 @@ from cortex.console.backend import create_app_with_broker
 from cortex.console.broker_subscriber import BrokerSubscriber
 from cortex.console.fanout import Fanout
 from cortex.console.node_registry import NodeRegistry
-from cortex.console.ring_buffer import EventRingBuffer, MetricsRingBuffer
+from cortex.console.ring_buffer import EventRingBuffer
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -39,10 +39,8 @@ def _channel_url(broker_url: str, channel: str) -> str:
 
 
 def build_app(broker_url: str, static_dir: Path, registry_path: Path):
-    fanout = Fanout()
     attack = AttackMatrixTracker()
     events_ring = EventRingBuffer(1000)
-    metrics_ring = MetricsRingBuffer(60)
     nodes = NodeRegistry()
 
     def on_event_sync(payload):
@@ -65,7 +63,9 @@ def build_app(broker_url: str, static_dir: Path, registry_path: Path):
 
 
 def _seed_ring_buffer(events_ring: EventRingBuffer, attack: AttackMatrixTracker) -> None:
-    import sqlite3, json, glob
+    import glob
+    import json
+    import sqlite3
     db_paths = glob.glob("/workspace/cortex/**/articles.sqlite", recursive=True)
     db_paths += glob.glob("/tmp/*/cortex-node/articles.sqlite")
     seen_ids: set[str] = set()
@@ -73,7 +73,10 @@ def _seed_ring_buffer(events_ring: EventRingBuffer, attack: AttackMatrixTracker)
         try:
             conn = sqlite3.connect(db_path)
             cur = conn.cursor()
-            cur.execute("SELECT id, type, content, scope, payload_json, producer_org FROM articles ORDER BY rowid")
+            cur.execute(
+                "SELECT id, type, content, scope, payload_json, producer_org "
+                "FROM articles ORDER BY rowid"
+            )
             for row in cur.fetchall():
                 art_id, art_type, content, scope, payload_json, producer_org = row
                 if art_id in seen_ids:
@@ -105,7 +108,8 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO)
     static_dir = Path(args.static)
     registry_path = Path(args.registry)
-    app, lifecycle = build_app(broker_url=args.broker, static_dir=static_dir, registry_path=registry_path)
+    app, lifecycle = build_app(broker_url=args.broker, static_dir=static_dir,
+                               registry_path=registry_path)
 
     @app.on_event("startup")
     async def _start():

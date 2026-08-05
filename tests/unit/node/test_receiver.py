@@ -56,6 +56,9 @@ def test_tampered_canonical_raises_canonical_mismatch(tmp_path: Path) -> None:
     priv_str = priv.decode("utf-8")
     art = replace(art, agent_signature=sign(canonical, priv_str), id=compute_article_id(canonical))
     tampered = replace(art, content="hello world")
-    store = SimpleNamespace(event_log_append=lambda *_: None, set_state=lambda *_, **__: None, put=lambda *_, **__: None)
+    store = SimpleNamespace(
+        event_log_append=lambda *_: None, set_state=lambda *_, **__: None,
+        put=lambda *_, **__: None,
+    )
     with pytest.raises((CanonicalMismatchError, SignatureVerificationError)):
         receive_publish_envelope(tampered, canonical, reg, store)

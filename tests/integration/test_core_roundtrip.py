@@ -6,17 +6,17 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from cortex.core.article import (
+from cortex.core.article import (  # noqa: E402
     ArticleType,
     MemoryArticle,
     Provenance,
     Scope,
 )
-from cortex.core.canonical import (
+from cortex.core.canonical import (  # noqa: E402
     article_canonical_bytes,
     compute_article_id,
 )
-from cortex.core.crypto import (
+from cortex.core.crypto import (  # noqa: E402
     did_for_agent,
     did_for_org,
     generate_agent_keypair,

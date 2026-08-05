@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import json
 
 import pytest
@@ -14,7 +15,9 @@ async def test_broker_events_reach_fanout(unused_tcp_port: int):
     fanout = Fanout(on_event=lambda env: received.append(env))
 
     async def broker_handler(ws):
-        await ws.send(json.dumps({"type": "event", "payload": {"event": "article.published", "data": {"id": "a1"}}}))
+        event = {"type": "event", "payload": {
+            "event": "article.published", "data": {"id": "a1"}}}
+        await ws.send(json.dumps(event))
 
     server = await serve(broker_handler, "127.0.0.1", unused_tcp_port)
     sub = BrokerSubscriber(uri=f"ws://127.0.0.1:{unused_tcp_port}", fanout=fanout)
@@ -25,9 +28,7 @@ async def test_broker_events_reach_fanout(unused_tcp_port: int):
         await sub.stop()
         server.close()
         await server.wait_closed()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await task
-        except asyncio.CancelledError:
-            pass
 
     assert received == [{"event": "article.published", "data": {"id": "a1"}}]

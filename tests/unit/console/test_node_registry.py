@@ -23,7 +23,8 @@ async def test_node_registry_proxy(tmp_path: Path):
         return httpx.Response(200, json={"ok": True})
 
     reg = NodeRegistry()
-    reg.register("alpha", "http://127.0.0.1:9999", transport=httpx.MockTransport(lambda req: handler(req)))
+    reg.register("alpha", "http://127.0.0.1:9999",
+                 transport=httpx.MockTransport(lambda req: handler(req)))
     _, client = reg.get("alpha")
     r = await client.get("/test")
     assert r.json() == {"ok": True}

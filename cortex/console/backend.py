@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Any
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from cortex.console.attack_matrix import AttackMatrixTracker
 from cortex.console.fanout import Fanout
-from cortex.console.node_registry import load_tenants
+from cortex.console.node_registry import NodeRegistry, load_tenants
 from cortex.console.ring_buffer import EventRingBuffer
 
 
@@ -29,21 +29,21 @@ def create_app_with_broker(
 ) -> FastAPI:
     app = FastAPI(title="cortex-console")
     if node_registry is None:
-        from cortex.console.node_registry import NodeRegistry
         node_registry = NodeRegistry()
     if attack_matrix is None:
-        from cortex.console.attack_matrix import AttackMatrixTracker
         attack_matrix = AttackMatrixTracker()
     if events_ring is None:
         events_ring = EventRingBuffer()
-    state: dict[str, Any] = {"fanout": fanout, "registry_path": registry_path, "static_dir": static_dir, "nodes": node_registry}
 
     @app.get("/")
     async def root() -> HTMLResponse:
         idx = static_dir / "index.html"
         if idx.exists():
             return HTMLResponse(idx.read_text())
-        return HTMLResponse("<html><head><title>Perciqa Cortex</title></head><body><h1>Perciqa Cortex</h1></body></html>")
+        return HTMLResponse(
+            "<html><head><title>Perciqa Cortex</title></head>"
+            "<body><h1>Perciqa Cortex</h1></body></html>"
+        )
 
     @app.get("/vite")
     @app.get("/vite/")
@@ -51,7 +51,10 @@ def create_app_with_broker(
         idx = static_dir / "index.html"
         if idx.exists():
             return HTMLResponse(idx.read_text())
-        return HTMLResponse("<html><head><title>Perciqa Cortex</title></head><body><h1>Perciqa Cortex</h1></body></html>")
+        return HTMLResponse(
+            "<html><head><title>Perciqa Cortex</title></head>"
+            "<body><h1>Perciqa Cortex</h1></body></html>"
+        )
 
     @app.get("/api/tenants")
     async def tenants() -> JSONResponse:
@@ -60,7 +63,9 @@ def create_app_with_broker(
     @app.get("/api/articles/{article_id}")
     async def article_detail(article_id: str, node: str | None = None) -> JSONResponse:
         if node is None or node not in node_registry.known:
-            return JSONResponse({"error": "unknown_node", "known": node_registry.known}, status_code=404)
+            return JSONResponse(
+                {"error": "unknown_node", "known": node_registry.known}, status_code=404,
+            )
         _, client = node_registry.get(node)
         r = await client.get(f"/debug/articles/{article_id}")
         return JSONResponse(r.json(), status_code=r.status_code)
@@ -71,7 +76,9 @@ def create_app_with_broker(
 
     @app.get("/api/attack-matrix/{attack_id}")
     async def attack_matrix_articles(attack_id: str) -> JSONResponse:
-        return JSONResponse({"attack_id": attack_id, "articles": attack_matrix.articles_for(attack_id)})
+        return JSONResponse(
+            {"attack_id": attack_id, "articles": attack_matrix.articles_for(attack_id)},
+        )
 
     @app.get("/api/rocm-info")
     async def rocm_info() -> JSONResponse:
@@ -103,7 +110,8 @@ def create_app_with_broker(
             "sensor_backend": snap.get("backend", "none"),
             "hip_version": hip_version,
             "torch_version": torch_version,
-            "rocm_active": snap.get("backend") in ("rocm-smi", "torch") and snap.get("device_name", "none") not in ("none", "unknown"),
+            "rocm_active": snap.get("backend") in ("rocm-smi", "torch")
+            and snap.get("device_name", "none") not in ("none", "unknown"),
         })
 
     @app.get("/api/llm-info")
@@ -115,6 +123,7 @@ def create_app_with_broker(
         the vLLM service is not available (e.g. running without --profiles gpu).
         """
         import os
+
         import httpx
 
         vllm_url = os.environ.get("VLLM_URL", "http://localhost:8000/v1").rstrip("/")
@@ -186,6 +195,9 @@ def create_app_with_broker(
         idx = static_dir / "index.html"
         if idx.exists():
             return HTMLResponse(idx.read_text())
-        return HTMLResponse("<html><head><title>Perciqa Cortex</title></head><body><h1>Perciqa Cortex</h1></body></html>")
+        return HTMLResponse(
+            "<html><head><title>Perciqa Cortex</title></head>"
+            "<body><h1>Perciqa Cortex</h1></body></html>"
+        )
 
     return app

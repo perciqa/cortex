@@ -27,6 +27,8 @@ def test_to_dict_matches_design_5_8_exactly():
         "queries_per_sec_cpu",
         "gpu_mem_util_pct",
         "p95_query_latency_ms",
+        "gpu_device_name",
+        "gpu_sensor_backend",
     ]
     assert d["node"] == "did:percq:org:soc-alpha"
     assert d["embeds_per_sec_radeon"] == 142.3

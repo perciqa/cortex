@@ -24,10 +24,14 @@ class TrustEngine:
     def _reputation(self, org: str) -> float:
         return float(self.reputation_overrides.get(org, self.default_org_reputation))
 
-    def trust_for(self, article: Any, now: datetime, store: Any, graph_version: int = 0) -> float:
+    def trust_for(self, article: Any, now: datetime, store: Any, graph_version: int = 0,
+                  visited: set[str] | None = None) -> float:
         key = (article.id, graph_version)
         if key in self._cache:
             return self._cache[key]
+        if visited is None:
+            visited = set()
+        visited.add(article.id)
         rcy = self.recency_decay((now - article.provenance.timestamp).total_seconds())
         R = self._reputation(article.provenance.producer_org)
         has_org_sign = 1 if getattr(article, "org_signature", None) else 0
@@ -40,10 +44,12 @@ class TrustEngine:
         if cites:
             cited_trusts: list[float] = []
             for c in cites:
+                if c in visited:
+                    continue
                 cited = store.get(c)
                 if cited is None:
                     continue
-                cited_trusts.append(self.trust_for(cited, now, store, graph_version))
+                cited_trusts.append(self.trust_for(cited, now, store, graph_version, visited))
             if cited_trusts:
                 source_trust = sum(cited_trusts) / len(cited_trusts)
                 source_penalty = sum(1 for t in cited_trusts if t < 0.2) * 0.1

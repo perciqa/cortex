@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 import time
@@ -44,6 +45,7 @@ class BrokerClient:
         self._ws = None
         self._connected = False
         self._stop = asyncio.Event()
+        self._loop: asyncio.AbstractEventLoop | None = None
         self._sender_task: asyncio.Task | None = None
         self._reader_task: asyncio.Task | None = None
         self._spill_seq = 0
@@ -55,10 +57,12 @@ class BrokerClient:
         self._connected = True
 
     async def connect(self) -> None:
+        self._loop = asyncio.get_running_loop()
         await self._connect_socket()
         # Send subscribe as the first message to the broker
-        from cortex.core.envelope import EnvelopeType
         import uuid
+
+        from cortex.core.envelope import EnvelopeType
         sub_env = {
             "type": EnvelopeType.SUBSCRIBE.value,
             "msg_id": str(uuid.uuid4()),
@@ -68,6 +72,7 @@ class BrokerClient:
             "payload": {"node_id": self.org_did, "topics": ["*"], "scopes": ["public"]},
         }
         await self._ws.send(json.dumps(sub_env, separators=(",", ":")))
+        self._rehydrate_spilled()
         self._sender_task = asyncio.create_task(self._sender_loop())
         self._reader_task = asyncio.create_task(self._reader_loop())
 
@@ -128,10 +133,8 @@ class BrokerClient:
                 except TimeoutError:
                     task.cancel()
         if self._ws is not None:
-            try:
+            with contextlib.suppress(Exception):
                 await self._ws.close()
-            except Exception:
-                pass
 
     async def publish_envelope(self, env: dict) -> None:
         if self._outbound.qsize() >= self.spill_threshold:
@@ -161,6 +164,16 @@ class BrokerClient:
             json.dumps(env, separators=(",", ":")), encoding="utf-8"
         )
 
+    def _rehydrate_spilled(self) -> None:
+        if not self.outbound_spill_dir.exists():
+            return
+        for path in sorted(self.outbound_spill_dir.glob("*.json")):
+            try:
+                self._outbound.put_nowait(json.loads(path.read_text(encoding="utf-8")))
+                path.unlink()
+            except Exception as exc:
+                log.warning("failed to rehydrate spilled message %s: %s", path, exc)
+
     async def _sender_loop(self) -> None:
         backoff = 1.0
         while not self._stop.is_set():
@@ -186,6 +199,7 @@ class BrokerClient:
         while not self._stop.is_set():
             try:
                 await self._connect_socket()
+                self._rehydrate_spilled()
                 return
             except Exception as e:
                 log.warning("broker reconnect failed: %s", e)

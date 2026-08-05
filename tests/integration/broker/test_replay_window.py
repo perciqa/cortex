@@ -48,7 +48,7 @@ async def test_stale_envelope_rejected_with_deadline_exceeded(tmp_path, unused_t
         await alpha.send(json.dumps({
             "type": "publish", "msg_id": "stale-1",
             "src": "did:percq:org:soc-alpha", "dst": "*", "ts": stale_ts,
-            "payload": {"article": {"id": "art-stale", "scope": "public",
+            "payload": {"article": {"id": "art-stale", "type": "activity", "scope": "public",
                                     "topic": "threat-intel", "content": "x"}},
         }))
         raw = await asyncio.wait_for(alpha.recv(), timeout=2.0)
@@ -80,7 +80,7 @@ async def test_duplicate_msg_id_within_window_dropped_silently(tmp_path, unused_
         pub = {
             "type": "publish", "msg_id": "dup-1",
             "src": "did:percq:org:soc-alpha", "dst": "*", "ts": now,
-            "payload": {"article": {"id": "art-dup", "scope": "public",
+            "payload": {"article": {"id": "art-dup", "type": "activity", "scope": "public",
                                     "topic": "threat-intel", "content": "x"}},
         }
         await alpha.send(json.dumps(pub))

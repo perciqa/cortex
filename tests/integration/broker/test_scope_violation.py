@@ -56,7 +56,8 @@ async def test_partner_beta_from_alpha_does_not_reach_other_org_subscriber(  # n
         publish = {
             "type": "publish", "msg_id": "pub-sv",
             "src": "did:percq:org:soc-alpha", "dst": "*", "ts": _ts(),
-            "payload": {"article": {"id": "art-sv", "scope": "partner:did:percq:org:soc-delta",
+            "payload": {"article": {"id": "art-sv", "type": "activity",
+                                    "scope": "partner:did:percq:org:soc-delta",
                                     "topic": "threat-intel", "content": "secret"}},
         }
         await alpha_ws.send(json.dumps(publish))
@@ -110,7 +111,7 @@ async def test_scope_violation_event_mirrored_when_no_recipient_allowed(tmp_path
         publish = {
             "type": "publish", "msg_id": "pub-private",
             "src": "did:percq:org:soc-alpha", "dst": "*", "ts": _ts(),
-            "payload": {"article": {"id": "art-priv", "scope": "private",
+            "payload": {"article": {"id": "art-priv", "type": "activity", "scope": "private",
                                     "topic": "threat-intel", "content": "internal"}},
         }
         await alpha_ws.send(json.dumps(publish))

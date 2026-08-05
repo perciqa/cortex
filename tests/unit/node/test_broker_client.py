@@ -39,7 +39,8 @@ async def test_publish_envelope_enqueues_and_sends(monkeypatch, tmp_path: Path) 
                           outbound_spill_dir=tmp_path / "outbound",
                           outbound_cap=5, spill_threshold=5)
     await client.connect()
-    env = {"type": "publish", "msg_id": "1", "src": "did:percq:org:soc-alpha", "dst": "*", "ts": "2026-07-18T12:00:00Z", "payload": {}}
+    env = {"type": "publish", "msg_id": "1", "src": "did:percq:org:soc-alpha",
+           "dst": "*", "ts": "2026-07-18T12:00:00Z", "payload": {}}
     await client.publish_envelope(env)
     await asyncio.sleep(0.05)
     await client.stop()
@@ -58,8 +59,40 @@ async def test_spill_when_queue_overflows(monkeypatch, tmp_path: Path) -> None:
     spill_dir = tmp_path / "outbound"
     spill_dir.mkdir(parents=True, exist_ok=True)
     for i in range(10):
-        env = {"type": "publish", "msg_id": str(i), "src": "x", "dst": "*", "ts": "t", "payload": {}}
+        env = {"type": "publish", "msg_id": str(i), "src": "x",
+               "dst": "*", "ts": "t", "payload": {}}
         await client.publish_envelope(env)
     await asyncio.sleep(0.02)
     spilled = list(spill_dir.glob("*.json"))
     assert len(spilled) >= 1, f"expected spill files, got {spilled}"
+
+
+def test_rehydrate_spilled_requeues_and_removes_files(tmp_path: Path) -> None:
+    spill_dir = tmp_path / "outbound"
+    spill_dir.mkdir(parents=True, exist_ok=True)
+    (spill_dir / "1000_1.json").write_text(json.dumps({"type": "publish", "msg_id": "a"}))
+    (spill_dir / "2000_2.json").write_text(json.dumps({"type": "derive", "msg_id": "b"}))
+    client = BrokerClient(url="ws://localhost:7432", org_did="did:percq:org:soc-alpha",
+                          registry_path=tmp_path / "reg.json", replay_window_sec=600,
+                          on_event=lambda *_: None, on_metrics=lambda *_: None,
+                          outbound_spill_dir=spill_dir,
+                          outbound_cap=5, spill_threshold=5)
+    client._rehydrate_spilled()
+    msgs = [client._outbound.get_nowait() for _ in range(2)]
+    assert [m["msg_id"] for m in msgs] == ["a", "b"]
+    assert list(spill_dir.glob("*.json")) == []
+
+
+def test_rehydrate_spilled_keeps_unreadable_file(tmp_path: Path) -> None:
+    spill_dir = tmp_path / "outbound"
+    spill_dir.mkdir(parents=True, exist_ok=True)
+    bad = spill_dir / "1000_1.json"
+    bad.write_text("{not json", encoding="utf-8")
+    client = BrokerClient(url="ws://localhost:7432", org_did="did:percq:org:soc-alpha",
+                          registry_path=tmp_path / "reg.json", replay_window_sec=600,
+                          on_event=lambda *_: None, on_metrics=lambda *_: None,
+                          outbound_spill_dir=spill_dir,
+                          outbound_cap=5, spill_threshold=5)
+    client._rehydrate_spilled()
+    assert client._outbound.empty()
+    assert bad.exists()

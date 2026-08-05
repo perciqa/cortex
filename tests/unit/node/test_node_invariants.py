@@ -10,7 +10,8 @@ from tests.unit.node.test_node_publish import FakeBroker, make_keys  # noqa: F40
 
 @pytest.mark.asyncio
 async def test_private_never_emits_envelope(cfg: Path, tmp_path: Path) -> None:
-    keys = make_keys(tmp_path); broker = FakeBroker()
+    keys = make_keys(tmp_path)
+    broker = FakeBroker()
     node = CortexNode(org_did="did:percq:org:soc-alpha", agent_did="did:percq:agent:alpha-bot-1",
                       key_paths=keys, broker_url="ws://localhost:7432", config_path=cfg,
                       embedder_backend_override="cpu")
@@ -39,7 +40,8 @@ def test_load_keys_refuses_world_readable(tmp_path: Path) -> None:
     pem = k.private_bytes(encoding=serialization.Encoding.PEM,
                           format=serialization.PrivateFormat.PKCS8,
                           encryption_algorithm=serialization.NoEncryption())
-    p = tmp_path / "k.pem"; p.write_bytes(pem)
+    p = tmp_path / "k.pem"
+    p.write_bytes(pem)
     try:
         p.chmod(0o644)
     except PermissionError:

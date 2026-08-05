@@ -94,6 +94,72 @@ async def test_query_fanout_merges_top_k_within_deadline(tmp_path, unused_tcp_po
 
 
 @pytest.mark.asyncio
+async def test_query_waits_for_all_targets_before_merging(tmp_path, unused_tcp_port):
+    reg = tmp_path / "org_registry.json"
+    reg.write_text(json.dumps({
+        "did:percq:org:soc-alpha": {"pubkey": "A", "name": "Alpha", "topics": ["*"]},
+        "did:percq:org:soc-beta": {"pubkey": "B", "name": "Beta", "topics": ["*"]},
+        "did:percq:org:soc-gamma": {"pubkey": "G", "name": "Gamma", "topics": ["*"]},
+    }))
+    server = BrokerServer(registry_path=reg, host="127.0.0.1", port=unused_tcp_port)
+    task = asyncio.create_task(server.serve())
+    uri = f"ws://127.0.0.1:{unused_tcp_port}"
+    try:
+        await asyncio.sleep(0.05)
+        alpha = await setup_sub(uri, "did:percq:org:soc-alpha", "node-alpha",
+                                ["threat-intel"], ["public"])
+        beta = await setup_sub(uri, "did:percq:org:soc-beta", "node-beta",
+                               ["threat-intel"], ["public"])
+        gamma = await setup_sub(uri, "did:percq:org:soc-gamma", "node-gamma",
+                                ["threat-intel"], ["public"])
+
+        query = {
+            "type": "query", "msg_id": "q-merge",
+            "src": "did:percq:org:soc-alpha", "dst": "*", "ts": _ts(),
+            "payload": {"query_id": "q-merge", "query_text": "merge me",
+                        "topic_filter": ["threat-intel"], "scope_filter": ["public"],
+                        "top_k": 5, "min_trust": 0.0, "deadline_ms": 1000},
+        }
+        await alpha.send(json.dumps(query))
+
+        def result(org: str, article_id: str, score: float) -> dict:
+            return {
+                "type": "query_result", "msg_id": f"r-{org}", "src": org,
+                "dst": "did:percq:org:soc-alpha", "ts": _ts(),
+                "payload": {"query_id": "q-merge", "results": [
+                    {"article_id": article_id, "score": score},
+                ]},
+            }
+
+        merged = None
+        # retry per round: responses sent before pending registration are dropped broker-side
+        for _ in range(20):
+            await beta.send(json.dumps(result("did:percq:org:soc-beta", "b1", 0.5)))
+            await gamma.send(json.dumps(result("did:percq:org:soc-gamma", "g1", 0.9)))
+            try:
+                raw = await asyncio.wait_for(alpha.recv(), timeout=0.1)
+            except TimeoutError:
+                continue
+            env = json.loads(raw)
+            if env.get("type") == "query_result":
+                merged = env
+                break
+        assert merged is not None
+        ids = {r["article_id"] for r in merged["payload"]["results"]}
+        assert ids == {"b1", "g1"}, f"expected results from both targets, got {ids}"
+        assert merged["payload"]["partial"] is False
+        await alpha.close()
+        await beta.close()
+        await gamma.close()
+    finally:
+        await server.stop()
+        await asyncio.sleep(0.05)
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
+
+
+@pytest.mark.asyncio
 async def test_query_deadline_truncation_returns_partial(tmp_path, unused_tcp_port):
     registry_path = write_registry(tmp_path)
     server = BrokerServer(registry_path=registry_path, host="127.0.0.1", port=unused_tcp_port)

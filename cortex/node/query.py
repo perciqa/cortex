@@ -82,10 +82,13 @@ def retrieve(
         hybrid = 0.5 * float(cosine) + 0.5 * trust
         summary = {
             "producer_org": getattr(article.provenance, "producer_org", None),
-            "timestamp": getattr(article.provenance, "timestamp", None).isoformat() if getattr(article.provenance, "timestamp", None) else None,
+            "timestamp": (getattr(article.provenance, "timestamp", None).isoformat()
+                          if getattr(article.provenance, "timestamp", None) else None),
             "run_id": getattr(article.provenance, "run_id", None),
             "n_cites": len(getattr(article, "cites", []) or []),
         }
-        scored.append(QueryResult(article=article, article_id=art_id, hybrid_score=hybrid, trust_score=trust, provenance_summary=summary))
+        scored.append(QueryResult(article=article, article_id=art_id,
+                                  hybrid_score=hybrid, trust_score=trust,
+                                  provenance_summary=summary))
     scored.sort(key=lambda r: -r.hybrid_score)
     return scored[:top_k]
