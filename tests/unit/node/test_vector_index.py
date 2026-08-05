@@ -33,6 +33,16 @@ def test_hnsw_add_search_save_load(tmp_path) -> None:
     assert hits2[0][0] == "a0"
 
 
+def test_failed_load_keeps_initialized_index_usable(tmp_path) -> None:
+    idx = HNSWIndex(dim=384)
+    with pytest.raises(RuntimeError):
+        idx.load(tmp_path / "missing")
+    vecs, ids = make_data(5)
+    for v, art_id in zip(vecs, ids, strict=True):
+        idx.add(art_id, v)
+    assert idx.size() == 5
+
+
 def test_faiss_gpu_or_skip() -> None:
     pytest.importorskip("faiss")
     from cortex.node.vector_index import FAISSGPUIndex

@@ -72,14 +72,15 @@ class HNSWIndex:
 
     def load(self, path: Path) -> None:
         p = Path(path)
-        self._index = self._hnswlib.Index(space="cosine", dim=self.dim)
-        self._index.load_index(str(p / "index.bin"))
+        index = self._hnswlib.Index(space="cosine", dim=self.dim)
+        index.load_index(str(p / "index.bin"))
+        index.set_ef(self.ef_search)
         with open(p / "meta.json", encoding="utf-8") as fh:
             meta = json.load(fh)
         self._id_to_row = {k: int(v) for k, v in meta["id_to_row"].items()}
         self._row_to_id = {int(k): v for k, v in meta["row_to_id"].items()}
         self._next = int(meta["next"])
-        self._index.set_ef(self.ef_search)
+        self._index = index
 
 
 class NumpyIndex:
