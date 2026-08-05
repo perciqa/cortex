@@ -62,7 +62,7 @@ async def test_event_channel_sees_peer_connected_and_article_published(tmp_path,
         await node_ws.send(json.dumps({
             "type": "publish", "msg_id": "pub-1",
             "src": "did:percq:org:soc-alpha", "dst": "*", "ts": _ts(),
-            "payload": {"article": {"id": "art-1", "scope": "public",
+            "payload": {"article": {"id": "art-1", "type": "activity", "scope": "public",
                                     "topic": "threat-intel", "content": "x"}},
         }))
         await asyncio.wait_for(node_ws.recv(), timeout=2.0)

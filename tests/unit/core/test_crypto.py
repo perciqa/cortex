@@ -2,7 +2,13 @@
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from cortex.core.crypto import generate_agent_keypair, generate_org_keypair
+from cortex.core.crypto import (
+    generate_agent_keypair,
+    generate_org_keypair,
+    load_private_pem,
+    sign,
+    verify,
+)
 
 
 def test_generate_org_keypair_returns_pem_pair():
@@ -41,8 +47,6 @@ def test_generate_keypairs_unique():
     assert p1[0] != p2[0]
     assert p1[1] != p2[1]
 
-
-from cortex.core.crypto import load_private_pem, sign, verify
 
 _FIXED_PRIVATE_PEM = """-----BEGIN PRIVATE KEY-----
 MC4CAQAwBQYDK2VwBCIEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB

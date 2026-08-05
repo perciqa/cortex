@@ -52,4 +52,6 @@ async def test_sidecar_metrics_payload_uses_design_5_8_key_order():
         "queries_per_sec_cpu",
         "gpu_mem_util_pct",
         "p95_query_latency_ms",
+        "gpu_device_name",
+        "gpu_sensor_backend",
     ]

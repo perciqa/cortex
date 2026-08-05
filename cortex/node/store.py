@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import sqlite3
 import time
@@ -63,10 +64,8 @@ class ArticleStore:
 
     def _migrate(self) -> None:
         for col in ("topic", "producer_agent", "producer_org", "run_id"):
-            try:
+            with contextlib.suppress(Exception):
                 self._conn.execute(f"ALTER TABLE articles ADD COLUMN {col} TEXT")
-            except Exception:
-                pass
 
     def close(self) -> None:
         self._conn.close()
@@ -81,7 +80,7 @@ class ArticleStore:
                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 article.id, article.type, article.content,
-                json.dumps(article.payload, sort_keys=True, separators=(",", ":")),
+                json.dumps(dict(article.payload), sort_keys=True, separators=(",", ":")),
                 article.scope, getattr(article, "topic", "*"),
                 article.provenance.producer_agent, article.provenance.producer_org,
                 article.provenance.run_id,
@@ -89,7 +88,8 @@ class ArticleStore:
                 bytes(article.org_signature) if article.org_signature else None,
                 json.dumps(list(article.cites), separators=(",", ":")),
                 state, _ts_iso(article.provenance.timestamp), None,
-                article.trust_score, _ts_iso(article.trust_expiration) if article.trust_expiration else None,
+                article.trust_score,
+                _ts_iso(article.trust_expiration) if article.trust_expiration else None,
             ),
         )
 

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from collections.abc import Mapping
+from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+from types import MappingProxyType
+from typing import Any
 
 from cortex.core.types import ArticleId
 
@@ -53,7 +56,7 @@ class MemoryArticle:
     id: ArticleId
     type: ArticleType
     content: str
-    payload: dict
+    payload: Mapping[str, Any]
     provenance: Provenance
     scope: Scope
     agent_signature: bytes
@@ -62,13 +65,15 @@ class MemoryArticle:
     embedding: list[float] | None = None
     embedding_model: str | None = None
     org_signature: bytes | None = None
-    cites: list[ArticleId] = field(default_factory=list)
+    cites: tuple[ArticleId, ...] = ()
     trust_score: float | None = None
     trust_expiration: datetime | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.scope, Scope):
             object.__setattr__(self, "scope", Scope(self.scope))
+        object.__setattr__(self, "payload", MappingProxyType(dict(self.payload)))
+        object.__setattr__(self, "cites", tuple(self.cites))
         if len(self.content) > _MAX_CONTENT_CHARS:
             raise ValueError(
                 f"content exceeds {_MAX_CONTENT_CHARS} chars "
@@ -80,7 +85,7 @@ class MemoryArticle:
             "id": self.id,
             "type": self.type.value,
             "content": self.content,
-            "payload": self.payload,
+            "payload": dict(self.payload),
             "topic": self.topic,
             "schema_version": self.schema_version,
             "scope": str(self.scope),
@@ -128,10 +133,7 @@ class MemoryArticle:
             source_data_schema=pd.get("source_data_schema"),
         )
         scope_val = d.get("scope", "private")
-        if isinstance(scope_val, Scope):
-            scope = scope_val
-        else:
-            scope = Scope(scope_val)
+        scope = scope_val if isinstance(scope_val, Scope) else Scope(scope_val)
         exp = d.get("trust_expiration")
         if isinstance(exp, str):
             exp = datetime.fromisoformat(exp.replace("Z", "+00:00"))
@@ -144,7 +146,8 @@ class MemoryArticle:
             scope=scope,
             topic=d.get("topic", "*"),
             schema_version=d.get("schema_version", "1.0"),
-            agent_signature=bytes.fromhex(d["agent_signature"]) if d.get("agent_signature") else b"",
+            agent_signature=(bytes.fromhex(d["agent_signature"])
+                             if d.get("agent_signature") else b""),
             embedding=d.get("embedding"),
             embedding_model=d.get("embedding_model"),
             org_signature=bytes.fromhex(d["org_signature"]) if d.get("org_signature") else None,

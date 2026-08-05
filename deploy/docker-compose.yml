@@ -41,7 +41,7 @@ services:
       - VLLM_API_KEY=${VLLM_API_KEY:-}
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/alpha.yaml"]
     healthcheck:
-      test: ["CMD", "python", "-c", "import sys; sys.exit(0 if open('/app/config/.node-healthy').read().strip()=='healthy' else 1)"]
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0 if open('/app/config/alpha.node-healthy').read().strip()=='healthy' else 1)"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -72,7 +72,7 @@ services:
       - VLLM_API_KEY=${VLLM_API_KEY:-}
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/beta.yaml"]
     healthcheck:
-      test: ["CMD", "python", "-c", "import sys; sys.exit(0 if open('/app/config/.node-healthy').read().strip()=='healthy' else 1)"]
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0 if open('/app/config/beta.node-healthy').read().strip()=='healthy' else 1)"]
       interval: 15s
       timeout: 5s
       retries: 3

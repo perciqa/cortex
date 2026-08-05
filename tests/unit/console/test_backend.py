@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import json
 from pathlib import Path
 
@@ -42,7 +43,8 @@ async def test_tenants_reads_registry(tmp_path: Path):
 @pytest.mark.asyncio
 async def test_ws_events_fanout(tmp_path: Path, unused_tcp_port: int):
     fanout = Fanout()
-    app = create_app_with_broker(static_dir=tmp_path, registry_path=tmp_path / "r.json", fanout=fanout, broker_url=None)
+    app = create_app_with_broker(static_dir=tmp_path, registry_path=tmp_path / "r.json",
+                                 fanout=fanout, broker_url=None)
     import uvicorn
     server = uvicorn.Config(app, host="127.0.0.1", port=unused_tcp_port, log_level="error")
     srv = uvicorn.Server(server)
@@ -52,21 +54,22 @@ async def test_ws_events_fanout(tmp_path: Path, unused_tcp_port: int):
         async with connect(f"ws://127.0.0.1:{unused_tcp_port}/ws/events") as ws:
             fanout.publish_event({"event": "article.published", "data": {"id": "x1"}})
             raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
-        assert json.loads(raw) == {"type": "event", "payload": {"event": "article.published", "data": {"id": "x1"}}}
+        assert json.loads(raw) == {
+            "type": "event", "payload": {"event": "article.published", "data": {"id": "x1"}},
+        }
     finally:
         srv.should_exit = True
         await asyncio.sleep(0.3)
         task.cancel()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await task
-        except asyncio.CancelledError:
-            pass
 
 
 @pytest.mark.asyncio
 async def test_ws_metrics_fanout(tmp_path: Path, unused_tcp_port: int):
     fanout = Fanout()
-    app = create_app_with_broker(static_dir=tmp_path, registry_path=tmp_path / "r.json", fanout=fanout, broker_url=None)
+    app = create_app_with_broker(static_dir=tmp_path, registry_path=tmp_path / "r.json",
+                                 fanout=fanout, broker_url=None)
     import uvicorn
     server = uvicorn.Config(app, host="127.0.0.1", port=unused_tcp_port, log_level="error")
     srv = uvicorn.Server(server)
@@ -74,7 +77,8 @@ async def test_ws_metrics_fanout(tmp_path: Path, unused_tcp_port: int):
     try:
         await asyncio.sleep(1.5)
         async with connect(f"ws://127.0.0.1:{unused_tcp_port}/ws/metrics") as ws:
-            sample = {"node": "soc-alpha", "embeds_per_sec_radeon": 142.3, "embeds_per_sec_cpu": 18.6,
+            sample = {"node": "soc-alpha", "embeds_per_sec_radeon": 142.3,
+                      "embeds_per_sec_cpu": 18.6,
                       "queries_per_sec_radeon": 23.1, "queries_per_sec_cpu": 2.7,
                       "gpu_mem_util_pct": 86, "p95_query_latency_ms": 42}
             fanout.publish_metrics(sample)
@@ -87,10 +91,8 @@ async def test_ws_metrics_fanout(tmp_path: Path, unused_tcp_port: int):
         srv.should_exit = True
         await asyncio.sleep(0.3)
         task.cancel()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await task
-        except asyncio.CancelledError:
-            pass
 
 
 @pytest.mark.asyncio
@@ -115,9 +117,13 @@ async def test_articles_endpoint_proxies_to_node_debug(tmp_path: Path):
 async def test_serves_built_dist_index(tmp_path: Path):
     dist = tmp_path / "dist"
     dist.mkdir()
-    (dist / "index.html").write_text("<html><head><title>Perciqa Cortex</title></head><body>app</body></html>")
+    (dist / "index.html").write_text(
+        "<html><head><title>Perciqa Cortex</title></head><body>app</body></html>",
+    )
     (dist / "static").mkdir()
-    (dist / "static" / "main.js").write_text("console.log('app');")
+    (dist / "static" / "main.js").write_text(
+        "console.log('app');",
+    )
     app = create_app(static_dir=dist, registry_path=tmp_path / "r.json")
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         idx = await ac.get("/")

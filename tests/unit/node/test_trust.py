@@ -27,7 +27,8 @@ def test_trust_for_known_value() -> None:
     e = TrustEngine(default_org_reputation=0.8,
                     reputation_overrides={"did:percq:org:soc-alpha": 0.9},
                     half_life_days=90, min_trust_default=0.3)
-    art = make_article("a1", org="did:percq:org:soc-alpha", ts=datetime(2026, 7, 18, 12, 0, tzinfo=UTC))
+    art = make_article("a1", org="did:percq:org:soc-alpha",
+                       ts=datetime(2026, 7, 18, 12, 0, tzinfo=UTC))
     now = datetime(2026, 7, 18, 12, 0, tzinfo=UTC)
     store = SimpleNamespace(get=lambda _id: None)
     t = e.trust_for(art, now, store)
@@ -39,8 +40,10 @@ def test_trust_for_with_cites() -> None:
     base_ts = datetime(2026, 7, 18, 12, 0, tzinfo=UTC)
     now = base_ts
     cited_articles = {
-        "c1": make_article("c1", org="did:percq:org:soc-alpha", ts=base_ts, org_signature=b"\x01", source_data_hash="h"),
-        "c2": make_article("c2", org="did:percq:org:soc-alpha", ts=base_ts, org_signature=b"\x01", source_data_hash="h"),
+        "c1": make_article("c1", org="did:percq:org:soc-alpha", ts=base_ts,
+                           org_signature=b"\x01", source_data_hash="h"),
+        "c2": make_article("c2", org="did:percq:org:soc-alpha", ts=base_ts,
+                           org_signature=b"\x01", source_data_hash="h"),
     }
 
     class StubStore:
@@ -68,3 +71,32 @@ def test_memoization_and_invalidation() -> None:
     t2 = e.trust_for(art, now, store, graph_version=1)
     assert t2 == t0
     assert ("m1", 1) in e._cache
+
+
+def test_trust_for_citation_cycle_does_not_recurse() -> None:
+    e = TrustEngine(default_org_reputation=0.9, half_life_days=90, min_trust_default=0.3)
+    base_ts = datetime(2026, 7, 18, 12, 0, tzinfo=UTC)
+    a = make_article("a1", ts=base_ts, cites=["b1"])
+    b = make_article("b1", ts=base_ts, cites=["a1"])
+
+    class CycleStore:
+        def get(self, _id):
+            return {"a1": a, "b1": b}.get(_id)
+
+    t = e.trust_for(a, base_ts, CycleStore())
+    assert 0.0 <= t <= 1.0
+    # then the cycle back-edge is skipped, so b1 contributes its base trust
+    assert t > 0.0
+
+
+def test_trust_for_self_citation_is_skipped() -> None:
+    e = TrustEngine(default_org_reputation=0.9, half_life_days=90, min_trust_default=0.3)
+    base_ts = datetime(2026, 7, 18, 12, 0, tzinfo=UTC)
+    a = make_article("s1", ts=base_ts, cites=["s1"])
+
+    class SelfStore:
+        def get(self, _id):
+            return a
+
+    t = e.trust_for(a, base_ts, SelfStore())
+    assert 0.0 <= t <= 1.0

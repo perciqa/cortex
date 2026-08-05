@@ -19,7 +19,9 @@ class AttackMatrixTracker:
         if not attack_id:
             return
         self._counts[attack_id] += 1
-        self._by_technique.setdefault(attack_id, []).append({"id": article.get("id"), "content": article.get("content", "")})
+        self._by_technique.setdefault(attack_id, []).append(
+            {"id": article.get("id"), "content": article.get("content", "")},
+        )
 
     def absorb(self, events: Iterable[dict]) -> None:
         for e in events:

@@ -12,7 +12,9 @@ from cortex.core.errors import (
 )
 
 
-def receive_publish_envelope(article: Any, expected_canonical: bytes, registry: Any, store: Any) -> str:
+def receive_publish_envelope(
+    article: Any, expected_canonical: bytes, registry: Any, store: Any,
+) -> str:
     canonical = article_canonical_bytes(article)
     if canonical != expected_canonical:
         art_id = getattr(article, "id", None) or compute_article_id(canonical)
@@ -29,8 +31,12 @@ def receive_publish_envelope(article: Any, expected_canonical: bytes, registry: 
         pub_pem = pub_pem.decode("utf-8")
     if not verify(canonical, article.agent_signature, pub_pem):
         store.put(article, state="quarantined")
-        store.event_log_append("node.receive.bad_signature", article.id, {"reason": "bad_signature"})
-        raise SignatureVerificationError(f"agent signature invalid for {article.id}")
+        store.event_log_append(
+            "node.receive.bad_signature", article.id, {"reason": "bad_signature"},
+        )
+        raise SignatureVerificationError(
+            f"agent signature invalid for {article.id}",
+        )
     transition(article, ArticleState.DRAFTED, ArticleState.SIGNED)
     store.put(article, state="signed")
     transition(article, ArticleState.SIGNED, ArticleState.INDEXED)

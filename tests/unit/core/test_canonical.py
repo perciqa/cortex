@@ -1,7 +1,13 @@
 import json
 from datetime import UTC, datetime
 
-from cortex.core.canonical import canonical_bytes
+from cortex.core.article import MemoryArticle
+from cortex.core.canonical import (
+    article_canonical_bytes,
+    canonical_bytes,
+    compute_article_id,
+    sha256_hex,
+)
 
 
 def test_canonical_insertion_order_invariant():
@@ -27,9 +33,6 @@ def test_canonical_naive_datetime_normalized_to_utc():
     assert out == b'{"t":"2026-07-15T12:34:56.789012Z"}'
 
 
-from cortex.core.canonical import compute_article_id, sha256_hex
-
-
 def test_sha256_hex_known_vector():
     assert (
         sha256_hex(b'{"a":1}')
@@ -44,10 +47,6 @@ def test_compute_article_id_known_vector():
         == "015abd7f5cc57a2dd94b7590f04ad8084273905ee33ec5cebeae62276a97f862"
     )
     assert len(compute_article_id(canonical)) == 64
-
-
-from cortex.core.article import MemoryArticle
-from cortex.core.canonical import article_canonical_bytes
 
 
 def _article_with_extras() -> MemoryArticle:

@@ -16,7 +16,8 @@ class VectorIndexProtocol(Protocol):
 
 
 class HNSWIndex:
-    def __init__(self, dim: int = 384, M: int = 32, ef_construction: int = 200, ef_search: int = 64) -> None:
+    def __init__(self, dim: int = 384, M: int = 32,
+                 ef_construction: int = 200, ef_search: int = 64) -> None:
         import hnswlib
         self._hnswlib = hnswlib
         self.dim = dim
@@ -24,7 +25,8 @@ class HNSWIndex:
         self.ef_construction = ef_construction
         self.ef_search = ef_search
         self._index = hnswlib.Index(space="cosine", dim=dim)
-        self._index.init_index(max_elements=max(1024, M * 10), M=M, ef_construction=ef_construction, random_seed=100)
+        self._index.init_index(max_elements=max(1024, M * 10), M=M,
+                               ef_construction=ef_construction, random_seed=100)
         self._index.set_ef(ef_search)
         self._id_to_row: dict[str, int] = {}
         self._row_to_id: dict[int, str] = {}
@@ -49,7 +51,7 @@ class HNSWIndex:
             return []
         labels, distances = self._index.knn_query(v, k=min(top_k, self._index.get_current_count()))
         out: list[tuple[str, float]] = []
-        for lbl, dist in zip(labels[0], distances[0]):
+        for lbl, dist in zip(labels[0], distances[0], strict=True):
             out.append((self._row_to_id[int(lbl)], float(1.0 - dist)))
         return out
 
@@ -60,19 +62,25 @@ class HNSWIndex:
         p = Path(path)
         p.mkdir(parents=True, exist_ok=True)
         self._index.save_index(str(p / "index.bin"))
+        meta = {
+            "id_to_row": self._id_to_row,
+            "row_to_id": {str(k): v for k, v in self._row_to_id.items()},
+            "next": self._next,
+        }
         with open(p / "meta.json", "w", encoding="utf-8") as fh:
-            json.dump({"id_to_row": self._id_to_row, "row_to_id": {str(k): v for k, v in self._row_to_id.items()}, "next": self._next}, fh)
+            json.dump(meta, fh)
 
     def load(self, path: Path) -> None:
         p = Path(path)
-        self._index = self._hnswlib.Index(space="cosine", dim=self.dim)
-        self._index.load_index(str(p / "index.bin"))
+        index = self._hnswlib.Index(space="cosine", dim=self.dim)
+        index.load_index(str(p / "index.bin"))
+        index.set_ef(self.ef_search)
         with open(p / "meta.json", encoding="utf-8") as fh:
             meta = json.load(fh)
         self._id_to_row = {k: int(v) for k, v in meta["id_to_row"].items()}
         self._row_to_id = {int(k): v for k, v in meta["row_to_id"].items()}
         self._next = int(meta["next"])
-        self._index.set_ef(self.ef_search)
+        self._index = index
 
 
 class NumpyIndex:
@@ -128,7 +136,8 @@ class NumpyIndex:
 
 
 class FAISSGPUIndex:
-    def __init__(self, dim: int = 384, M: int = 32, ef_construction: int = 200, ef_search: int = 64) -> None:
+    def __init__(self, dim: int = 384, M: int = 32,
+                 ef_construction: int = 200, ef_search: int = 64) -> None:
         try:
             import faiss
         except ImportError as e:
@@ -156,7 +165,7 @@ class FAISSGPUIndex:
         v = np.asarray(query_vec, dtype=np.float32).reshape(1, -1)
         D, idx = self._index.search(v, min(top_k, self._index.ntotal))
         out: list[tuple[str, float]] = []
-        for score, row in zip(D[0], idx[0]):
+        for score, row in zip(D[0], idx[0], strict=True):
             if row < 0:
                 continue
             out.append((self._row_to_id[int(row)], float(score)))
@@ -166,11 +175,17 @@ class FAISSGPUIndex:
         return int(self._index.ntotal)
 
     def save(self, path: Path) -> None:
-        p = Path(path); p.mkdir(parents=True, exist_ok=True)
+        p = Path(path)
+        p.mkdir(parents=True, exist_ok=True)
         cpu = self._faiss.index_gpu_to_cpu(self._index)
         self._faiss.write_index(cpu, str(p / "index.bin"))
+        meta = {
+            "id_to_row": self._id_to_row,
+            "row_to_id": {str(k): v for k, v in self._row_to_id.items()},
+            "next": self._next,
+        }
         with open(p / "meta.json", "w", encoding="utf-8") as fh:
-            json.dump({"id_to_row": self._id_to_row, "row_to_id": {str(k): v for k, v in self._row_to_id.items()}, "next": self._next}, fh)
+            json.dump(meta, fh)
 
     def load(self, path: Path) -> None:
         p = Path(path)

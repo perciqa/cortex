@@ -11,7 +11,10 @@ class FakeIndex:
         self.vecs = vecs
 
     def search(self, q: np.ndarray, top_k: int) -> list[tuple[str, float]]:
-        sims = [(k, float(np.dot(q, v) / (np.linalg.norm(q) * np.linalg.norm(v)))) for k, v in self.vecs.items()]
+        sims = [
+            (k, float(np.dot(q, v) / (np.linalg.norm(q) * np.linalg.norm(v))))
+            for k, v in self.vecs.items()
+        ]
         sims.sort(key=lambda x: -x[1])
         return sims[:top_k]
 
@@ -31,7 +34,8 @@ class FakeEmbedder:
         return v / np.linalg.norm(v)
 
 
-def make_article(art_id: str, scope: str, trust: float, content: str = "x", art_type: str = "finding"):
+def make_article(art_id: str, scope: str, trust: float,
+                 content: str = "x", art_type: str = "finding"):
     return SimpleNamespace(
         id=art_id, type=art_type, content=content, payload={}, scope=scope,
         agent_signature=b"\x01", org_signature=None, cites=[],

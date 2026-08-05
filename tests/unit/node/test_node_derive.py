@@ -53,7 +53,8 @@ async def test_derive_creates_edges_and_emits_envelope(cfg: Path, tmp_path: Path
                              provenance=prov, scope="public", agent_signature=b"",
                              org_signature=None, cites=[], trust_score=None, trust_expiration=None)
         cited_ids.append(node.publish(base))
-    new = MemoryArticle(id="", type=ArticleType.INSIGHT, content="correlated insight from three findings",
+    new = MemoryArticle(id="", type=ArticleType.INSIGHT,
+                        content="correlated insight from three findings",
                        payload={}, embedding=None, embedding_model=None, provenance=prov_base,
                        scope="public", agent_signature=b"", org_signature=None, cites=[],
                        trust_score=None, trust_expiration=None)

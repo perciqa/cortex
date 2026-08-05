@@ -77,3 +77,23 @@ def test_unsubscribe_removes_subscriber():
     assert len(r.subscribers_for("apt29", "public", "did:percq:org:soc-alpha")) == 1
     r.unsubscribe("A")
     assert r.subscribers_for("apt29", "public", "did:percq:org:soc-alpha") == []
+
+
+def test_wildcard_subscriber_receives_topic_specific_publish():
+    r = Router()
+    wild = make_sub("W", "did:percq:org:soc-wild", ["*"], ["public"])
+    specific = make_sub("S", "did:percq:org:soc-spec", ["finance"], ["public"])
+    r.subscribe(wild)
+    r.subscribe(specific)
+    subs = r.subscribers_for(topic="finance", scope="public",
+                             src_org="did:percq:org:soc-alpha")
+    assert {s.node_id for s in subs} == {"W", "S"}
+
+
+def test_wildcard_subscriber_also_matches_default_topic():
+    r = Router()
+    wild = make_sub("W", "did:percq:org:soc-wild", ["*"], ["public"])
+    r.subscribe(wild)
+    subs = r.subscribers_for(topic="*", scope="public",
+                             src_org="did:percq:org:soc-alpha")
+    assert {s.node_id for s in subs} == {"W"}

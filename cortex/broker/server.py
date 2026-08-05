@@ -6,7 +6,6 @@ import json
 import logging
 import time
 import uuid
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -22,16 +21,6 @@ from cortex.core.crypto import verify
 from cortex.core.envelope import Envelope, EnvelopeType, envelope_to_json
 
 log = logging.getLogger(__name__)
-
-
-@dataclass
-class BrokerConfig:
-    host: str = "127.0.0.1"
-    port: int = 7432
-    registry_path: Path = Path("./registry/org_registry.json")
-    replay_window_sec: int = 600
-    event_channel_max_clients: int = 16
-    metrics_channel_max_clients: int = 16
 
 
 def _now_unix() -> int:
@@ -246,10 +235,13 @@ class BrokerServer:
     async def _handle_publish(self, ws: Any, env: dict, src_org: str, node_id: str) -> None:
         payload = env.get("payload") or {}
         article = payload.get("article") or {}
-        article = payload.get("article") or {}
         canonical_hex = payload.get("canonical", "")
         scope = article.get("scope", "private")
         topic = article.get("topic", "*")
+        if article.get("type") != "activity" and not canonical_hex:
+            await ws.send(_error(src_org, "INVALID_CANONICAL",
+                                 "signed articles must include a canonical hash"))
+            return
         if canonical_hex and article.get("type") != "activity":
             try:
                 from cortex.core.article import MemoryArticle
@@ -267,7 +259,8 @@ class BrokerServer:
                     return
                 if isinstance(pub_pem, bytes):
                     pub_pem = pub_pem.decode("utf-8")
-                sig_to_verify = art.org_signature if art.org_signature is not None else art.agent_signature
+                sig_to_verify = (art.org_signature if art.org_signature is not None
+                                 else art.agent_signature)
                 if not verify(canonical, sig_to_verify, pub_pem):
                     await ws.send(_error(src_org, "INVALID_SIGNATURE",
                                          "signature verification failed"))
@@ -299,7 +292,7 @@ class BrokerServer:
         for sub in self.router.all_subscribers():
             if sub.node_id == node_id:
                 continue
-            if topic_filter and not (set(sub.topics) & set(topic_filter)):
+            if topic_filter and "*" not in sub.topics and not (set(sub.topics) & set(topic_filter)):
                 continue
             ok = False
             for sc in scope_filter or ["public"]:
@@ -383,7 +376,9 @@ class BrokerServer:
         if query_id and query_id in self._pending_queries:
             pending = self._pending_queries[query_id]
             pending["results_per_target"][env.get("src", "_")] = payload.get("results", [])
-            pending["event"].set()
+            # release only when the full fan-out has answered, not the first node
+            if len(pending["results_per_target"]) >= pending["target_count"]:
+                pending["event"].set()
 
     async def _forward_to_subscribers(self, env: dict, src_org: str, node_id: str,
                                       topic: str, scope: str) -> bool:

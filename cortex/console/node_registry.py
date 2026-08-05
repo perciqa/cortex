@@ -26,7 +26,8 @@ class NodeRegistry:
     def __init__(self) -> None:
         self._nodes: dict[str, tuple[str, httpx.BaseClient | None]] = {}
 
-    def register(self, slug: str, base_url: str, transport: httpx.BaseTransport | None = None) -> None:
+    def register(self, slug: str, base_url: str,
+                 transport: httpx.BaseTransport | None = None) -> None:
         client = httpx.AsyncClient(base_url=base_url, transport=transport)
         self._nodes[slug] = (base_url, client)
 

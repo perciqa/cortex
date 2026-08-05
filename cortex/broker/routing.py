@@ -39,7 +39,7 @@ class Router:
     def subscribers_for(self, topic: str, scope: str, src_org: str) -> list[Subscriber]:
         out: list[Subscriber] = []
         for sub in self._by_node.values():
-            if topic not in sub.topics:
+            if "*" not in sub.topics and topic not in sub.topics:
                 continue
             if scope not in sub.scopes and "*" not in sub.scopes:
                 continue

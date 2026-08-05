@@ -3,7 +3,7 @@ import pytest
 
 hnswlib = pytest.importorskip("hnswlib")
 
-from cortex.node.vector_index import HNSWIndex
+from cortex.node.vector_index import HNSWIndex  # noqa: E402
 
 
 def make_data(n: int = 100, dim: int = 384, seed: int = 0) -> tuple[np.ndarray, list[str]]:
@@ -17,7 +17,7 @@ def make_data(n: int = 100, dim: int = 384, seed: int = 0) -> tuple[np.ndarray, 
 def test_hnsw_add_search_save_load(tmp_path) -> None:
     vecs, ids = make_data()
     idx = HNSWIndex(dim=384)
-    for v, art_id in zip(vecs, ids):
+    for v, art_id in zip(vecs, ids, strict=True):
         idx.add(art_id, v)
     assert idx.size() == 100
     q = vecs[0]
@@ -33,12 +33,22 @@ def test_hnsw_add_search_save_load(tmp_path) -> None:
     assert hits2[0][0] == "a0"
 
 
+def test_failed_load_keeps_initialized_index_usable(tmp_path) -> None:
+    idx = HNSWIndex(dim=384)
+    with pytest.raises(RuntimeError):
+        idx.load(tmp_path / "missing")
+    vecs, ids = make_data(5)
+    for v, art_id in zip(vecs, ids, strict=True):
+        idx.add(art_id, v)
+    assert idx.size() == 5
+
+
 def test_faiss_gpu_or_skip() -> None:
     pytest.importorskip("faiss")
     from cortex.node.vector_index import FAISSGPUIndex
     vecs, ids = make_data(50, seed=7)
     idx = FAISSGPUIndex(dim=384)
-    for v, art_id in zip(vecs, ids):
+    for v, art_id in zip(vecs, ids, strict=True):
         idx.add(art_id, v)
     assert idx.size() == 50
     hits = idx.search(vecs[0], top_k=5)

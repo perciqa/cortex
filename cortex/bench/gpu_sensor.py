@@ -62,7 +62,8 @@ def _rocm_smi_mem_info() -> dict | None:
         )
         data = json.loads(raw.decode())
         # rocm-smi JSON layout varies by version; handle both known shapes.
-        # Shape A (older):  {"card0": {"VRAM Total Memory (B)": "...", "VRAM Total Used Memory (B)": "..."}}
+        # Shape A (older):  {"card0": {"VRAM Total Memory (B)": "...",
+        #                              "VRAM Total Used Memory (B)": "..."}}
         # Shape B (newer):  {"GPU[0]": {"vram_total": ..., "vram_used": ...}}
         for _key, vals in data.items():
             if not isinstance(vals, dict):
@@ -132,8 +133,9 @@ class GpuSensor:
 
         # --- Fallback: torch.cuda (works on any CUDA/ROCm with torch wheel) ---
         if torch_cuda.is_available():
+            mem = max(0.0, min(100.0, torch_cuda.mem_util_pct()))
             return {
-                "mem_util_pct": torch_cuda.mem_util_pct(),
+                "mem_util_pct": mem,
                 "device_name": torch_cuda.device_name(),
                 "backend": "torch",
             }

@@ -54,7 +54,7 @@ async def test_full_publish_acl_forward_event_mirror_roundtrip(tmp_path, unused_
             "type": "publish", "msg_id": "e2e-pub",
             "src": "did:percq:org:soc-beta",
             "dst": "*", "ts": _ts(),
-            "payload": {"article": {"id": "art-e2e", "scope": "public",
+            "payload": {"article": {"id": "art-e2e", "type": "activity", "scope": "public",
                                     "topic": "threat-intel", "content": "TTP"}},
         }))
         # Drain ack from alpha and the forwarded publish from beta
@@ -66,7 +66,7 @@ async def test_full_publish_acl_forward_event_mirror_roundtrip(tmp_path, unused_
         await alpha.send(json.dumps({
             "type": "publish", "msg_id": "e2e-pub-2",
             "src": "did:percq:org:soc-alpha", "dst": "*", "ts": _ts(),
-            "payload": {"article": {"id": "art-e2e-2", "scope": "public",
+            "payload": {"article": {"id": "art-e2e-2", "type": "activity", "scope": "public",
                                     "topic": "threat-intel", "content": "TTP2"}},
         }))
         ack = json.loads(await asyncio.wait_for(alpha.recv(), timeout=2.0))

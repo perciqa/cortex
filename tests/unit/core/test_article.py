@@ -1,5 +1,8 @@
+from datetime import UTC, datetime
+
 import pytest
 
+from cortex.core.article import ArticleType, MemoryArticle, Provenance, Scope
 from cortex.core.crypto import did_for_agent, did_for_org
 from cortex.core.types import AgentDID, ArticleId, OrgDID
 
@@ -27,9 +30,6 @@ def test_did_for_agent_generates_uuid_v4_when_omitted():
     # RFC 4122 v4: version nibble == 4, variant nibble in {8,9,a,b}
     assert uuid_part[14] == "4"
     assert uuid_part[19] in ("8", "9", "a", "b")
-
-
-from cortex.core.article import ArticleType, Scope
 
 
 def test_article_type_members():
@@ -61,13 +61,8 @@ def test_scope_roundtrip_string():
 
 def test_scope_is_frozen():
     s = Scope("private")
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         s.value = "public"
-
-
-from datetime import UTC, datetime
-
-from cortex.core.article import Provenance
 
 
 def _ts() -> datetime:
@@ -111,11 +106,8 @@ def test_provenance_is_frozen():
         run_id="r",
         timestamp=_ts(),
     )
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         p.run_id = "other"
-
-
-from cortex.core.article import MemoryArticle
 
 
 def _prov() -> Provenance:
@@ -144,7 +136,7 @@ def test_memory_article_defaults_and_fields():
     assert a.embedding is None
     assert a.embedding_model is None
     assert a.org_signature is None
-    assert a.cites == []
+    assert a.cites == ()
     assert a.trust_score is None
     assert a.trust_expiration is None
     assert a.agent_signature == b"\x01"
@@ -186,5 +178,23 @@ def test_memory_article_is_frozen():
         scope=Scope.PRIVATE,
         agent_signature=b"",
     )
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         a.content = "y"
+
+
+def test_memory_article_payload_and_cites_are_immutable():
+    a = MemoryArticle(
+        id="0" * 64,
+        type=ArticleType.FINDING,
+        content="x",
+        payload={"k": 1},
+        provenance=_prov(),
+        scope=Scope.PRIVATE,
+        agent_signature=b"",
+        cites=["c1", "c2"],
+    )
+    assert isinstance(a.cites, tuple)
+    with pytest.raises(TypeError):
+        a.payload["k"] = 2
+    with pytest.raises(AttributeError):
+        a.cites.append("c3")

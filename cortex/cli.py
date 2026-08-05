@@ -26,7 +26,7 @@ def _start(args: argparse.Namespace) -> int:
         "agent": ensure_keys(Path(cfg.node.key_paths["agent"]), kind="agent"),
     }
 
-    health_file = config_path.parent / ".node-healthy"
+    health_file = config_path.parent / f"{config_path.stem}.node-healthy"
     node = CortexNode(
         org_did=cfg.node.org_did,
         agent_did=cfg.node.agent_did,

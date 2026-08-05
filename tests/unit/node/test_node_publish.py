@@ -32,7 +32,8 @@ def make_keys(tmp_path: Path) -> dict[str, Path]:
             encryption_algorithm=serialization.NoEncryption(),
         )
         p = tmp_path / f"{label}.pem"
-        p.write_bytes(pem); p.chmod(0o600)
+        p.write_bytes(pem)
+        p.chmod(0o600)
         out[label] = p
     return out
 

@@ -37,10 +37,9 @@ class Embedder:
         desired = self.requested_backend
         if desired == "auto":
             desired = "gpu" if torch.cuda.is_available() else "cpu"
-        if desired == "gpu":
-            if not self._check_gpu():
-                desired = "cpu"
-                self.fallback_to_cpu = True
+        if desired == "gpu" and not self._check_gpu():
+            desired = "cpu"
+            self.fallback_to_cpu = True
         self._device = "cuda" if desired == "gpu" else "cpu"
         from transformers import AutoModel, AutoTokenizer
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
@@ -65,7 +64,8 @@ class Embedder:
             return False
 
     def _prefix(self, text: str) -> str:
-        return f"finding: {text}" if not text.startswith(("finding:", "query:", "passage:")) else text
+        prefixes = ("finding:", "query:", "passage:")
+        return f"finding: {text}" if not text.startswith(prefixes) else text
 
     @staticmethod
     def _normalize(text: str) -> str:
@@ -83,7 +83,10 @@ class Embedder:
         while i < len(prefix):
             batch = prefix[i : i + self.effective_batch_size]
             try:
-                enc = self._tokenizer(batch, padding=True, truncation=True, max_length=512, return_tensors="pt").to(self._device)
+                enc = self._tokenizer(
+                    batch, padding=True, truncation=True,
+                    max_length=512, return_tensors="pt",
+                ).to(self._device)
                 with torch.inference_mode():
                     hidden = self._model(**enc).last_hidden_state
                 mask = enc["attention_mask"].unsqueeze(-1).to(hidden.dtype)
@@ -93,7 +96,8 @@ class Embedder:
                 i += self.effective_batch_size
             except RuntimeError as e:
                 msg = str(e)
-                if "out of memory" in msg.lower() and self.fallback_on_oom and self.effective_batch_size > 1:
+                if ("out of memory" in msg.lower() and self.fallback_on_oom
+                        and self.effective_batch_size > 1):
                     self.effective_batch_size = max(1, self.effective_batch_size // 2)
                     if self._device == "cuda":
                         torch.cuda.empty_cache()

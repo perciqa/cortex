@@ -86,7 +86,7 @@ async def test_dead_letter_emitted_when_send_fails(tmp_path, unused_tcp_port, mo
         await alpha.send(json.dumps({
             "type": "publish", "msg_id": "pub-dl",
             "src": "did:percq:org:soc-alpha", "dst": "*", "ts": _ts(),
-            "payload": {"article": {"id": "art-dl", "scope": "public",
+            "payload": {"article": {"id": "art-dl", "type": "activity", "scope": "public",
                                     "topic": "threat-intel", "content": "x"}},
         }))
         await asyncio.wait_for(alpha.recv(), timeout=2.0)
