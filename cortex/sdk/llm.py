@@ -11,14 +11,14 @@ class vLLMClient:
     """Thin OpenAI-compatible client pointing at a vLLM server (typically on ROCm).
 
     Used by `agent_step` for the ReAct reasoning loop. Default model is
-    google/gemma-4-12B—the Gemma 4 12B instruct model served by the
+    perciqa/aurora-code-mini-v1—the Aurora Code Mini V1 model served by the
     inference pod. Override with the `model` param or `VLLM_MODEL` env var.
     """
 
     def __init__(
         self,
         base_url: str = "http://localhost:8000/v1",
-        model: str = "google/gemma-4-12B",
+        model: str = "perciqa/aurora-code-mini-v1",
         api_key: str | None = None,
         temperature: float = 0.2,
         max_tokens: int = 512,
