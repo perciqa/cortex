@@ -231,6 +231,12 @@ This repo is submitted to the **AMD AI DevMaster Hackathon 2026**.
 - **Console:** https://cortex.perciqa.com *(live, no setup required)*
 - **Hackathon deck:** [Perciqa Cortex Hackathon Deck](Perciqa_Cortex_Hackathon_Deck.pptx)
 
+### Hackathon Documents
+
+- [Project Specification](hackathon/project-specification.md) — scenarios, architecture, core capabilities, model intro, local deployment plan, ROCm optimization
+- [Inference Optimization on AMD](hackathon/inference-optimization.md) — live Radeon-vs-CPU bench numbers and methodology
+- [Application Scenarios](hackathon/application-scenarios.md) — SOC Alpha/Beta scenario banks and cross-org fabric operations
+
 ### AMD / ROCm Integration
 
 - **Embedder:** BAAI/bge-small-en-v1.5 on PyTorch-ROCm (AMD Radeon PRO W7900, RDNA3, 48 GB VRAM)
