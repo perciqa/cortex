@@ -37,7 +37,7 @@ services:
       - CORTEX_EMBED_BACKEND=${CORTEX_EMBED_BACKEND:-auto}
       # vLLM inference pod — agents use this for LLM reasoning (derive step)
       - VLLM_URL=${VLLM_URL:-http://vllm:8000/v1}
-      - VLLM_MODEL=${VLLM_MODEL:-google/gemma-4-12B}
+      - VLLM_MODEL=${VLLM_MODEL:-perciqa/aurora-code-mini-v1}
       - VLLM_API_KEY=${VLLM_API_KEY:-}
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/alpha.yaml"]
     healthcheck:
@@ -68,7 +68,7 @@ services:
       - CORTEX_LOG_LEVEL=INFO
       - CORTEX_EMBED_BACKEND=${CORTEX_EMBED_BACKEND:-auto}
       - VLLM_URL=${VLLM_URL:-http://vllm:8000/v1}
-      - VLLM_MODEL=${VLLM_MODEL:-google/gemma-4-12B}
+      - VLLM_MODEL=${VLLM_MODEL:-perciqa/aurora-code-mini-v1}
       - VLLM_API_KEY=${VLLM_API_KEY:-}
     command: ["python", "-m", "cortex.cli", "start", "--config", "/app/config/beta.yaml"]
     healthcheck:
@@ -150,7 +150,7 @@ services:
               count: 1
               capabilities: [gpu]
 
-  # vLLM inference pod — serves Gemma 4 12B instruct on ROCm.
+  # vLLM inference pod — serves Aurora Code Mini V1 on ROCm.
   # Only starts with: COMPOSE_PROFILES=gpu docker compose up
   # VLLM_MODEL_DIR must point to a directory containing the model weights.
   vllm:
@@ -169,7 +169,7 @@ services:
       - --model
       - /models
       - --served-model-name
-      - ${VLLM_MODEL:-google/gemma-4-12B}
+      - ${VLLM_MODEL:-perciqa/aurora-code-mini-v1}
       - --host
       - 0.0.0.0
       - --port

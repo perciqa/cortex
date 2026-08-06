@@ -127,7 +127,7 @@ def create_app_with_broker(
         import httpx
 
         vllm_url = os.environ.get("VLLM_URL", "http://localhost:8000/v1").rstrip("/")
-        model_name = os.environ.get("VLLM_MODEL", "google/gemma-4-12B")
+        model_name = os.environ.get("VLLM_MODEL", "perciqa/aurora-code-mini-v1")
 
         try:
             async with httpx.AsyncClient(timeout=3.0) as client:

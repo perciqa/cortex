@@ -178,7 +178,7 @@ Key environment overrides:
 | `CORTEX_LOG_LEVEL` | Set logging verbosity (`DEBUG`, `INFO`, `WARN`) |
 | `VLLM_URL` | OpenAI-compatible API endpoint for live LLM reasoning |
 | `VLLM_API_KEY` | API key for the LLM endpoint (if required) |
-| `VLLM_MODEL` | Model name override (default: `google/gemma-4-12B`) |
+| `VLLM_MODEL` | Model name override (default: `perciqa/aurora-code-mini-v1`) |
 
 When `VLLM_URL` or `VLLM_API_KEY` is set, agent reasoning routes through the live LLM instead of using scripted responses.
 
@@ -191,7 +191,7 @@ VLLM_URL=http://localhost:8000/v1 python -m cortex.cli start --config deploy/con
 # Or with a hosted API (Groq, Together AI, etc.):
 VLLM_URL=https://api.groq.com/openai/v1 \
   VLLM_API_KEY=gsk_... \
-  VLLM_MODEL=llama-3.1-8b-instant \
+  VLLM_MODEL=perciqa/aurora-code-mini-v1 \
   python -m cortex.cli start --config deploy/config/alpha.yaml
 ```
 
@@ -222,7 +222,7 @@ This repo is submitted to the AMD Radeon Hackathon 2026-07.
 
 - **ROCm GPU:** Embedding pipeline runs on Radeon via PyTorch ROCm (verified on MI300X)
 - **Bench:** Live GPU metrics via rocm-smi
-- **Inference:** vLLM serving Gemma 4 12B on ROCm
+- **Inference:** vLLM serving Aurora Code Mini V1 on ROCm
 
 ## License
 
