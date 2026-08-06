@@ -407,27 +407,28 @@ def _row_to_article(row: Any) -> MemoryArticle | None:
         created = _dt.datetime.fromisoformat(row["created_at"])
     except Exception:
         created = _dt.datetime.now(_dt.UTC)
-    def _get_col(row: Any, key: str, default: Any = None) -> Any:
-        return row[key] if key in row.keys() and row[key] is not None else default
+    data = dict(row)
+    def _get_col(key: str, default: Any = None) -> Any:
+        return data[key] if key in data and data[key] is not None else default
 
     prov = Provenance(
-        producer_agent=_get_col(row, "producer_agent", ""),
-        producer_org=_get_col(row, "producer_org", ""),
+        producer_agent=_get_col("producer_agent", ""),
+        producer_org=_get_col("producer_org", ""),
         computation_ref=None, source_data_hash=None,
-        source_data_schema=None, run_id=_get_col(row, "run_id", ""),
+        source_data_schema=None, run_id=_get_col("run_id", ""),
         timestamp=created,
     )
-    payload = json.loads(_get_col(row, "payload_json", "{}"))
-    cites = json.loads(_get_col(row, "cites_json", "[]"))
+    payload = json.loads(_get_col("payload_json", "{}"))
+    cites = json.loads(_get_col("cites_json", "[]"))
     trust_exp = None
-    if _get_col(row, "trust_expires"):
+    if _get_col("trust_expires"):
         with contextlib.suppress(Exception):
-            trust_exp = _dt.datetime.fromisoformat(_get_col(row, "trust_expires"))
+            trust_exp = _dt.datetime.fromisoformat(_get_col("trust_expires"))
     return MemoryArticle(
-        id=row["id"], type=row["type"], content=row["content"],
+        id=data["id"], type=data["type"], content=data["content"],
         payload=payload, embedding=None, embedding_model=None,
-        provenance=prov, scope=row["scope"], topic=_get_col(row, "topic", "*"),
-        agent_signature=_get_col(row, "agent_sig") or b"",
-        org_signature=_get_col(row, "org_sig"),
-        cites=cites, trust_score=row["trust_score"], trust_expiration=trust_exp,
+        provenance=prov, scope=data["scope"], topic=_get_col("topic", "*"),
+        agent_signature=_get_col("agent_sig") or b"",
+        org_signature=_get_col("org_sig"),
+        cites=cites, trust_score=data["trust_score"], trust_expiration=trust_exp,
     )
