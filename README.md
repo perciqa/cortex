@@ -4,9 +4,14 @@
 
 Cortex is a decentralized network of sovereign nodes that lets AI agents share **memory articles** across organizational trust boundaries, without exposing raw data, weights, or trusting a central vendor. Every article carries cryptographic provenance, scoped permissions, and a derived trust score.
 
-[![Status](https://img.shields.io/badge/status-early%20development-orange)](https://github.com/perciqa/cortex)
+[![CI](https://github.com/perciqa/cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/perciqa/cortex/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![ROCm](https://img.shields.io/badge/AMD-ROCm%20accelerated-E8272D)](https://rocm.docs.amd.com/)
+[![Hackathon](https://img.shields.io/badge/AMD%20AI%20DevMaster-2026-E8272D)](https://github.com/perciqa/cortex)
+
+**[▶ Watch the demo](https://youtu.be/LEs7aeuJ6b8)** &nbsp;|&nbsp; **[Live console](https://cortex.perciqa.com)**
+
+[![Demo Video](https://img.youtube.com/vi/LEs7aeuJ6b8/maxresdefault.jpg)](https://youtu.be/LEs7aeuJ6b8)
 
 ---
 
@@ -39,6 +44,8 @@ There are three runtime loops.
 
 ## Architecture
 
+![Cortex architecture diagram](cortex_architecture_diagram.webp)
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                   Cortex Fabric Broker                       │
@@ -67,8 +74,8 @@ There are three runtime loops.
 | `cortex-node` | Local tenant node: embedder, store, signer, and query engine |
 | `cortex-broker` | Federated pub/sub routing with topic and scope ACL |
 | `cortex-sdk` | Agent-facing convenience layer with LangChain and LlamaIndex adapters |
-| `cortex-console` | Real-time read-only web UI |
-| `cortex-bench` | GPU vs CPU benchmark harness |
+| `cortex-console` | Real-time web UI: article feed, ATT&CK matrix, provenance graph, bench panel, ROCm/LLM info |
+| `cortex-bench` | GPU vs CPU benchmark harness with Prometheus metrics |
 
 ---
 
@@ -111,8 +118,6 @@ Drafted -> Signed -> Indexed -> Published -> Cited -> Archived
 ```
 
 Articles with `private` scope never leave the local node. `partner:<org_did>` articles go only to that named org. `public` articles reach all subscribed peers.
-
----
 
 ---
 
@@ -218,15 +223,37 @@ cortex/
 
 ## Hackathon Submission
 
-This repo is submitted to the AMD Radeon Hackathon 2026-07.
+This repo is submitted to the **AMD AI DevMaster Hackathon 2026**.
 
-- **ROCm GPU:** Embedding pipeline runs on Radeon via PyTorch ROCm (verified on MI300X)
-- **Bench:** Live GPU metrics via rocm-smi
-- **Inference:** vLLM serving Aurora Code Mini V1 on ROCm
+### Live Demo
+
+- **Video:** https://youtu.be/LEs7aeuJ6b8
+- **Console:** https://cortex.perciqa.com *(live, no setup required)*
+- **Hackathon deck:** [Perciqa Cortex Hackathon Deck](Perciqa_Cortex_Hackathon_Deck.pptx)
+
+### AMD / ROCm Integration
+
+- **Embedder:** BAAI/bge-small-en-v1.5 on PyTorch-ROCm (AMD Radeon PRO W7900, RDNA3, 48 GB VRAM)
+- **Measured throughput:** 6.68 ms/embed · >1,000 embeds/sec in batch · 4× faster than CPU
+- **Inference:** Aurora Code Mini V1 (fine-tuned on AMD infrastructure) served by vLLM on ROCm
+- **GPU monitoring:** Live `rocm-smi` metrics via bench sidecar, Prometheus exporter on `:9464`
+- **Fallback:** Embedder auto-halves batch size on OOM and falls back to CPU; reasoning falls back to scripted mode
+
+### Content Pipeline
+
+A GitHub Actions workflow ([cortex-soc](https://github.com/WeSavetheKids/cortex-soc)) publishes fresh MITRE ATT&CK threat-intel findings from two SOC agents (Alpha: APT/espionage, Beta: ransomware/cybercrime) into the live fabric every 30 minutes — so the hosted console always has real, recent content.
+
+### Test Suite
+
+~213 tests across unit, integration, and end-to-end. Run with:
+
+```bash
+pytest tests/
+```
 
 ## License
 
-TBD.
+MIT
 
 ---
 
