@@ -165,7 +165,7 @@ VLLM_URL=http://localhost:8000/v1 python -m cortex.cli start --config deploy/con
 | `CORTEX_LOG_LEVEL` | `DEBUG` / `INFO` / `WARN` |
 
 ### 6.6 Live pod deployment (production)
-1. Provision an MI300X-class Radeon pod; install ROCm + PyTorch-ROCm.
+1. Provision an AMD Radeon PRO W7900-class pod (49 GB VRAM); install ROCm + PyTorch-ROCm.
 2. Start vLLM serving Aurora Code Mini V1 on :8000.
 3. Start broker (:7432), alpha + beta nodes, console (:8080).
 4. Publish console via a Cloudflare tunnel (`cortex.perciqa.com → localhost:8080`).

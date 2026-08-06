@@ -239,8 +239,8 @@ This repo is submitted to the **AMD AI DevMaster Hackathon 2026**.
 
 ### AMD / ROCm Integration
 
-- **Embedder:** BAAI/bge-small-en-v1.5 on PyTorch-ROCm (AMD Radeon PRO W7900, RDNA3, 48 GB VRAM)
-- **Measured throughput:** 6.68 ms/embed · >1,000 embeds/sec in batch · 4× faster than CPU
+- **Embedder:** BAAI/bge-small-en-v1.5 on PyTorch-ROCm (AMD Radeon PRO W7900, RDNA3, 49 GB VRAM; rocm-smi reports device `D7070910`)
+- **Measured throughput:** ~2,060 embeds/sec on Radeon vs ~5.7 on CPU (~360×), ~214 queries/sec, p95 query latency ~4.6 ms (live, via bench sidecar)
 - **Inference:** Aurora Code Mini V1 (fine-tuned on AMD infrastructure) served by vLLM on ROCm
 - **GPU monitoring:** Live `rocm-smi` metrics via bench sidecar, Prometheus exporter on `:9464`
 - **Fallback:** Embedder auto-halves batch size on OOM and falls back to CPU; reasoning falls back to scripted mode

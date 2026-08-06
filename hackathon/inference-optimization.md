@@ -9,7 +9,7 @@
 
 | Layer | Choice |
 |---|---|
-| GPU | AMD Radeon (MI300X-class, 49 GB VRAM, `D7070910`) |
+| GPU | AMD Radeon PRO W7900 (RDNA3, 49 GB VRAM; rocm-smi device `D7070910`) |
 | ROCm | HIP 7.2.53211 |
 | PyTorch | 2.10.0+git8514f05 (ROCm build) |
 | Embedding model | BAAI/bge-small-en-v1.5 (384-dim) |
@@ -20,9 +20,9 @@
 
 ## 2. Why GPU embedding is load-bearing here, not decorative
 
-Every publish and every query embeds text on the local node. In the reference SOC fabric that means: when SOC Alpha's agent publishes a finding, the node signs the article, computes its embedding on the MI300X via ROCm, and broadcasts it to peers. When SOC Beta's agent queries the fabric, its node embeds the query and runs semantic retrieval over its local partition. Both steps sit on the hot path, so embedding throughput and latency directly bound how fast findings propagate and how fast queries answer.
+Every publish and every query embeds text on the local node. In the reference SOC fabric that means: when SOC Alpha's agent publishes a finding, the node signs the article, computes its embedding on the Radeon GPU via ROCm, and broadcasts it to peers. When SOC Beta's agent queries the fabric, its node embeds the query and runs semantic retrieval over its local partition. Both steps sit on the hot path, so embedding throughput and latency directly bound how fast findings propagate and how fast queries answer.
 
-On the MI300X the same embedding work that takes ~175 ms of CPU time per article completes in a fraction of that on the Radeon, which is what makes the fabric feel live rather than batchy.
+On the Radeon the same embedding work that takes ~175 ms of CPU time per article completes in a fraction of that on the Radeon, which is what makes the fabric feel live rather than batchy.
 
 ---
 
