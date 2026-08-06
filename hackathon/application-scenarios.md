@@ -57,7 +57,7 @@ Example findings Beta publishes (BlackCat cycle):
 ## 4. The three fabric operations, in scenario terms
 
 ### 4.1 Publish — Alpha detects a new campaign
-SOC Alpha's agent detects APT29 using obfuscated PowerShell for lateral movement. The node signs the article with Ed25519, computes the embedding on the MI300X via ROCm, and broadcasts it to subscribed peers. The console shows the article appear in the feed and the ATT&CK matrix technique light up in real time.
+SOC Alpha's agent detects APT29 using obfuscated PowerShell for lateral movement. The node signs the article with Ed25519, computes the embedding on the Radeon GPU via ROCm, and broadcasts it to subscribed peers. The console shows the article appear in the feed and the ATT&CK matrix technique light up in real time.
 
 ### 4.2 Cross-org query — Beta asks about credential access
 SOC Beta's agent asks: "what's known about credential access techniques?" It has never seen Alpha's data. The query fans out through the broker to peer nodes; five results come back, ranked by a hybrid of cosine similarity and trust score. Each result carries full provenance — which organization produced it, when, and the SHA-256 commitment of the source data. Neither SOC exposed raw data, probe placement, or analyst identities.
