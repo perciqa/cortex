@@ -272,8 +272,16 @@ class CortexNode:
             deadline_ms=int(payload.get("deadline_ms", 400)),
         )
         return [
-            {"article_id": r.article_id, "score": r.hybrid_score,
-             "trust_score": r.trust_score, "content": r.article.content[:200]}
+            {
+                "article_id": r.article_id,
+                "score": r.hybrid_score,
+                "trust_score": r.trust_score,
+                "content": r.article.content[:200],
+                "producer_org": getattr(r.article.provenance, "producer_org", None),
+                "timestamp": (getattr(r.article.provenance, "timestamp", None).isoformat()
+                              if getattr(r.article.provenance, "timestamp", None) else None),
+                "source_data_hash": getattr(r.article.provenance, "source_data_hash", None),
+            }
             for r in results
         ]
 
@@ -306,7 +314,13 @@ class CortexNode:
                     article=None, article_id=rid,
                     hybrid_score=r.get("score", 0.0),
                     trust_score=r.get("trust_score", 0.0),
-                    provenance_summary={},
+                    provenance_summary={
+                        "producer_org": r.get("producer_org"),
+                        "timestamp": r.get("timestamp"),
+                        "source_data_hash": r.get("source_data_hash"),
+                        "content": r.get("content"),
+                        "n_cites": 0,
+                    },
                 ))
         merged.sort(key=lambda r: -r.hybrid_score)
         return merged[:top_k]
@@ -394,7 +408,7 @@ def _row_to_article(row: Any) -> MemoryArticle | None:
     except Exception:
         created = _dt.datetime.now(_dt.UTC)
     def _get_col(row: Any, key: str, default: Any = None) -> Any:
-        return row[key] if key in row and row[key] is not None else default
+        return row[key] if key in row.keys() and row[key] is not None else default
 
     prov = Provenance(
         producer_agent=_get_col(row, "producer_agent", ""),

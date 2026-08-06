@@ -5,6 +5,7 @@ import contextlib
 import json
 import logging
 import time
+import uuid
 from collections.abc import Callable
 from pathlib import Path
 
@@ -111,7 +112,7 @@ class BrokerClient:
                     results = self.on_query(env) or []
                     resp = {
                         "type": "query_result",
-                        "msg_id": env.get("msg_id", ""),
+                        "msg_id": str(uuid.uuid4()),
                         "src": self.org_did,
                         "dst": env.get("src", "*"),
                         "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

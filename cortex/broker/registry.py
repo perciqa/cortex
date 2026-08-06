@@ -34,6 +34,8 @@ class OrgRegistry:
         raw = json.loads(text)
         records: dict[str, OrgRecord] = {}
         for did, body in raw.items():
+            if not isinstance(body, dict):
+                continue
             records[did] = OrgRecord(
                 did=did,
                 pubkey=body["pubkey"],
